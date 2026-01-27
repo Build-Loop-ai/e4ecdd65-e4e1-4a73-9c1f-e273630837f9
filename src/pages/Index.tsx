@@ -39,17 +39,11 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero - with gradient background */}
+      {/* Hero - clean gradient */}
       <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 px-6 overflow-hidden">
-        {/* Grainy gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5" />
-        <div 
-          className="absolute inset-0 opacity-50"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          }}
-        />
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+        {/* Simple purple to white gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-primary/5 to-background" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/10 rounded-full blur-3xl" />
         
         <div className="container mx-auto max-w-4xl relative">
           <motion.div 
@@ -63,7 +57,7 @@ const Index = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-8"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8"
             >
               <Zap className="h-4 w-4 text-primary" />
               <span className="text-sm font-medium text-primary">The outreach tool for web designers</span>
@@ -72,7 +66,7 @@ const Index = () => {
             {/* Main headline */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground tracking-tight leading-[1.1] mb-6">
               Turn any website into a
-              <span className="block bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              <span className="block text-primary">
                 winning proposal
               </span>
             </h1>
@@ -85,13 +79,13 @@ const Index = () => {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
-              <Button size="lg" asChild className="h-12 px-6 text-base shadow-lg shadow-primary/25 group">
+              <Button size="lg" asChild className="h-12 px-6 text-base shadow-lg shadow-primary/20 group">
                 <Link to={user ? "/dashboard" : "/auth"}>
                   Start for free
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="h-12 px-6 text-base bg-background/50 backdrop-blur-sm" asChild>
+              <Button size="lg" variant="outline" className="h-12 px-6 text-base" asChild>
                 <Link to="/auth">
                   <Play className="h-4 w-4 mr-2" />
                   See how it works
@@ -107,8 +101,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Trusted by - subtle gradient */}
-      <section className="py-12 border-y border-border/40 bg-gradient-to-r from-muted/50 via-background to-muted/50">
+      {/* Trusted by */}
+      <section className="py-12 border-y border-border/40">
         <div className="container mx-auto px-6">
           <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-8">
             Trusted by leading design studios
@@ -125,16 +119,9 @@ const Index = () => {
 
       {/* How it works - PRIMARY BACKGROUND */}
       <section className="relative py-24 md:py-32 px-6 bg-primary overflow-hidden">
-        {/* Grainy overlay */}
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          }}
-        />
-        {/* Gradient orbs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-accent/20 rounded-full blur-3xl" />
+        {/* Subtle lighter areas */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto max-w-5xl relative">
           <motion.div
@@ -176,7 +163,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="relative p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-colors"
+                className="relative p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-colors"
               >
                 <span className="text-6xl font-bold text-white/20 block mb-4">
                   {item.step}
@@ -193,11 +180,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features - light with accent touches */}
+      {/* Features */}
       <section className="relative py-24 md:py-32 px-6 overflow-hidden">
-        {/* Subtle gradient */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-primary/10 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-accent/10 to-transparent rounded-full blur-3xl" />
+        {/* Subtle purple glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto max-w-4xl relative">
           <motion.div
@@ -245,21 +231,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Testimonial - ACCENT GRADIENT BACKGROUND */}
-      <section className="relative py-24 md:py-32 px-6 overflow-hidden">
-        {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent" />
-        {/* Grainy overlay */}
-        <div 
-          className="absolute inset-0 opacity-25"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          }}
-        />
-        {/* Decorative elements */}
-        <div className="absolute top-10 left-10 w-32 h-32 border border-white/10 rounded-full" />
-        <div className="absolute bottom-10 right-10 w-48 h-48 border border-white/10 rounded-full" />
-        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-white/5 rounded-full blur-2xl" />
+      {/* Testimonial - gradient purple to white */}
+      <section className="relative py-24 md:py-32 px-6 overflow-hidden bg-gradient-to-b from-primary to-primary/80">
+        {/* Light accent */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-white/10 rounded-full blur-3xl" />
         
         <div className="container mx-auto max-w-3xl relative">
           <motion.div
@@ -282,7 +257,7 @@ const Index = () => {
             </blockquote>
             
             <div className="flex items-center justify-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-semibold text-lg border border-white/20">
+              <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-semibold text-lg border border-white/30">
                 MR
               </div>
               <div className="text-left">
@@ -294,16 +269,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA - with gradient accent */}
+      {/* CTA */}
       <section className="py-24 md:py-32 px-6 relative overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent" />
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          }}
-        />
+        {/* Subtle gradient from top */}
+        <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-primary/10 to-transparent" />
         
         <div className="container mx-auto max-w-2xl relative">
           <motion.div
@@ -333,7 +302,7 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-6 border-t border-border/40 bg-muted/30">
+      <footer className="py-8 px-6 border-t border-border/40">
         <div className="container mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <PitchLogo size="sm" />
           <p className="text-sm text-muted-foreground">
