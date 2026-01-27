@@ -58,10 +58,26 @@ export function HeroSection({
   };
 
   // ========== ELEGANT MINIMAL - "Atelier" ==========
-  // Maximum whitespace, centered serif text, thin animated line
+  // Maximum whitespace, centered serif text, thin animated line - WITH BACKGROUND IMAGE
   if (effectiveTemplateId === 'elegant-minimal') {
     return (
-      <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-stone-50">
+      <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* Background image - always present */}
+        <div className="absolute inset-0">
+          {bgImage ? (
+            <motion.img
+              src={bgImage}
+              alt=""
+              className="w-full h-full object-cover"
+              style={{ scale }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-stone-200 via-stone-100 to-stone-50" />
+          )}
+          {/* Light elegant overlay */}
+          <div className="absolute inset-0 bg-stone-50/85" />
+        </div>
+
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 opacity-[0.02]" style={{
           backgroundImage: `linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)`,
@@ -140,16 +156,25 @@ export function HeroSection({
   }
 
   // ========== WARM FRIENDLY - "Neighborhood" ==========
-  // Warm gradient with bouncy animations, wave divider at bottom
+  // Warm gradient with bouncy animations, wave divider at bottom - WITH BACKGROUND IMAGE
   if (effectiveTemplateId === 'warm-friendly') {
     return (
       <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Warm gradient background */}
-        <div className="absolute inset-0" style={{
-          background: bgImage 
-            ? `linear-gradient(to bottom, rgba(255,247,237,0.95), rgba(254,243,199,0.98)), url(${bgImage}) center/cover`
-            : `linear-gradient(135deg, #fff7ed 0%, #fef3c7 40%, #fed7aa 100%)`
-        }} />
+        {/* Background image - always present */}
+        <div className="absolute inset-0">
+          {bgImage ? (
+            <motion.img
+              src={bgImage}
+              alt=""
+              className="w-full h-full object-cover"
+              style={{ scale }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-orange-100 via-amber-50 to-rose-100" />
+          )}
+          {/* Warm overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-orange-50/90 via-amber-50/85 to-orange-100/90" />
+        </div>
         
         {/* Floating organic blobs */}
         <FloatingShape color={primaryColor || '#f97316'} size={400} blur={100} className="top-10 right-10 opacity-40" duration={20} />
@@ -229,10 +254,26 @@ export function HeroSection({
   }
 
   // ========== BOLD STARTER - "Impact Studio" ==========
-  // Clean massive white headline on black, NO gradient text, subtle grid pattern
+  // Clean massive white headline on black, WITH BACKGROUND IMAGE
   if (effectiveTemplateId === 'bold-starter') {
     return (
       <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
+        {/* Background image - always present */}
+        <div className="absolute inset-0">
+          {bgImage ? (
+            <motion.img
+              src={bgImage}
+              alt=""
+              className="w-full h-full object-cover"
+              style={{ scale }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-black" />
+          )}
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/70" />
+        </div>
+
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 opacity-[0.08]" style={{
           backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
@@ -334,12 +375,28 @@ export function HeroSection({
   }
 
   // ========== MODERN PROFESSIONAL - "Tech Forward" ==========
-  // Clean centered layout with animated gradient orbs - no ugly cards
+  // Clean centered layout WITH BACKGROUND IMAGE always present
   if (effectiveTemplateId === 'modern-professional') {
     return (
       <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
-        {/* Gradient mesh background with animated orbs */}
+        {/* Background image - always present */}
         <div className="absolute inset-0">
+          {bgImage ? (
+            <motion.img
+              src={bgImage}
+              alt=""
+              className="w-full h-full object-cover"
+              style={{ scale }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-black" />
+          )}
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
+
+        {/* Gradient mesh background with animated orbs */}
+        <div className="absolute inset-0 pointer-events-none">
           <motion.div 
             animate={{ 
               x: [0, 50, 0],
@@ -377,15 +434,7 @@ export function HeroSection({
           backgroundSize: '80px 80px',
         }} />
 
-        {/* Background image with overlay if available */}
-        {bgImage && (
-          <motion.div style={{ scale }} className="absolute inset-0">
-            <img src={bgImage} alt="" className="w-full h-full object-cover opacity-20" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/80 via-[#0a0a0a]/60 to-[#0a0a0a]/90" />
-          </motion.div>
-        )}
-
-        <motion.div 
+        <motion.div
           style={{ y, opacity }}
           className="container mx-auto max-w-5xl text-center relative z-10 px-6"
         >
@@ -589,8 +638,8 @@ export function HeroSection({
             transition={{ duration: 0.8, delay: 0.2 }}
             className="order-1 lg:order-2 relative"
           >
-            {bgImage ? (
-              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200">
+            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200">
+              {bgImage ? (
                 <motion.img
                   src={bgImage}
                   alt=""
@@ -598,16 +647,16 @@ export function HeroSection({
                   animate={{ scale: [1, 1.08, 1] }}
                   transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent" />
-              </div>
-            ) : (
-              <div 
-                className="aspect-[4/5] rounded-2xl ring-1 ring-slate-200"
-                style={{
-                  background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}15 0%, ${primaryColor || '#3b82f6'}05 100%)`
-                }}
-              />
-            )}
+              ) : (
+                <div 
+                  className="w-full h-full"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}30 0%, ${primaryColor || '#3b82f6'}10 50%, ${primaryColor || '#3b82f6'}25 100%)`
+                  }}
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent" />
+            </div>
             
             {/* Decorative element */}
             <div 
