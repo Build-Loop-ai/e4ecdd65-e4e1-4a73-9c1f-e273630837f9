@@ -63,9 +63,20 @@ export type FallbackPatternType =
   | 'education'
   | 'default';
 
+// Brand colors from AI analysis
+export interface BrandColors {
+  primary: string;
+  secondary?: string | null;
+  accent?: string | null;
+  background?: string | null;
+  textPrimary?: string | null;
+  colorScheme?: 'light' | 'dark';
+}
+
 export interface ProcessedSchema {
   businessIntelligence?: BusinessIntelligence;
   adaptedContent?: AdaptedContent;
+  brandColors?: BrandColors;
   classifiedImages?: ClassifiedImage[];
   hero: {
     headline: string;

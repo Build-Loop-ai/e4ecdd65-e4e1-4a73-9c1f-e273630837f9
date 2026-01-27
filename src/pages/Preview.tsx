@@ -19,6 +19,7 @@ import {
   getBusinessIntelligence,
   type ProcessedSchema 
 } from '@/lib/businessIntelligence';
+import { getIndustryColors } from '@/lib/industryColors';
 import type { Tables } from '@/integrations/supabase/types';
 
 type ClientPreview = Tables<'client_previews'>;
@@ -126,16 +127,23 @@ export default function Preview() {
   const adaptedContent = getAdaptedContent(schema);
   const sectionOrder = getSectionOrder(schema);
 
-  // Extract colors from brand colors (Firecrawl branding format)
-  const colors = brandColors?.colors || brandColors?.branding?.colors || {};
-  const primaryColor = colors?.primary || null;
-  const secondaryColor = colors?.secondary || null;
-  const accentColor = colors?.accent || null;
-  const backgroundColor = colors?.background || null;
-  const textColor = colors?.textPrimary || null;
+  // Extract colors from multiple sources with intelligent fallbacks
+  const firecrawlColors = (brandColors?.colors || brandColors?.branding?.colors || {}) as Record<string, string | undefined>;
+  const aiColors = schema?.brandColors;
+  const industryFallback = getIndustryColors(businessIntelligence.industry);
+  
+  // Priority: AI-validated colors > Firecrawl colors > Industry defaults
+  const primaryColor = aiColors?.primary || firecrawlColors?.primary || industryFallback.primary;
+  const secondaryColor = aiColors?.secondary || firecrawlColors?.secondary || industryFallback.secondary;
+  const accentColor = aiColors?.accent || firecrawlColors?.accent || primaryColor || industryFallback.accent;
+  const backgroundColor = aiColors?.background || firecrawlColors?.background || null;
+  const textColor = aiColors?.textPrimary || firecrawlColors?.textPrimary || null;
+  const colorScheme = aiColors?.colorScheme || 'light';
   
   // Get logo from schema or branding data
   const logo = schema?.logo || brandColors?.logo || brandColors?.branding?.logo || brandColors?.branding?.images?.logo || null;
+
+  console.log('Brand colors - Primary:', primaryColor, 'Secondary:', secondaryColor, 'Source:', aiColors?.primary ? 'AI' : firecrawlColors?.primary ? 'Firecrawl' : 'Industry fallback');
 
   // Create CSS variables for brand colors
   const brandStyles = {
