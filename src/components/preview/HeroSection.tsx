@@ -326,7 +326,7 @@ export function HeroSection({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="text-xl md:text-2xl text-white/50 max-w-2xl mx-auto leading-relaxed mb-12"
+            className="text-xl md:text-2xl text-white/70 max-w-2xl mx-auto leading-relaxed mb-12"
           >
             {subheadline}
           </motion.p>
@@ -342,7 +342,7 @@ export function HeroSection({
               className="group text-lg px-12 py-8 rounded-xl font-bold transition-all hover:scale-105"
               style={{
                 backgroundColor: primaryColor || '#3b82f6',
-                color: 'white',
+                color: getContrastColor(primaryColor || '#3b82f6'),
                 boxShadow: `0 0 60px -15px ${primaryColor || '#3b82f6'}`,
               }}
             >
@@ -474,7 +474,7 @@ export function HeroSection({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-lg md:text-xl lg:text-2xl text-white/50 max-w-2xl mx-auto leading-relaxed mb-12"
+            className="text-lg md:text-xl lg:text-2xl text-white/70 max-w-2xl mx-auto leading-relaxed mb-12"
           >
             {subheadline}
           </motion.p>
@@ -491,7 +491,7 @@ export function HeroSection({
               className="group text-base px-10 py-7 rounded-xl font-semibold transition-all hover:scale-105"
               style={{
                 backgroundColor: primaryColor || '#3b82f6',
-                color: 'white',
+                color: getContrastColor(primaryColor || '#3b82f6'),
                 boxShadow: `0 0 80px -20px ${primaryColor || '#3b82f6'}`,
               }}
             >
@@ -501,7 +501,7 @@ export function HeroSection({
             <Button
               size="lg"
               variant="outline"
-              className="text-base px-10 py-7 rounded-xl font-semibold border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
+              className="text-base px-10 py-7 rounded-xl font-semibold border-white/30 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm"
             >
               Meer info
             </Button>
@@ -616,7 +616,7 @@ export function HeroSection({
                 className="text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
                 style={{
                   backgroundColor: primaryColor || '#1e40af',
-                  color: 'white',
+                  color: getContrastColor(primaryColor || '#1e40af'),
                 }}
               >
                 {ctaText}
