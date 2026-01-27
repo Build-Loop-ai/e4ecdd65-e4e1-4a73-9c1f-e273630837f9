@@ -105,6 +105,16 @@ export function GallerySection({
       return rotations[index % rotations.length];
     };
 
+    // Determine grid layout based on image count
+    const getGridClass = () => {
+      const count = validImages.length;
+      if (count <= 2) return 'grid-cols-1 sm:grid-cols-2 max-w-2xl';
+      if (count === 3) return 'grid-cols-1 sm:grid-cols-3 max-w-4xl';
+      if (count === 4) return 'grid-cols-2 lg:grid-cols-4 max-w-5xl';
+      if (count <= 6) return 'grid-cols-2 md:grid-cols-3 max-w-5xl';
+      return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-6xl';
+    };
+
     return (
       <section ref={containerRef} className="py-24 overflow-hidden bg-gradient-to-b from-background to-orange-50/50">
         <div className="container mx-auto px-6 mb-12">
@@ -125,8 +135,8 @@ export function GallerySection({
           </motion.div>
         </div>
 
-        {/* Polaroid gallery */}
-        <div className="flex gap-8 px-6 overflow-x-auto pb-8 scrollbar-hide">
+        {/* Polaroid gallery - responsive grid */}
+        <div className={`grid ${getGridClass()} gap-8 px-6 mx-auto`}>
           {validImages.map((image, index) => (
             <motion.div
               key={index}
@@ -135,7 +145,7 @@ export function GallerySection({
               viewport={{ once: true }}
               whileHover={{ scale: 1.05, rotate: 0, zIndex: 10 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="flex-shrink-0 bg-white p-3 pb-12 rounded-sm shadow-xl shadow-orange-100/50 cursor-pointer"
+              className="bg-white p-3 pb-12 rounded-sm shadow-xl shadow-orange-100/50 cursor-pointer mx-auto"
               style={{ 
                 transform: `rotate(${getRandomRotation(index)}deg)`,
               }}
@@ -143,7 +153,7 @@ export function GallerySection({
               <img 
                 src={image} 
                 alt={`Gallery ${index + 1}`}
-                className="w-64 h-64 md:w-72 md:h-72 object-cover"
+                className="w-full aspect-square object-cover"
                 onError={(e) => { e.currentTarget.parentElement!.style.display = 'none'; }}
               />
             </motion.div>
