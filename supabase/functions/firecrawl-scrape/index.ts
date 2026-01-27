@@ -9,7 +9,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('Firecrawl scrape function started');
+    
     const { url, options } = await req.json();
+    console.log('Received URL:', url);
 
     if (!url) {
       return new Response(
@@ -22,10 +25,12 @@ Deno.serve(async (req) => {
     if (!apiKey) {
       console.error('FIRECRAWL_API_KEY not configured');
       return new Response(
-        JSON.stringify({ success: false, error: 'Firecrawl connector not configured' }),
+        JSON.stringify({ success: false, error: 'Firecrawl connector not configured. Please check your connector settings.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    console.log('API key found, length:', apiKey.length);
 
     // Format URL
     let formattedUrl = url.trim();
@@ -35,35 +40,57 @@ Deno.serve(async (req) => {
 
     console.log('Scraping URL:', formattedUrl);
 
-    const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: formattedUrl,
-        formats: options?.formats || ['markdown', 'html', 'links', 'branding'],
-        onlyMainContent: options?.onlyMainContent ?? false,
-        waitFor: options?.waitFor || 2000,
-      }),
-    });
+    // Create abort controller for timeout (55 seconds to stay under edge function limit)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 55000);
 
-    const data = await response.json();
+    try {
+      const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: formattedUrl,
+          formats: options?.formats || ['markdown', 'links', 'branding'],
+          onlyMainContent: options?.onlyMainContent ?? true,
+          waitFor: options?.waitFor || 1000,
+        }),
+        signal: controller.signal,
+      });
 
-    if (!response.ok) {
-      console.error('Firecrawl API error:', data);
+      clearTimeout(timeoutId);
+
+      console.log('Firecrawl response status:', response.status);
+
+      const data = await response.json();
+      console.log('Firecrawl response received');
+
+      if (!response.ok) {
+        console.error('Firecrawl API error:', JSON.stringify(data));
+        return new Response(
+          JSON.stringify({ success: false, error: data.error || data.message || `Request failed with status ${response.status}` }),
+          { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('Scrape successful');
       return new Response(
-        JSON.stringify({ success: false, error: data.error || `Request failed with status ${response.status}` }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify(data),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        console.error('Request timed out');
+        return new Response(
+          JSON.stringify({ success: false, error: 'Scraping took too long. Please try a simpler website or try again.' }),
+          { status: 504, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      throw fetchError;
     }
-
-    console.log('Scrape successful');
-    return new Response(
-      JSON.stringify(data),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
   } catch (error) {
     console.error('Error scraping:', error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to scrape';
