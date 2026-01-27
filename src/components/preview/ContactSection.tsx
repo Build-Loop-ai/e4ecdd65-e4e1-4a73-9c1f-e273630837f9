@@ -5,6 +5,7 @@ import { Mail, Phone, MapPin, ArrowRight, Instagram, Facebook } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
 import { getButtonTextColor } from '@/lib/colorContrast';
+import { handlePreviewClick } from './HeroSection';
 
 interface ContactSectionProps {
   email?: string | null;
@@ -219,6 +220,7 @@ export function ContactSection({
                 <p className="text-base sm:text-lg mb-4 sm:mb-6 font-medium">Klaar om te beginnen?</p>
                 <Button 
                   size="lg"
+                  onClick={handlePreviewClick}
                   className="rounded-full px-6 sm:px-8 py-5 sm:py-6 font-semibold shadow-lg transition-all hover:scale-105 text-sm sm:text-base"
                   style={{ 
                     backgroundColor: primaryColor || '#f97316',
@@ -296,6 +298,7 @@ export function ContactSection({
           >
             <Button 
               size="lg"
+              onClick={handlePreviewClick}
               className="group text-lg px-14 py-8 rounded-xl font-bold transition-all hover:scale-105"
               style={{
                 backgroundColor: primaryColor || '#3b82f6',
@@ -386,6 +389,7 @@ export function ContactSection({
               </p>
               <Button 
                 size="lg"
+                onClick={handlePreviewClick}
                 className="text-base px-8 py-6 rounded-xl font-semibold transition-all hover:scale-105"
                 style={{
                   backgroundColor: primaryColor || '#3b82f6',
@@ -516,6 +520,7 @@ export function ContactSection({
             </p>
             <Button 
               size="lg"
+              onClick={handlePreviewClick}
               className="text-base px-8 py-6 rounded-lg font-semibold"
               style={{
                 backgroundColor: primaryColor || 'hsl(var(--primary))',

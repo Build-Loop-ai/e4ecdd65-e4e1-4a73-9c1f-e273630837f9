@@ -18,6 +18,26 @@ import {
 } from '@/lib/businessIntelligence';
 import { getPatternForIndustry } from '@/lib/heroPatterns';
 import { getButtonTextColor, isDarkColor, getReadableTextColor } from '@/lib/colorContrast';
+import { toast } from 'sonner';
+
+// Fun preview messages to show when buttons are clicked
+const previewMessages = [
+  "✨ This is just a preview! Once we work together, this button will do amazing things.",
+  "🚀 Love the enthusiasm! This will be fully functional after we team up.",
+  "💡 Great click! This feature comes to life when we build your real site.",
+  "🎨 You found a button! All interactions will work on your actual website.",
+  "⚡ Nice! This is where the magic happens once we collaborate.",
+];
+
+const getRandomMessage = () => previewMessages[Math.floor(Math.random() * previewMessages.length)];
+
+export const handlePreviewClick = (e: React.MouseEvent) => {
+  e.preventDefault();
+  toast(getRandomMessage(), {
+    duration: 4000,
+    position: 'bottom-center',
+  });
+};
 
 interface HeroSectionProps {
   companyName?: string;
@@ -277,6 +297,7 @@ export function HeroSection({
             >
               <Button
                 size="lg"
+                onClick={handlePreviewClick}
                 className="group text-base px-8 py-6 rounded-full font-semibold transition-all hover:scale-105"
                 style={{ 
                   backgroundColor: primaryColor || '#f97316', 
@@ -381,6 +402,7 @@ export function HeroSection({
           >
             <Button
               size="lg"
+              onClick={handlePreviewClick}
               className="group text-lg px-12 py-8 rounded-xl font-bold transition-all hover:scale-105"
               style={{
                 backgroundColor: primaryColor || '#3b82f6',
@@ -530,6 +552,7 @@ export function HeroSection({
           >
             <Button
               size="lg"
+              onClick={handlePreviewClick}
               className="group text-base px-10 py-7 rounded-xl font-semibold transition-all hover:scale-105"
               style={{
                 backgroundColor: primaryColor || '#3b82f6',
@@ -543,6 +566,7 @@ export function HeroSection({
             <Button
               size="lg"
               variant="outline"
+              onClick={handlePreviewClick}
               className="text-base px-10 py-7 rounded-xl font-semibold border-white/30 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm"
             >
               Meer info
@@ -651,6 +675,7 @@ export function HeroSection({
             >
               <Button
                 size="lg"
+                onClick={handlePreviewClick}
                 className="text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
                 style={{
                   backgroundColor: primaryColor || '#1e40af',
@@ -663,6 +688,7 @@ export function HeroSection({
               <Button
                 size="lg"
                 variant="outline"
+                onClick={handlePreviewClick}
                 className="text-base px-8 py-6 rounded-lg font-semibold border-slate-300 text-slate-700 hover:bg-slate-100"
               >
                 Meer info
