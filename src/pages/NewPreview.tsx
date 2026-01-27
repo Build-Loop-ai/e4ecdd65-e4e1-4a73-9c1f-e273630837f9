@@ -88,9 +88,13 @@ export default function NewPreview() {
       setStep('template');
     } catch (error) {
       console.error('Error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
+      const stepHint = step === 'scraping' ? 'during website scraping' : 'during AI processing';
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Something went wrong',
+        title: `Error ${stepHint}`,
+        description: errorMessage.includes('Failed to fetch') 
+          ? 'Network error - please check your connection and try again'
+          : errorMessage,
         variant: 'destructive',
       });
       setStep('url');

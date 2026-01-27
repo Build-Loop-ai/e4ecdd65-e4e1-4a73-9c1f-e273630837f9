@@ -1,6 +1,6 @@
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform',
 };
 
 Deno.serve(async (req) => {
@@ -9,7 +9,9 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('process-content started');
     const { scrapedContent, brandColors } = await req.json();
+    console.log('Payload received - markdown length:', scrapedContent?.markdown?.length || 0);
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
