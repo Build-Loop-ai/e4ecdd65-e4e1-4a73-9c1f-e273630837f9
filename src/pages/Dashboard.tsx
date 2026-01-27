@@ -173,93 +173,92 @@ export default function Dashboard() {
                 return (
                   <div
                     key={preview.id}
-                    className="group p-4 rounded-xl border border-border bg-card hover:shadow-card hover:border-border/80 transition-all cursor-pointer"
+                    className="group rounded-xl border border-border bg-card hover:shadow-elevated hover:border-primary/20 transition-all cursor-pointer overflow-hidden"
                     onClick={() => navigate(`/manage/${preview.id}`)}
                   >
-                    <div className="flex items-start gap-3">
-                      {/* Logo/Avatar */}
-                      <div 
-                        className="h-12 w-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
-                        style={{ 
-                          backgroundColor: data.heroImage ? undefined : 'hsl(var(--muted))',
-                          backgroundImage: data.heroImage ? `url(${data.heroImage})` : undefined,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                        }}
-                      >
-                        {!data.heroImage && (
-                          <span className="text-sm font-semibold text-muted-foreground">
+                    {/* Preview Thumbnail */}
+                    <div 
+                      className="w-full aspect-video bg-muted relative overflow-hidden"
+                      style={{ 
+                        backgroundImage: data.heroImage ? `url(${data.heroImage})` : undefined,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }}
+                    >
+                      {!data.heroImage && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
+                          <span className="text-3xl font-bold text-primary/30">
                             {data.companyName.slice(0, 2).toUpperCase()}
                           </span>
-                        )}
+                        </div>
+                      )}
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-center justify-center">
+                        <Eye className="h-8 w-8 text-background opacity-0 group-hover:opacity-70 transition-opacity drop-shadow-lg" />
                       </div>
-                      
-                      {/* Content */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <h3 className="font-medium text-foreground truncate">
-                              {data.companyName}
-                            </h3>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              {formatDate(preview.created_at)}
-                            </p>
-                          </div>
-                          <Badge variant={getStatusVariant(preview.status)} className="text-[10px] h-5 flex-shrink-0">
-                            {preview.status.replace('_', ' ')}
-                          </Badge>
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <div className="min-w-0">
+                          <h3 className="font-medium text-foreground truncate">
+                            {data.companyName}
+                          </h3>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {formatDate(preview.created_at)}
+                          </p>
                         </div>
+                        <Badge variant={getStatusVariant(preview.status)} className="text-[10px] h-5 flex-shrink-0">
+                          {preview.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
                         
-                        {/* Actions */}
-                        <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs"
-                            onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}
-                          >
-                            <Eye className="h-3 w-3 mr-1" />
-                            View
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs"
-                            onClick={(e) => copyPreviewLink(preview.slug, e)}
-                          >
-                            <Copy className="h-3 w-3 mr-1" />
-                            Copy
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 w-7 p-0"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <MoreHorizontal className="h-3.5 w-3.5" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-40">
-                              <DropdownMenuItem onClick={() => navigate(`/manage/${preview.id}`)}>
-                                Manage
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}>
-                                <ExternalLink className="h-3.5 w-3.5 mr-2" />
-                                Open preview
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                onClick={(e) => deletePreview(preview.id, e)}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                <Trash2 className="h-3.5 w-3.5 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                      {/* Actions */}
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          Open
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={(e) => copyPreviewLink(preview.slug, e)}
+                        >
+                          <Copy className="h-3 w-3 mr-1" />
+                          Copy
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 w-7 p-0 ml-auto"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="h-3.5 w-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem onClick={() => navigate(`/manage/${preview.id}`)}>
+                              Manage
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={(e) => deletePreview(preview.id, e)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="h-3.5 w-3.5 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </div>
