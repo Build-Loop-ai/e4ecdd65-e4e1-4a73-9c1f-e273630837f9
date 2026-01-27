@@ -6,7 +6,7 @@ import { AnimatedCounter } from '@/components/animations/AnimatedCounter';
 import { TextReveal } from '@/components/animations/TextReveal';
 import { TiltCard } from '@/components/animations/TiltCard';
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
-
+import { getContrastingAccent } from '@/lib/colorContrast';
 interface Stat {
   value: string;
   label: string;
@@ -242,31 +242,36 @@ export function AboutSection({
               transition={{ duration: 0.8 }}
               className="flex flex-wrap justify-center gap-8 md:gap-12 lg:gap-20 mb-24"
             >
-              {stats.map((stat, index) => (
-                <motion.div 
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
-                  className="text-center"
-                >
-                  <AnimatedCounter 
-                    value={stat.value}
-                    className="text-5xl md:text-7xl lg:text-8xl font-black block mb-4"
-                    duration={2}
-                  />
-                  <div 
-                    className="text-sm text-white/40 uppercase tracking-[0.3em]"
-                    style={{
-                      background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}, #8b5cf6)`,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
+              {stats.map((stat, index) => {
+                // Ensure stats are visible on black background
+                const statColor = getContrastingAccent(primaryColor || '#3b82f6', true);
+                return (
+                  <motion.div 
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ duration: 0.6, delay: index * 0.15 }}
+                    className="text-center"
                   >
-                    {stat.label}
-                  </div>
-                </motion.div>
-              ))}
+                    <AnimatedCounter 
+                      value={stat.value}
+                      className="text-5xl md:text-7xl lg:text-8xl font-black block mb-4"
+                      style={{ color: statColor }}
+                      duration={2}
+                    />
+                    <div 
+                      className="text-sm text-white/40 uppercase tracking-[0.3em]"
+                      style={{
+                        background: `linear-gradient(135deg, ${statColor}, #8b5cf6)`,
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }}
+                    >
+                      {stat.label}
+                    </div>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           )}
 
@@ -345,24 +350,29 @@ export function AboutSection({
               transition={{ duration: 0.8 }}
               className="flex flex-wrap justify-center gap-6 md:gap-12 lg:gap-16 mb-24"
             >
-              {stats.map((stat, index) => (
-                <motion.div 
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="text-center min-w-0"
-                >
-                  <AnimatedCounter 
-                    value={stat.value}
-                    className="text-4xl md:text-5xl lg:text-6xl font-black block mb-3"
-                    duration={2}
-                  />
-                  <div className="text-sm text-white/40 uppercase tracking-widest">
-                    {stat.label}
-                  </div>
-                </motion.div>
-              ))}
+              {stats.map((stat, index) => {
+                // Use contrasting accent color that's visible on dark background
+                const statColor = getContrastingAccent(primaryColor || '#3b82f6', true);
+                return (
+                  <motion.div 
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    className="text-center min-w-0"
+                  >
+                    <AnimatedCounter 
+                      value={stat.value}
+                      className="text-4xl md:text-5xl lg:text-6xl font-black block mb-3"
+                      style={{ color: statColor }}
+                      duration={2}
+                    />
+                    <div className="text-sm text-white/40 uppercase tracking-widest">
+                      {stat.label}
+                    </div>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           )}
 
