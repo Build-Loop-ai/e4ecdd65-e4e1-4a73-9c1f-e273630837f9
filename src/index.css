@@ -44,9 +44,9 @@
     --muted: 210 20% 96%;
     --muted-foreground: 215 16% 47%;
 
-    /* Accent: Violet for highlights */
-    --accent: 270 95% 75%;
-    --accent-foreground: 222 47% 11%;
+    /* Accent: Same as primary for consistency */
+    --accent: 239 84% 67%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -72,9 +72,9 @@
     --sidebar-ring: 239 84% 67%;
     --sidebar-muted: 215 16% 57%;
 
-    /* Chart colors - Indigo-based palette */
+    /* Chart colors - Primary-based palette */
     --chart-1: 239 84% 67%;
-    --chart-2: 270 95% 75%;
+    --chart-2: 239 84% 55%;
     --chart-3: 160 84% 39%;
     --chart-4: 35 92% 55%;
     --chart-5: 340 75% 55%;
@@ -99,8 +99,8 @@
     --muted: 222 47% 15%;
     --muted-foreground: 215 16% 57%;
 
-    --accent: 270 95% 75%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 239 84% 67%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -123,7 +123,7 @@
     --sidebar-muted: 215 16% 50%;
 
     --chart-1: 239 84% 67%;
-    --chart-2: 270 95% 75%;
+    --chart-2: 239 84% 55%;
     --chart-3: 160 84% 45%;
     --chart-4: 35 92% 60%;
     --chart-5: 340 75% 60%;
