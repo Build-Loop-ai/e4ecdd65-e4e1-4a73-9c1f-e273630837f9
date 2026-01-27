@@ -1,4 +1,4 @@
-import { ArrowRight, Globe, Sparkles, Zap, Eye, MessageSquare, BarChart3, Check, Play } from 'lucide-react';
+import { ArrowRight, ScanLine, Wand2, Palette, MousePointerClick, TrendingUp, Send, Check, Play, Link2, Layers, Timer, Users, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,39 +8,39 @@ import { useRef } from 'react';
 
 const features = [
   {
-    icon: Globe,
-    title: 'Scrape Any Website',
-    description: 'Enter a URL and we extract their logo, colors, images, and content automatically.',
+    icon: ScanLine,
+    title: 'Deep Website Scanning',
+    description: 'Our crawler extracts logos, brand colors, images, copy, and structure from any URL.',
     gradient: 'from-blue-500/20 to-cyan-500/20'
   },
   {
-    icon: Sparkles,
-    title: 'AI-Powered Magic',
-    description: 'Our AI structures content into professional sections: hero, services, about, gallery.',
+    icon: Wand2,
+    title: 'Intelligent Restructuring',
+    description: 'AI organizes messy content into polished sections: hero, services, testimonials, contact.',
     gradient: 'from-violet-500/20 to-purple-500/20'
   },
   {
-    icon: Eye,
-    title: 'Stunning Templates',
-    description: 'Five distinct, high-end templates designed to impress any prospect.',
+    icon: Palette,
+    title: 'Brand-Matched Design',
+    description: 'Templates automatically adapt to extracted brand colors and visual identity.',
     gradient: 'from-pink-500/20 to-rose-500/20'
   },
   {
-    icon: MessageSquare,
-    title: 'Collect Feedback',
-    description: 'Prospects can leave comments directly on the preview. Close deals faster.',
+    icon: MousePointerClick,
+    title: 'One-Click Feedback',
+    description: 'Prospects leave comments directly on the preview. No signup needed for them.',
     gradient: 'from-amber-500/20 to-orange-500/20'
   },
   {
-    icon: BarChart3,
-    title: 'Track Everything',
-    description: 'See who viewed your pitch, when, and for how long. Know when to follow up.',
+    icon: TrendingUp,
+    title: 'Engagement Analytics',
+    description: 'Track views, time spent, scroll depth, and know exactly when to follow up.',
     gradient: 'from-emerald-500/20 to-teal-500/20'
   },
   {
-    icon: Zap,
-    title: 'Share Instantly',
-    description: 'One-click shareable links. No login required for prospects to view.',
+    icon: Send,
+    title: 'Instant Sharing',
+    description: 'Generate a clean, branded link. Send via email, text, or embed anywhere.',
     gradient: 'from-indigo-500/20 to-blue-500/20'
   }
 ];
@@ -122,7 +122,7 @@ const Index = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              <span>Win more web design clients</span>
+              <span>The secret weapon for winning web design clients</span>
             </motion.div>
             
             {/* Headline */}
@@ -145,8 +145,8 @@ const Index = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
             >
-              Show prospects exactly how their new website could look. 
-              <span className="text-foreground font-medium"> Create stunning previews that close deals.</span>
+              Scan any website. Let AI rebuild it beautifully. 
+              <span className="text-foreground font-medium"> Send a preview that closes the deal.</span>
             </motion.p>
             
             {/* CTA */}
@@ -181,7 +181,7 @@ const Index = () => {
             </motion.p>
           </motion.div>
 
-          {/* Hero Visual */}
+          {/* REAL DEMO - Before/After Transformation */}
           <motion.div 
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
@@ -191,120 +191,183 @@ const Index = () => {
             {/* Glow effect behind the card */}
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 blur-3xl opacity-50 -z-10 scale-95" />
             
-            <div className="relative rounded-2xl border border-border/50 bg-card/80 backdrop-blur-xl shadow-2xl overflow-hidden">
-              {/* Browser chrome */}
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-400/80 hover:bg-red-400 transition-colors cursor-pointer" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-400/80 hover:bg-yellow-400 transition-colors cursor-pointer" />
-                  <div className="w-3 h-3 rounded-full bg-green-400/80 hover:bg-green-400 transition-colors cursor-pointer" />
+            {/* Transformation Visual */}
+            <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+              {/* BEFORE - Old Website */}
+              <motion.div 
+                className="relative rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm overflow-hidden"
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-muted text-xs font-medium text-muted-foreground z-10">
+                  Before
                 </div>
-                <div className="flex-1 flex justify-center">
-                  <div className="px-4 py-1.5 rounded-lg bg-background/80 text-xs text-muted-foreground border border-border/50 flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                <div className="p-4 pt-10">
+                  {/* Old website mockup */}
+                  <div className="rounded-lg border border-border bg-background overflow-hidden">
+                    {/* Ugly old header */}
+                    <div className="bg-slate-700 px-4 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded bg-amber-600 flex items-center justify-center text-white text-xs font-bold">SB</div>
+                        <span className="text-white text-sm font-medium">Sunrise Bakery</span>
+                      </div>
+                      <div className="flex gap-4 text-white/60 text-xs">
+                        <span>HOME</span>
+                        <span>MENU</span>
+                        <span>ABOUT</span>
+                        <span>CONTACT</span>
+                      </div>
                     </div>
-                    pitch.app/preview/acme-corp
+                    {/* Old content */}
+                    <div className="p-4 space-y-3">
+                      <div className="text-center py-6 bg-gradient-to-b from-amber-100 to-amber-50">
+                        <p className="text-amber-900 text-lg font-serif">Welcome to Sunrise Bakery!</p>
+                        <p className="text-amber-700 text-xs mt-1">Serving fresh bread since 1985</p>
+                        <div className="mt-3 inline-block px-3 py-1 bg-amber-600 text-white text-xs rounded">ORDER NOW</div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="aspect-square bg-amber-100 rounded flex items-center justify-center text-amber-400 text-xs">img</div>
+                        <div className="aspect-square bg-amber-100 rounded flex items-center justify-center text-amber-400 text-xs">img</div>
+                        <div className="aspect-square bg-amber-100 rounded flex items-center justify-center text-amber-400 text-xs">img</div>
+                      </div>
+                      <div className="text-xs text-muted-foreground text-center py-2">
+                        © 2019 Sunrise Bakery. All rights reserved.
+                      </div>
+                    </div>
                   </div>
                 </div>
+                <div className="px-4 pb-4">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Link2 className="h-3 w-3" />
+                    <span className="truncate">sunrisebakery-oldsite.com</span>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Arrow indicator */}
+              <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                <motion.div 
+                  className="w-14 h-14 rounded-full bg-primary shadow-xl shadow-primary/30 flex items-center justify-center"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <ChevronRight className="h-6 w-6 text-white" />
+                </motion.div>
               </div>
-              
-              {/* Preview content mockup */}
-              <div className="aspect-[16/9] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
-                {/* Animated grid background */}
-                <div className="absolute inset-0 opacity-20">
-                  <div className="absolute inset-0" style={{
-                    backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)`,
-                    backgroundSize: '40px 40px'
-                  }} />
+
+              {/* AFTER - Pitch Preview */}
+              <motion.div 
+                className="relative rounded-2xl border-2 border-primary/30 bg-card/80 backdrop-blur-xl shadow-2xl shadow-primary/10 overflow-hidden"
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+              >
+                <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary text-xs font-medium text-primary-foreground z-10">
+                  After (Pitch Preview)
                 </div>
                 
-                {/* Mock hero section */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.div 
-                    className="text-center px-8"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8, delay: 0.8 }}
-                  >
-                    <motion.div 
-                      className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/30"
-                      animate={{ rotate: [0, 5, -5, 0] }}
-                      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      <span className="text-3xl font-bold text-white">A</span>
-                    </motion.div>
-                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
-                      Acme Corporation
-                    </h3>
-                    <p className="text-white/60 max-w-md mx-auto mb-6 text-sm sm:text-base">
-                      Building the future, one solution at a time
-                    </p>
-                    <div className="inline-flex gap-3">
-                      <motion.div 
-                        className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium shadow-lg shadow-primary/30"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ type: "spring", stiffness: 400 }}
-                      >
-                        Get Started
-                      </motion.div>
-                      <motion.div 
-                        className="px-6 py-2.5 rounded-lg bg-white/10 text-white text-sm font-medium border border-white/20 backdrop-blur-sm"
-                        whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.15)" }}
-                        transition={{ type: "spring", stiffness: 400 }}
-                      >
-                        Learn More
-                      </motion.div>
+                {/* Browser chrome */}
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30 mt-8">
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-destructive/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-chart-4/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-success/60" />
+                  </div>
+                  <div className="flex-1 flex justify-center">
+                    <div className="px-3 py-1 rounded-md bg-background/80 text-xs text-muted-foreground flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-success" />
+                      pitch.app/p/sunrise-bakery
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
                 
-                {/* Decorative floating elements */}
-                <motion.div 
-                  className="absolute top-10 right-10 w-32 h-32 bg-primary/30 rounded-full blur-2xl"
-                  animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div 
-                  className="absolute bottom-10 left-10 w-24 h-24 bg-accent/30 rounded-full blur-2xl"
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                />
-                <motion.div 
-                  className="absolute top-1/2 right-20 w-16 h-16 bg-cyan-500/20 rounded-full blur-xl"
-                  animate={{ y: [0, -20, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                />
-              </div>
+                {/* Modern preview content */}
+                <div className="aspect-[4/3] bg-gradient-to-br from-amber-900 via-amber-800 to-orange-900 relative overflow-hidden">
+                  {/* Background pattern */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute inset-0" style={{
+                      backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)`,
+                      backgroundSize: '24px 24px'
+                    }} />
+                  </div>
+                  
+                  {/* Hero content */}
+                  <div className="absolute inset-0 flex items-center justify-center p-6">
+                    <div className="text-center">
+                      <motion.div 
+                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mx-auto mb-4 shadow-lg"
+                        animate={{ rotate: [0, 5, -5, 0] }}
+                        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <span className="text-2xl">🥐</span>
+                      </motion.div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                        Sunrise Bakery
+                      </h3>
+                      <p className="text-white/70 text-sm mb-4 max-w-xs mx-auto">
+                        Artisan breads & pastries crafted fresh daily since 1985
+                      </p>
+                      <div className="inline-flex gap-2">
+                        <div className="px-4 py-2 rounded-lg bg-amber-500 text-white text-xs font-medium shadow-lg">
+                          Order Online
+                        </div>
+                        <div className="px-4 py-2 rounded-lg bg-white/10 text-white text-xs font-medium backdrop-blur-sm border border-white/20">
+                          View Menu
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Floating elements */}
+                  <motion.div 
+                    className="absolute top-4 right-4 w-20 h-20 bg-amber-400/20 rounded-full blur-xl"
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                  />
+                  <motion.div 
+                    className="absolute bottom-4 left-4 w-16 h-16 bg-orange-400/20 rounded-full blur-xl"
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+                  />
+                </div>
+                
+                {/* Stats bar */}
+                <div className="px-4 py-3 bg-muted/30 border-t border-border/50 flex items-center justify-between">
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                      Live
+                    </span>
+                    <span>247 views</span>
+                    <span>12 feedback</span>
+                  </div>
+                  <div className="text-xs text-primary font-medium">
+                    Ready to share →
+                  </div>
+                </div>
+              </motion.div>
             </div>
             
-            {/* Floating elements around the card */}
+            {/* Floating action badges */}
             <motion.div 
-              className="absolute -top-6 -right-6 w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/30 flex items-center justify-center"
-              animate={{ y: [0, -8, 0], rotate: [0, 10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <Sparkles className="w-6 h-6 text-white" />
-            </motion.div>
-            
-            <motion.div 
-              className="absolute -bottom-4 -left-4 px-4 py-2 rounded-full bg-card border border-border shadow-lg text-sm font-medium flex items-center gap-2"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 1 }}
-            >
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-muted-foreground">Live preview ready</span>
-            </motion.div>
-            
-            <motion.div 
-              className="absolute -bottom-4 right-8 px-4 py-2 rounded-full bg-card border border-border shadow-lg text-sm font-medium flex items-center gap-2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              className="absolute -top-4 left-1/4 px-3 py-1.5 rounded-full bg-card border border-border shadow-lg text-xs font-medium flex items-center gap-2"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1.2 }}
             >
-              <Eye className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">142 views</span>
+              <ScanLine className="w-3.5 h-3.5 text-primary" />
+              <span className="text-muted-foreground">Scanning complete</span>
+            </motion.div>
+            
+            <motion.div 
+              className="absolute -bottom-4 right-1/4 px-3 py-1.5 rounded-full bg-card border border-border shadow-lg text-xs font-medium flex items-center gap-2"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 1.4 }}
+            >
+              <Timer className="w-3.5 h-3.5 text-success" />
+              <span className="text-muted-foreground">Created in 47 seconds</span>
             </motion.div>
           </motion.div>
         </div>
@@ -344,7 +407,7 @@ const Index = () => {
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
               From URL to pitch in{' '}
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                minutes
+                under 2 minutes
               </span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -354,10 +417,10 @@ const Index = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-4">
             {[
-              { number: '01', title: 'Enter URL', description: 'Paste your prospect\'s current website URL', icon: Globe },
-              { number: '02', title: 'AI Analyzes', description: 'We extract and organize their content magically', icon: Sparkles },
-              { number: '03', title: 'Pick Template', description: 'Choose the perfect look for their industry', icon: Eye },
-              { number: '04', title: 'Share & Win', description: 'Send the link and close the deal', icon: Zap }
+              { number: '01', title: 'Paste the URL', description: 'Enter your prospect\'s current website address', icon: Link2 },
+              { number: '02', title: 'AI Scans & Extracts', description: 'We pull logos, colors, images, and all content', icon: ScanLine },
+              { number: '03', title: 'Pick a Template', description: 'Choose from 5 stunning industry-specific designs', icon: Layers },
+              { number: '04', title: 'Share & Close', description: 'Send the link, track views, collect feedback', icon: Send }
             ].map((step, index) => (
               <motion.div
                 key={step.number}
@@ -413,13 +476,13 @@ const Index = () => {
               Features
             </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4">
-              Everything you need to{' '}
+              Built for{' '}
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                close deals
+                closing deals
               </span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Powerful features designed for web design professionals
+              Everything web designers and agencies need to win more clients
             </p>
           </motion.div>
 
@@ -469,7 +532,7 @@ const Index = () => {
                 {[...Array(5)].map((_, i) => (
                   <motion.svg 
                     key={i} 
-                    className="w-6 h-6 text-yellow-400 fill-current" 
+                    className="w-6 h-6 text-chart-4 fill-current" 
                     viewBox="0 0 20 20"
                     initial={{ opacity: 0, scale: 0 }}
                     whileInView={{ opacity: 1, scale: 1 }}
@@ -482,17 +545,16 @@ const Index = () => {
               </div>
               
               <blockquote className="text-2xl sm:text-3xl md:text-4xl font-medium text-foreground mb-10 leading-relaxed">
-                "Pitch helped me close <span className="text-primary">3 clients in my first week</span>. The previews look so professional, 
-                prospects think I spent hours designing them."
+                "I used to spend hours mocking up proposals. Now I scan their site, pick a template, and <span className="text-primary">send a pitch in under 5 minutes</span>. Already closed 3 new clients this month."
               </blockquote>
               
               <div className="flex items-center justify-center gap-4">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold text-lg shadow-lg shadow-primary/30">
-                  JD
+                  MR
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-foreground text-lg">James Davidson</p>
-                  <p className="text-sm text-muted-foreground">Freelance Web Designer</p>
+                  <p className="font-semibold text-foreground text-lg">Maria Rodriguez</p>
+                  <p className="text-sm text-muted-foreground">Founder, Studio Pixel</p>
                 </div>
               </div>
             </div>
@@ -521,6 +583,17 @@ const Index = () => {
             </div>
             
             <div className="relative bg-gradient-to-br from-primary via-primary to-accent rounded-[22px] p-12 md:p-16 text-center">
+              <motion.div
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm font-medium mb-6"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <Users className="h-4 w-4" />
+                <span>Join 500+ designers already using Pitch</span>
+              </motion.div>
+              
               <motion.h2 
                 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4"
                 initial={{ opacity: 0, y: 10 }}
@@ -537,7 +610,7 @@ const Index = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                Join designers and agencies who are closing deals faster with stunning website previews.
+                Stop wasting hours on proposals that go nowhere. Start sending previews that close.
               </motion.p>
               
               <motion.div 
