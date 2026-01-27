@@ -20,10 +20,16 @@ export function InstagramFeed({
   posts,
   primaryColor,
 }: InstagramFeedProps) {
-  if (!posts || posts.length === 0) return null;
+  // Filter for valid posts with working image URLs
+  const validPosts = posts?.filter(post => 
+    post.image && 
+    post.image.startsWith('http') &&
+    !post.image.includes('placeholder') &&
+    !post.image.includes('default')
+  ).slice(0, 8) || [];
 
-  const validPosts = posts.filter(post => post.image && post.image.startsWith('http')).slice(0, 8);
-  if (validPosts.length === 0) return null;
+  // Require minimum 3 valid posts to show Instagram section
+  if (validPosts.length < 3) return null;
 
   return (
     <section className="py-24 px-6 bg-muted/30">
