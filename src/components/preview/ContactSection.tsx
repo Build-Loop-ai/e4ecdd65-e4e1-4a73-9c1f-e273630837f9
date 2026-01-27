@@ -362,6 +362,11 @@ export function ContactSection({
 
   // ========== MODERN PROFESSIONAL - Glassmorphism floating card ==========
   if (effectiveTemplateId === 'modern-professional') {
+    // Don't render section if no contact info at all
+    if (!hasContact && !hasSocial) {
+      return null;
+    }
+    
     return (
       <section className="py-32 px-6 bg-[#0a0a0a] relative overflow-hidden">
         {/* Background gradients */}
@@ -401,23 +406,24 @@ export function ContactSection({
               </Button>
             </motion.div>
 
-            {/* Right - Glass card */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="relative"
-            >
-              {/* Animated border */}
-              <div 
-                className="absolute -inset-px rounded-3xl opacity-50"
-                style={{
-                  background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}, transparent, ${primaryColor || '#3b82f6'})`,
-                }}
-              />
-              
-              <div className="relative p-8 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 space-y-4">
+            {/* Right - Glass card - only show if there's contact info */}
+            {hasContact && (
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="relative"
+              >
+                {/* Animated border */}
+                <div 
+                  className="absolute -inset-px rounded-3xl opacity-50"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}, transparent, ${primaryColor || '#3b82f6'})`,
+                  }}
+                />
+                
+                <div className="relative p-8 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 space-y-4">
                 {email && (
                   <a
                     href={`mailto:${email}`}
@@ -495,6 +501,7 @@ export function ContactSection({
                 )}
               </div>
             </motion.div>
+            )}
           </div>
         </div>
       </section>
