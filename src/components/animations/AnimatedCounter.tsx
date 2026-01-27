@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { motion, useInView } from 'framer-motion';
 
 interface AnimatedCounterProps {
@@ -13,16 +13,21 @@ export function AnimatedCounter({ value, className = '', duration = 2 }: Animate
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [displayValue, setDisplayValue] = useState('0');
+  const [hasAnimated, setHasAnimated] = useState(false);
 
-  // Extract numeric part and suffix (like +, %, k, etc.)
-  const numericMatch = value.match(/^([\d.,]+)(.*)$/);
-  const targetNumber = numericMatch ? parseFloat(numericMatch[1].replace(',', '')) : 0;
-  const suffix = numericMatch ? numericMatch[2] : '';
-  const hasDecimal = value.includes('.');
-  const decimalPlaces = hasDecimal ? (value.split('.')[1]?.match(/\d+/)?.[0]?.length || 0) : 0;
+  // Memoize parsed values to prevent re-renders from resetting animation
+  const { targetNumber, suffix, originalNumeric, hasDecimal, decimalPlaces } = useMemo(() => {
+    const numericMatch = value.match(/^([\d.,]+)(.*)$/);
+    const target = numericMatch ? parseFloat(numericMatch[1].replace(',', '')) : 0;
+    const sfx = numericMatch ? numericMatch[2] : '';
+    const original = numericMatch ? numericMatch[1] : value;
+    const hasDec = value.includes('.');
+    const decPlaces = hasDec ? (value.split('.')[1]?.match(/\d+/)?.[0]?.length || 0) : 0;
+    return { targetNumber: target, suffix: sfx, originalNumeric: original, hasDecimal: hasDec, decimalPlaces: decPlaces };
+  }, [value]);
 
   useEffect(() => {
-    if (!isInView) return;
+    if (!isInView || hasAnimated) return;
 
     let startTime: number;
     let animationFrame: number;
@@ -45,13 +50,14 @@ export function AnimatedCounter({ value, className = '', duration = 2 }: Animate
       if (progress < 1) {
         animationFrame = requestAnimationFrame(animate);
       } else {
-        setDisplayValue(numericMatch ? numericMatch[1] : value);
+        setDisplayValue(originalNumeric);
+        setHasAnimated(true);
       }
     };
 
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
-  }, [isInView, targetNumber, duration, hasDecimal, decimalPlaces, value, numericMatch]);
+  }, [isInView, hasAnimated, targetNumber, duration, hasDecimal, decimalPlaces, originalNumeric]);
 
   return (
     <motion.span
