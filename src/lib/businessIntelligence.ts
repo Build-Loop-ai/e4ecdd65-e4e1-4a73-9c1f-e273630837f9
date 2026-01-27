@@ -19,20 +19,67 @@ export interface AdaptedContent {
   contactTitle: string;
 }
 
+// Image classification types for intelligent placement
+export type ImageClassification = 
+  | 'hero' 
+  | 'about' 
+  | 'team' 
+  | 'gallery' 
+  | 'product' 
+  | 'service' 
+  | 'logo' 
+  | 'unusable';
+
+export type ImageSubjectType = 
+  | 'portrait' 
+  | 'group' 
+  | 'interior' 
+  | 'exterior' 
+  | 'product' 
+  | 'abstract' 
+  | 'food' 
+  | 'action';
+
+export interface ClassifiedImage {
+  url: string;
+  classification: ImageClassification;
+  confidence: number;
+  reasoning?: string;
+  hasText: boolean;
+  subjectType?: ImageSubjectType;
+}
+
+export type FallbackPatternType = 
+  | 'tech' 
+  | 'beauty' 
+  | 'food' 
+  | 'legal' 
+  | 'creative' 
+  | 'medical' 
+  | 'construction' 
+  | 'retail'
+  | 'fitness'
+  | 'automotive'
+  | 'education'
+  | 'default';
+
 export interface ProcessedSchema {
   businessIntelligence?: BusinessIntelligence;
   adaptedContent?: AdaptedContent;
+  classifiedImages?: ClassifiedImage[];
   hero: {
     headline: string;
     subheadline: string;
     ctaText: string;
     backgroundImages?: string[];
+    fallbackPattern?: FallbackPatternType;
   };
   about: {
     title: string;
     description: string;
     valueProps: string[];
     stats?: Array<{ value: string; label: string }>;
+    image?: string | null;
   };
   services: Array<{
     title: string;
@@ -117,4 +164,65 @@ export function getBusinessIntelligence(schema: ProcessedSchema | null): Busines
     };
   }
   return DEFAULT_BUSINESS_INTELLIGENCE;
+}
+
+// Get suitable hero images (images classified as hero that don't have text)
+export function getSuitableHeroImages(schema: ProcessedSchema | null): string[] {
+  if (!schema?.classifiedImages || !schema.hero?.backgroundImages) {
+    // Fall back to all background images if no classification available
+    return schema?.hero?.backgroundImages || [];
+  }
+  
+  // Filter to only images classified as 'hero' without text
+  return schema.hero.backgroundImages.filter(imgUrl => {
+    const classification = schema.classifiedImages?.find(c => c.url === imgUrl);
+    // Include if classified as hero and doesn't have text, OR if not classified (for backwards compatibility)
+    if (!classification) return true;
+    return classification.classification === 'hero' && !classification.hasText;
+  });
+}
+
+// Get about section image (portrait/team photo for split layouts)
+export function getAboutImage(schema: ProcessedSchema | null): string | null {
+  // First check if about section already has an image
+  if (schema?.about?.image) {
+    return schema.about.image;
+  }
+  
+  // Otherwise, find the first "about" or "team" classified image
+  if (schema?.classifiedImages) {
+    const aboutImage = schema.classifiedImages.find(
+      img => (img.classification === 'about' || img.classification === 'team') && 
+             !img.hasText && 
+             img.confidence > 0.6
+    );
+    return aboutImage?.url || null;
+  }
+  
+  return null;
+}
+
+// Map industry to fallback pattern type
+export function getFallbackPatternType(industry: string): FallbackPatternType {
+  const industryPatternMap: Record<string, FallbackPatternType> = {
+    'technology': 'tech',
+    'beauty_wellness': 'beauty',
+    'food_hospitality': 'food',
+    'professional_services': 'legal',
+    'creative_agency': 'creative',
+    'healthcare': 'medical',
+    'construction_trades': 'construction',
+    'retail_ecommerce': 'retail',
+    'fitness_sports': 'fitness',
+    'automotive': 'automotive',
+    'education': 'education',
+  };
+  
+  return industryPatternMap[industry] || 'default';
+}
+
+// Check if we should use pattern fallback (no suitable hero images)
+export function shouldUsePatternFallback(schema: ProcessedSchema | null): boolean {
+  const suitableImages = getSuitableHeroImages(schema);
+  return suitableImages.length === 0;
 }

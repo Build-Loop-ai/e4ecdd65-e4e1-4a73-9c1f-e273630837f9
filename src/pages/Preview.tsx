@@ -216,6 +216,9 @@ export default function Preview() {
         backgroundImages={schema?.hero?.backgroundImages}
         primaryColor={primaryColor}
         templateId={templateId}
+        classifiedImages={schema?.classifiedImages}
+        fallbackPattern={schema?.hero?.fallbackPattern}
+        industry={businessIntelligence.industry}
       />
 
       {/* Render sections in AI-recommended order */}
