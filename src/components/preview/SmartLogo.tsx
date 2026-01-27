@@ -88,30 +88,8 @@ export function SmartLogo({ src, alt, className = '', onDark = true, fallbackTex
     img.src = src;
   }, [src]);
 
-  // Show fallback if no source or error loading
+  // Show nothing if no source or error loading - no ugly fallback initials
   if (!src || imageStatus === 'error') {
-    if (fallbackText) {
-      const initials = fallbackText
-        .split(' ')
-        .slice(0, 2)
-        .map(word => word[0])
-        .join('')
-        .toUpperCase();
-      
-      return (
-        <div 
-          className={`flex items-center justify-center font-bold ${className}`}
-          style={{ 
-            backgroundColor: onDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-            color: onDark ? 'white' : 'black',
-            borderRadius: '8px',
-            padding: '0.5em 1em',
-          }}
-        >
-          {initials}
-        </div>
-      );
-    }
     return null;
   }
 
