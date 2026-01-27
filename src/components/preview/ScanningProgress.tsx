@@ -260,12 +260,14 @@ export function ScanningProgress({ phase, url, scrapedData, processedSchema }: S
                       className="p-4 bg-muted/50 rounded-lg"
                     >
                       <p className="text-xs text-muted-foreground mb-2">Logo Found</p>
-                      <img 
-                        src={logo} 
-                        alt="Extracted logo" 
-                        className="h-12 object-contain"
-                        onError={(e) => e.currentTarget.style.display = 'none'}
-                      />
+                      <div className="bg-white/10 rounded p-2 inline-block">
+                        <img 
+                          src={logo} 
+                          alt="Extracted logo" 
+                          className="h-12 object-contain max-w-[150px]"
+                          onError={(e) => e.currentTarget.style.display = 'none'}
+                        />
+                      </div>
                     </motion.div>
                   )}
 
