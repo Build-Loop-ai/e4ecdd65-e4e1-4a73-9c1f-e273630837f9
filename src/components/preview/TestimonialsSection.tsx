@@ -1,9 +1,10 @@
 'use client';
 
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
-import { Quote } from 'lucide-react';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { useRef, useState, useEffect } from 'react';
+import { Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
+import { MarqueeText } from '@/components/animations/MarqueeText';
 
 interface Testimonial {
   quote: string;
@@ -23,15 +24,12 @@ export function TestimonialsSection({
   templateId,
 }: TestimonialsSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [typedText, setTypedText] = useState('');
 
-  const x = useTransform(scrollYProgress, [0, 1], ["10%", "-20%"]);
   const template = getTemplateStyle(templateId);
 
-  // Filter testimonials with meaningful content (at least 20 characters)
+  // Filter testimonials with meaningful content
   const validTestimonials = testimonials?.filter(t => 
     t.quote && t.quote.length >= 20 && t.author && t.author.length >= 2
   ) || [];
@@ -39,56 +37,142 @@ export function TestimonialsSection({
   // Require minimum 2 valid testimonials to show section
   if (validTestimonials.length < 2) return null;
 
-  // Elegant Minimal variant
+  // ========== ELEGANT MINIMAL - Fade between quotes on scroll ==========
   if (templateId === 'elegant-minimal') {
     return (
       <section ref={containerRef} className="py-40 bg-background">
-        <div className="container mx-auto px-6 max-w-4xl">
+        <div className="container mx-auto px-6 max-w-3xl">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 1.5 }}
             className="text-center mb-20"
           >
             <h2 
-              className="text-3xl md:text-4xl font-light tracking-tight mb-4"
+              className="text-3xl md:text-4xl font-light tracking-tight mb-6"
               style={{ fontFamily: 'Georgia, serif' }}
             >
-              Wat klanten zeggen
+              Wat anderen zeggen
             </h2>
-            <div 
-              className="w-16 h-px mx-auto"
+            <motion.div 
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.5 }}
+              className="w-16 h-px mx-auto origin-center"
               style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
             />
           </motion.div>
 
-          {/* Centered single testimonial display */}
-          <div className="space-y-20">
-            {validTestimonials.slice(0, 3).map((testimonial, index) => (
+          {/* Single quote with fade transition */}
+          <div className="relative min-h-[300px]">
+            <AnimatePresence mode="wait">
               <motion.div
-                key={index}
+                key={activeIndex}
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.8 }}
                 className="text-center"
               >
                 <p 
-                  className="text-xl md:text-2xl leading-relaxed text-foreground mb-8"
+                  className="text-xl md:text-2xl lg:text-3xl leading-relaxed text-foreground mb-10"
                   style={{ fontFamily: 'Georgia, serif' }}
                 >
-                  "{testimonial.quote}"
+                  "{validTestimonials[activeIndex].quote}"
                 </p>
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-center gap-4">
                   <div 
-                    className="w-px h-6"
+                    className="w-px h-8"
                     style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
                   />
                   <div className="text-left">
-                    <p className="text-sm font-medium text-foreground">{testimonial.author}</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {validTestimonials[activeIndex].author}
+                    </p>
+                    {validTestimonials[activeIndex].role && (
+                      <p className="text-xs text-muted-foreground">
+                        {validTestimonials[activeIndex].role}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Dots navigation */}
+          <div className="flex justify-center gap-3 mt-12">
+            {validTestimonials.slice(0, 5).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === activeIndex ? 'w-8' : 'opacity-30'
+                }`}
+                style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ========== WARM FRIENDLY - Speech bubbles with avatars ==========
+  if (templateId === 'warm-friendly') {
+    return (
+      <section ref={containerRef} className="py-24 bg-gradient-to-b from-orange-50/50 to-background">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, type: 'spring' }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+              Blije klanten 💬
+            </h2>
+            <div 
+              className="w-20 h-1.5 mx-auto rounded-full"
+              style={{ backgroundColor: primaryColor || '#f97316' }}
+            />
+          </motion.div>
+
+          {/* Speech bubble cards */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {validTestimonials.slice(0, 6).map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1, type: 'spring' }}
+                className="relative"
+              >
+                {/* Speech bubble */}
+                <div className="bg-white rounded-3xl p-6 shadow-lg shadow-orange-100/40 border border-orange-100/60 relative">
+                  <p className="text-foreground leading-relaxed mb-4">
+                    "{testimonial.quote}"
+                  </p>
+                  {/* Bubble tail */}
+                  <div className="absolute -bottom-3 left-8 w-6 h-6 bg-white border-l border-b border-orange-100/60 rotate-[-45deg]" />
+                </div>
+                
+                {/* Author with avatar */}
+                <div className="flex items-center gap-3 mt-6 ml-4">
+                  <div 
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-md"
+                    style={{ backgroundColor: primaryColor || '#f97316' }}
+                  >
+                    {testimonial.author.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">{testimonial.author}</p>
                     {testimonial.role && (
-                      <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
                     )}
                   </div>
                 </div>
@@ -100,195 +184,218 @@ export function TestimonialsSection({
     );
   }
 
-  // Warm Friendly variant
-  if (templateId === 'warm-friendly') {
+  // ========== BOLD STARTER - Marquee ticker ==========
+  if (templateId === 'bold-starter') {
+    // Create marquee text from testimonials
+    const marqueeContent = validTestimonials.map(t => `"${t.quote}" — ${t.author}`).join('   •   ');
+
     return (
-      <section ref={containerRef} className="py-24 overflow-hidden bg-gradient-to-b from-orange-50/30 to-background">
+      <section ref={containerRef} className="py-24 bg-[#0a0a0a] overflow-hidden">
         <div className="container mx-auto px-6 mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
+          <motion.h2 
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center"
+            className="text-4xl md:text-5xl font-black text-white tracking-tight"
           >
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+            Wat klanten zeggen
+          </motion.h2>
+        </div>
+
+        {/* Marquee strips */}
+        <div className="space-y-6">
+          <div 
+            className="py-6 border-y border-white/10"
+            style={{ backgroundColor: `${primaryColor || '#3b82f6'}10` }}
+          >
+            <MarqueeText 
+              speed={15} 
+              direction="left" 
+              className="text-xl md:text-2xl font-medium text-white/80"
+            >
+              {marqueeContent}
+            </MarqueeText>
+          </div>
+          
+          <div className="py-4 opacity-50">
+            <MarqueeText 
+              speed={10} 
+              direction="right" 
+              className="text-lg text-white/40"
+            >
+              {marqueeContent}
+            </MarqueeText>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ========== MODERN PROFESSIONAL - 3D perspective carousel ==========
+  if (templateId === 'modern-professional') {
+    const goNext = () => setActiveIndex((prev) => (prev + 1) % validTestimonials.length);
+    const goPrev = () => setActiveIndex((prev) => (prev - 1 + validTestimonials.length) % validTestimonials.length);
+
+    return (
+      <section ref={containerRef} className="py-32 bg-[#0a0a0a] overflow-hidden">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
               Wat klanten zeggen
             </h2>
             <div 
-              className="w-20 h-1.5 mx-auto rounded-full"
-              style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
+              className="w-16 h-1"
+              style={{ backgroundColor: primaryColor || '#3b82f6' }}
             />
           </motion.div>
-        </div>
 
-        {/* Rounded cards */}
-        <motion.div 
-          style={{ x }}
-          className="flex gap-6 pl-6"
-        >
-          {validTestimonials.map((testimonial, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="flex-shrink-0 w-[340px] md:w-[420px] p-8 rounded-3xl bg-white shadow-lg shadow-orange-100/30 border border-orange-100/50"
-            >
-              <div className="flex items-center gap-4 mb-6">
-                <div 
-                  className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md"
-                  style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
-                >
-                  {testimonial.author.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold text-foreground">{testimonial.author}</p>
-                  {testimonial.role && (
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                  )}
-                </div>
-              </div>
-              <p className="text-foreground leading-relaxed">
-                "{testimonial.quote}"
-              </p>
-            </motion.div>
-          ))}
-        </motion.div>
+          {/* 3D Carousel */}
+          <div className="relative" style={{ perspective: '1000px' }}>
+            <div className="flex items-center justify-center min-h-[400px]">
+              {validTestimonials.map((testimonial, index) => {
+                const offset = index - activeIndex;
+                const isActive = index === activeIndex;
+                
+                return (
+                  <motion.div
+                    key={index}
+                    animate={{
+                      rotateY: offset * 30,
+                      x: offset * 300,
+                      z: isActive ? 0 : -200,
+                      opacity: Math.abs(offset) > 1 ? 0 : 1 - Math.abs(offset) * 0.5,
+                      scale: isActive ? 1 : 0.8,
+                    }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute w-full max-w-2xl"
+                    style={{ 
+                      transformStyle: 'preserve-3d',
+                      zIndex: isActive ? 10 : 5 - Math.abs(offset),
+                    }}
+                  >
+                    <div className="p-10 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10">
+                      <Quote 
+                        className="w-12 h-12 mb-6"
+                        style={{ color: primaryColor || '#3b82f6', opacity: 0.5 }}
+                      />
+                      <p className="text-xl md:text-2xl text-white leading-relaxed mb-8">
+                        "{testimonial.quote}"
+                      </p>
+                      <div className="flex items-center gap-4">
+                        <div 
+                          className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold"
+                          style={{ backgroundColor: primaryColor || '#3b82f6' }}
+                        >
+                          {testimonial.author.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-white">{testimonial.author}</p>
+                          {testimonial.role && (
+                            <p className="text-sm text-white/50">{testimonial.role}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex justify-center gap-4 mt-8">
+              <button
+                onClick={goPrev}
+                className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5 text-white" />
+              </button>
+              <button
+                onClick={goNext}
+                className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <ChevronRight className="w-5 h-5 text-white" />
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
     );
   }
 
-  // Bold Starter variant
-  if (templateId === 'bold-starter') {
-    return (
-      <section ref={containerRef} className="py-32 overflow-hidden bg-black">
-        <div className="container mx-auto px-6 mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 
-              className="text-4xl md:text-5xl font-black tracking-tight"
-              style={{ 
-                background: `linear-gradient(135deg, white 0%, ${primaryColor || '#3b82f6'} 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Wat klanten zeggen
-            </h2>
-          </motion.div>
-        </div>
+  // ========== CORPORATE CLASSIC - Single quote with typewriter effect ==========
+  // Typewriter effect
+  useEffect(() => {
+    setTypedText('');
+    const quote = validTestimonials[activeIndex]?.quote || '';
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i <= quote.length) {
+        setTypedText(quote.slice(0, i));
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 30);
+    return () => clearInterval(interval);
+  }, [activeIndex, validTestimonials]);
 
-        {/* Glassmorphism cards */}
-        <motion.div 
-          style={{ x }}
-          className="flex gap-6 pl-6"
-        >
-          {validTestimonials.map((testimonial, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="flex-shrink-0 w-[380px] md:w-[480px] p-10 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10"
-            >
-              <Quote 
-                className="w-16 h-16 mb-6"
-                style={{ 
-                  color: primaryColor || '#3b82f6',
-                  opacity: 0.5
-                }}
-              />
-              <p className="text-xl md:text-2xl leading-relaxed mb-8 text-white">
-                "{testimonial.quote}"
-              </p>
-              <div className="flex items-center gap-4">
-                <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold"
-                  style={{ 
-                    background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}, #8b5cf6)` 
-                  }}
-                >
-                  {testimonial.author.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold text-white">{testimonial.author}</p>
-                  {testimonial.role && (
-                    <p className="text-sm text-white/50">{testimonial.role}</p>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
-    );
-  }
-
-  // Default: Modern Professional / Corporate Classic
   return (
-    <section ref={containerRef} className="py-24 overflow-hidden bg-muted/30">
-      <div className="container mx-auto px-6 mb-12">
+    <section ref={containerRef} className="py-32 bg-muted/30">
+      <div className="container mx-auto px-6 max-w-4xl">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
             Wat klanten zeggen
           </h2>
           <div 
-            className="w-16 h-1"
+            className="w-20 h-1 mx-auto"
             style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
           />
         </motion.div>
-      </div>
 
-      {/* Horizontal scrolling testimonials */}
-      <motion.div 
-        style={{ x }}
-        className="flex gap-8 pl-6"
-      >
-        {validTestimonials.map((testimonial, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="flex-shrink-0 w-[400px] md:w-[500px] p-10 rounded-3xl bg-background border border-border/50 shadow-sm"
-          >
-            <Quote 
-              className="w-12 h-12 mb-6 opacity-20"
-              style={{ color: primaryColor || 'hsl(var(--primary))' }}
-            />
-            <p className="text-lg md:text-xl leading-relaxed mb-8 text-foreground">
-              "{testimonial.quote}"
+        {/* Single large quote with typewriter */}
+        <div className="text-center min-h-[250px]">
+          <Quote 
+            className="w-16 h-16 mx-auto mb-8 opacity-20"
+            style={{ color: primaryColor || 'hsl(var(--primary))' }}
+          />
+          <p className="text-xl md:text-2xl lg:text-3xl text-foreground leading-relaxed mb-10 min-h-[120px]">
+            "{typedText}"
+            <span className="animate-pulse">|</span>
+          </p>
+          <p className="text-lg font-semibold text-foreground">
+            {validTestimonials[activeIndex]?.author}
+          </p>
+          {validTestimonials[activeIndex]?.role && (
+            <p className="text-muted-foreground mt-1">
+              {validTestimonials[activeIndex].role}
             </p>
-            <div className="flex items-center gap-4">
-              <div 
-                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold"
-                style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
-              >
-                {testimonial.author.charAt(0)}
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">{testimonial.author}</p>
-                {testimonial.role && (
-                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
+          )}
+        </div>
+
+        {/* Dots navigation */}
+        <div className="flex justify-center gap-3 mt-12">
+          {validTestimonials.slice(0, 5).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveIndex(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === activeIndex ? 'scale-125' : 'opacity-30 hover:opacity-60'
+              }`}
+              style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
+            />
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

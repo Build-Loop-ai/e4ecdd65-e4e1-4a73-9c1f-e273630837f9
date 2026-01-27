@@ -7,6 +7,7 @@ interface TiltCardProps {
   children: ReactNode;
   className?: string;
   tiltAmount?: number;
+  maxTilt?: number; // Alias for tiltAmount
   glareEnabled?: boolean;
   glareColor?: string;
 }
@@ -15,17 +16,19 @@ export function TiltCard({
   children, 
   className = '', 
   tiltAmount = 10,
+  maxTilt,
   glareEnabled = true,
   glareColor = 'rgba(255, 255, 255, 0.4)'
 }: TiltCardProps) {
+  const effectiveTilt = maxTilt ?? tiltAmount;
   const ref = useRef<HTMLDivElement>(null);
   
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   
   const springConfig = { damping: 20, stiffness: 300 };
-  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [tiltAmount, -tiltAmount]), springConfig);
-  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-tiltAmount, tiltAmount]), springConfig);
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [effectiveTilt, -effectiveTilt]), springConfig);
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-effectiveTilt, effectiveTilt]), springConfig);
   
   const glareX = useTransform(x, [-0.5, 0.5], ['0%', '100%']);
   const glareY = useTransform(y, [-0.5, 0.5], ['0%', '100%']);
