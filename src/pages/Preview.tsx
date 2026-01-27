@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +8,9 @@ import { useToast } from '@/hooks/use-toast';
 import { HeroSection } from '@/components/preview/HeroSection';
 import { AboutSection } from '@/components/preview/AboutSection';
 import { ServicesSection } from '@/components/preview/ServicesSection';
+import { HorizontalGallery } from '@/components/preview/HorizontalGallery';
+import { InstagramFeed } from '@/components/preview/InstagramFeed';
+import { TestimonialsSection } from '@/components/preview/TestimonialsSection';
 import { ContactSection } from '@/components/preview/ContactSection';
 import { FeedbackButton } from '@/components/preview/FeedbackButton';
 import type { Tables } from '@/integrations/supabase/types';
@@ -17,23 +22,46 @@ interface ProcessedSchema {
     headline: string;
     subheadline: string;
     ctaText: string;
+    backgroundImages?: string[];
   };
   about: {
     title: string;
     description: string;
     valueProps: string[];
+    stats?: Array<{ value: string; label: string }>;
   };
   services: Array<{
     title: string;
     description: string;
+    image?: string | null;
+  }>;
+  gallery?: {
+    images: string[];
+    title?: string;
+  };
+  instagram?: {
+    handle?: string;
+    posts: Array<{
+      image: string;
+      caption?: string | null;
+      link: string;
+    }>;
+  };
+  testimonials?: Array<{
+    quote: string;
+    author: string;
+    role?: string | null;
   }>;
   contact: {
     email: string | null;
     phone: string | null;
     address: string | null;
+    instagram?: string | null;
+    facebook?: string | null;
   };
   logo: string | null;
   companyName: string;
+  tagline?: string;
 }
 
 export default function Preview() {
@@ -75,9 +103,10 @@ export default function Preview() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="h-[60vh] flex items-center justify-center">
-          <Skeleton className="h-64 w-full max-w-2xl" />
+      <div className="min-h-screen bg-foreground flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-background/20 border-t-background rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-background/60">Loading preview...</p>
         </div>
       </div>
     );
@@ -85,10 +114,10 @@ export default function Preview() {
 
   if (!preview) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Preview niet gevonden</h1>
-          <p className="text-muted-foreground">Deze preview link is mogelijk ongeldig of verlopen.</p>
+      <div className="min-h-screen bg-foreground flex items-center justify-center">
+        <div className="text-center text-background">
+          <h1 className="text-4xl font-black mb-4">Preview niet gevonden</h1>
+          <p className="text-background/60">Deze preview link is mogelijk ongeldig of verlopen.</p>
         </div>
       </div>
     );
@@ -112,6 +141,7 @@ export default function Preview() {
         subheadline={schema?.hero?.subheadline || 'Een professionele online aanwezigheid voor uw bedrijf'}
         ctaText={schema?.hero?.ctaText || 'Aan de slag'}
         logo={logo}
+        backgroundImages={schema?.hero?.backgroundImages}
         isModern={isModern}
         primaryColor={primaryColor}
       />
@@ -120,6 +150,7 @@ export default function Preview() {
         title={schema?.about?.title || 'Over Ons'}
         description={schema?.about?.description || 'Wij bieden uitzonderlijke diensten om uw bedrijf te laten groeien.'}
         valueProps={schema?.about?.valueProps}
+        stats={schema?.about?.stats}
         isModern={isModern}
         primaryColor={primaryColor}
       />
@@ -130,10 +161,32 @@ export default function Preview() {
         primaryColor={primaryColor}
       />
 
+      {/* Gallery with horizontal scroll */}
+      <HorizontalGallery
+        images={schema?.gallery?.images || []}
+        title={schema?.gallery?.title || 'Ons werk'}
+        primaryColor={primaryColor}
+      />
+
+      {/* Instagram Feed */}
+      <InstagramFeed
+        handle={schema?.instagram?.handle}
+        posts={schema?.instagram?.posts || []}
+        primaryColor={primaryColor}
+      />
+
+      {/* Testimonials with horizontal scroll */}
+      <TestimonialsSection
+        testimonials={schema?.testimonials || []}
+        primaryColor={primaryColor}
+      />
+
       <ContactSection
         email={schema?.contact?.email}
         phone={schema?.contact?.phone}
         address={schema?.contact?.address}
+        instagram={schema?.contact?.instagram}
+        facebook={schema?.contact?.facebook}
         isModern={isModern}
         primaryColor={primaryColor}
       />
@@ -141,8 +194,19 @@ export default function Preview() {
       <FeedbackButton previewId={preview.id} primaryColor={primaryColor} />
 
       {/* Footer */}
-      <footer className="py-8 px-4 border-t text-center text-sm text-muted-foreground bg-muted/30">
-        <p>Preview gegenereerd door PreviewPro</p>
+      <footer className="py-12 px-6 border-t border-border/50 bg-background">
+        <div className="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-muted-foreground">
+            Preview gegenereerd door PreviewPro
+          </p>
+          {logo && (
+            <img 
+              src={logo} 
+              alt={schema?.companyName || 'Logo'} 
+              className="h-8 w-auto object-contain opacity-50"
+            />
+          )}
+        </div>
       </footer>
     </div>
   );
