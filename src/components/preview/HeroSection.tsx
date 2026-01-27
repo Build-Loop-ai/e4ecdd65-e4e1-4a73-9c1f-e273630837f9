@@ -148,7 +148,11 @@ export function HeroSection({
         >
           <Button 
             size="lg" 
-            className="group text-lg px-10 py-7 rounded-full font-semibold bg-white text-black hover:bg-white/90 shadow-2xl transition-all duration-500 hover:scale-105"
+            className="group text-lg px-10 py-7 rounded-full font-semibold shadow-2xl transition-all duration-500 hover:scale-105"
+            style={{
+              backgroundColor: primaryColor || 'white',
+              color: primaryColor ? 'white' : 'black',
+            }}
           >
             {ctaText}
             <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />

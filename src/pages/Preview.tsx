@@ -127,14 +127,30 @@ export default function Preview() {
   const brandColors = preview.brand_colors as any;
   const isModern = preview.template_id === 'modern-professional';
 
-  // Extract primary color from brand colors
-  const primaryColor = brandColors?.colors?.primary || brandColors?.branding?.colors?.primary || null;
+  // Extract colors from brand colors (Firecrawl branding format)
+  const colors = brandColors?.colors || brandColors?.branding?.colors || {};
+  const primaryColor = colors?.primary || null;
+  const secondaryColor = colors?.secondary || null;
+  const accentColor = colors?.accent || null;
+  const backgroundColor = colors?.background || null;
+  const textColor = colors?.textPrimary || null;
   
   // Get logo from schema or branding data
   const logo = schema?.logo || brandColors?.logo || brandColors?.branding?.logo || brandColors?.branding?.images?.logo || null;
 
+  // Create CSS variables for brand colors
+  const brandStyles = {
+    '--brand-primary': primaryColor || 'hsl(var(--primary))',
+    '--brand-secondary': secondaryColor || 'hsl(var(--secondary))',
+    '--brand-accent': accentColor || primaryColor || 'hsl(var(--accent))',
+    '--brand-background': backgroundColor || 'hsl(var(--background))',
+    '--brand-text': textColor || 'hsl(var(--foreground))',
+  } as React.CSSProperties;
+
+  console.log('Brand colors extracted:', { primaryColor, secondaryColor, accentColor, backgroundColor, textColor });
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={brandStyles}>
       <HeroSection
         companyName={schema?.companyName}
         headline={schema?.hero?.headline || 'Welkom op uw nieuwe website'}
