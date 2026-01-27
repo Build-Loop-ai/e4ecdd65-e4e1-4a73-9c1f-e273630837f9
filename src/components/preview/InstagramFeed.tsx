@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Instagram } from 'lucide-react';
+import { getButtonTextColor } from '@/lib/colorContrast';
 
 interface InstagramPost {
   image: string;
@@ -76,7 +77,7 @@ export function InstagramFeed({
               className="hidden md:flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors"
               style={{ 
                 backgroundColor: primaryColor || 'hsl(var(--primary))',
-                color: 'white'
+                color: getButtonTextColor(primaryColor || '#6366F1')
               }}
             >
               Volg ons

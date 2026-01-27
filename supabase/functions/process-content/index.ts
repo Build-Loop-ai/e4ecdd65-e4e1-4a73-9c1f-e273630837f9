@@ -20,6 +20,45 @@ Deno.serve(async (req) => {
 
     const systemPrompt = `You are an expert at analyzing scraped website content and organizing it into a structured schema for a premium, high-end website template.
 
+## BRAND COLOR ANALYSIS (CRITICAL - DO THIS FIRST)
+
+Analyze the brand colors provided from Firecrawl. This is ESSENTIAL for maintaining brand consistency.
+
+If Firecrawl extracted colors, validate and use them. If colors are missing or incomplete:
+1. Look for color mentions in CSS, metadata, or content
+2. Analyze the brand personality to infer appropriate colors
+3. Use industry-appropriate defaults if nothing found
+
+You MUST return validated brand colors in this format:
+{
+  "brandColors": {
+    "primary": "#hexcolor - the main brand color (REQUIRED - this is the most important color)",
+    "secondary": "#hexcolor or null - supporting color",
+    "accent": "#hexcolor or null - accent for CTAs/highlights",
+    "background": "#hexcolor - suggested background (light or dark)",
+    "textPrimary": "#hexcolor - main text color",
+    "colorScheme": "light" | "dark" - overall brand preference
+  }
+}
+
+COLOR DETECTION RULES:
+1. If Firecrawl provided colors.primary, use it as the base but validate it looks like a real brand color
+2. If primary is missing, look for:
+   - Colors in the logo description
+   - Dominant colors mentioned in CSS snippets
+   - Common industry colors (tech=blue, food=red/orange, legal=navy, beauty=pink/purple)
+3. NEVER return null for primary - always provide a valid hex color
+4. If the brand uses dark colors predominantly, set colorScheme to "dark"
+5. Industry color defaults:
+   - Technology: #3B82F6 (blue)
+   - Beauty/Wellness: #EC4899 (pink)
+   - Food/Hospitality: #F97316 (orange)
+   - Legal/Professional: #1E3A5F (navy)
+   - Healthcare: #14B8A6 (teal)
+   - Creative Agency: #8B5CF6 (purple)
+   - Construction: #D97706 (amber)
+   - Retail: #6366F1 (indigo)
+
 ## BUSINESS INTELLIGENCE ANALYSIS (CRITICAL - DO THIS FIRST)
 
 Before extracting content, you MUST analyze the business to determine:
@@ -142,6 +181,14 @@ Return a JSON object with this exact structure:
     "recommendedTemplate": "string - one of the 5 template IDs",
     "confidence": 0.85
   },
+  "brandColors": {
+    "primary": "#hexcolor - REQUIRED main brand color",
+    "secondary": "#hexcolor or null",
+    "accent": "#hexcolor or null",
+    "background": "#hexcolor or null",
+    "textPrimary": "#hexcolor or null",
+    "colorScheme": "light" or "dark"
+  },
   "adaptedContent": {
     "servicesTitle": "string - industry-appropriate services title",
     "galleryTitle": "string - industry-appropriate gallery title",
@@ -175,6 +222,33 @@ Return a JSON object with this exact structure:
     ],
     "image": "string url or null - first image classified as 'about' or 'team'"
   },
+  "services": [
+    { "title": "string", "description": "string", "image": "string url or null" }
+  ],
+  "gallery": {
+    "images": ["array of ALL image URLs found on the site"],
+    "title": "string - industry-appropriate section title"
+  },
+  "instagram": {
+    "handle": "string - instagram username if found",
+    "posts": [
+      { "image": "string url", "caption": "string or null", "link": "string url" }
+    ]
+  },
+  "testimonials": [
+    { "quote": "string", "author": "string", "role": "string or null" }
+  ],
+  "contact": {
+    "email": "string or null",
+    "phone": "string or null",
+    "address": "string or null",
+    "instagram": "string url or null",
+    "facebook": "string url or null"
+  },
+  "logo": "string url or null",
+  "companyName": "string",
+  "tagline": "string - short brand tagline if available"
+}
   "services": [
     { "title": "string", "description": "string", "image": "string url or null" }
   ],

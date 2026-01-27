@@ -14,6 +14,7 @@ import {
 import { MessageSquare, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getButtonTextColor } from '@/lib/colorContrast';
 
 interface FeedbackButtonProps {
   previewId: string;
@@ -68,7 +69,7 @@ export function FeedbackButton({ previewId, primaryColor }: FeedbackButtonProps)
             className="shadow-2xl hover:shadow-xl transition-all duration-300 rounded-full px-6"
             style={{ 
               backgroundColor: primaryColor || 'hsl(var(--primary))',
-              color: 'white'
+              color: getButtonTextColor(primaryColor || '#6366F1')
             }}
           >
             <MessageSquare className="h-5 w-5 mr-2" />

@@ -17,6 +17,7 @@ import {
   type FallbackPatternType,
 } from '@/lib/businessIntelligence';
 import { getPatternForIndustry } from '@/lib/heroPatterns';
+import { getButtonTextColor, isDarkColor, getReadableTextColor } from '@/lib/colorContrast';
 
 interface HeroSectionProps {
   companyName?: string;
@@ -90,15 +91,12 @@ export function HeroSection({
     ? getPatternForIndustry(industry || 'other')
     : getPatternForIndustry(industry || 'other');
 
-  const getContrastColor = (hexColor: string | undefined) => {
-    if (!hexColor) return 'black';
-    const hex = hexColor.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance > 0.5 ? 'black' : 'white';
-  };
+  // Use the imported color contrast utilities
+  const buttonTextColor = getButtonTextColor(primaryColor || '#3B82F6');
+  
+  // Determine if we're on a dark background template
+  const isDarkTemplate = effectiveTemplateId === 'bold-starter' || effectiveTemplateId === 'modern-professional';
+  const heroTextColor = isDarkTemplate ? '#FFFFFF' : getReadableTextColor('#FFFFFF', primaryColor);
 
   // ========== ELEGANT MINIMAL - "Atelier" ==========
   if (effectiveTemplateId === 'elegant-minimal') {
@@ -282,7 +280,7 @@ export function HeroSection({
                 className="group text-base px-8 py-6 rounded-full font-semibold transition-all hover:scale-105"
                 style={{ 
                   backgroundColor: primaryColor || '#f97316', 
-                  color: getContrastColor(primaryColor),
+                  color: buttonTextColor,
                 }}
               >
                 {ctaText}
@@ -386,7 +384,7 @@ export function HeroSection({
               className="group text-lg px-12 py-8 rounded-xl font-bold transition-all hover:scale-105"
               style={{
                 backgroundColor: primaryColor || '#3b82f6',
-                color: getContrastColor(primaryColor || '#3b82f6'),
+                color: buttonTextColor,
                 boxShadow: `0 0 60px -15px ${primaryColor || '#3b82f6'}`,
               }}
             >
@@ -535,7 +533,7 @@ export function HeroSection({
               className="group text-base px-10 py-7 rounded-xl font-semibold transition-all hover:scale-105"
               style={{
                 backgroundColor: primaryColor || '#3b82f6',
-                color: getContrastColor(primaryColor || '#3b82f6'),
+                color: buttonTextColor,
                 boxShadow: `0 0 80px -20px ${primaryColor || '#3b82f6'}`,
               }}
             >
@@ -656,7 +654,7 @@ export function HeroSection({
                 className="text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
                 style={{
                   backgroundColor: primaryColor || '#1e40af',
-                  color: getContrastColor(primaryColor || '#1e40af'),
+                  color: buttonTextColor,
                 }}
               >
                 {ctaText}

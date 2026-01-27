@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, ArrowRight, Instagram, Facebook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
+import { getButtonTextColor } from '@/lib/colorContrast';
 
 interface ContactSectionProps {
   email?: string | null;
