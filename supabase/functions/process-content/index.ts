@@ -54,13 +54,17 @@ Return a JSON object with this exact structure:
 
 If information is missing, make reasonable professional placeholders that fit the business type.`;
 
+    // Extract logo from branding data
+    const logoUrl = brandColors?.logo || brandColors?.images?.logo || scrapedContent?.branding?.logo || scrapedContent?.branding?.images?.logo || null;
+    console.log('Logo URL found:', logoUrl);
+
     const userPrompt = `Here is the scraped website content to analyze:
 
 MARKDOWN CONTENT:
 ${scrapedContent?.markdown || 'No markdown content available'}
 
-BRAND COLORS:
-${JSON.stringify(brandColors || {}, null, 2)}
+BRAND COLORS AND BRANDING:
+${JSON.stringify(brandColors || scrapedContent?.branding || {}, null, 2)}
 
 LINKS FOUND:
 ${JSON.stringify(scrapedContent?.links?.slice(0, 20) || [], null, 2)}
@@ -68,7 +72,10 @@ ${JSON.stringify(scrapedContent?.links?.slice(0, 20) || [], null, 2)}
 METADATA:
 ${JSON.stringify(scrapedContent?.metadata || {}, null, 2)}
 
-Please analyze this content and return the structured JSON schema.`;
+LOGO URL (if found):
+${logoUrl || 'No logo found'}
+
+Please analyze this content and return the structured JSON schema. Make sure to include the logo URL in your response if available.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
