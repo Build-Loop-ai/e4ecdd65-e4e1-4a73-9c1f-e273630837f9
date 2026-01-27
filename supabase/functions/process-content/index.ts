@@ -20,23 +20,118 @@ Deno.serve(async (req) => {
 
     const systemPrompt = `You are an expert at analyzing scraped website content and organizing it into a structured schema for a premium, high-end website template.
 
-Your task is to extract and organize ALL available content from the provided website:
+## BUSINESS INTELLIGENCE ANALYSIS (CRITICAL - DO THIS FIRST)
+
+Before extracting content, you MUST analyze the business to determine:
+
+1. **INDUSTRY** - Classify into one of these categories:
+   - beauty_wellness (barbers, salons, spas, nail studios, tattoo shops)
+   - food_hospitality (restaurants, cafes, bars, bakeries, catering, hotels)
+   - professional_services (law firms, accounting, consulting, real estate, insurance)
+   - creative_agency (design studios, marketing agencies, photography, video production)
+   - retail_ecommerce (shops, boutiques, online stores)
+   - healthcare (doctors, dentists, clinics, therapists, chiropractors)
+   - construction_trades (contractors, plumbers, electricians, roofers, landscaping)
+   - technology (SaaS, software, IT services, tech startups)
+   - education (schools, tutoring, training, courses)
+   - fitness_sports (gyms, personal trainers, yoga studios, sports clubs)
+   - automotive (car dealers, mechanics, auto detailing)
+   - other
+
+2. **BUSINESS TYPE** - Specific type (e.g., "barber", "law_firm", "italian_restaurant", "dentist", etc.)
+
+3. **TARGET AUDIENCE** - Who are their customers?
+   - local_consumers, businesses, luxury_clients, young_professionals, families, etc.
+
+4. **BRAND PERSONALITY** - Analyze from their imagery, colors, and language:
+   - professional, friendly, luxury, edgy, traditional, modern, playful, sophisticated
+
+5. **PRIMARY ACTION** - What should visitors do?
+   - book_appointment, call_now, get_quote, shop_now, learn_more, contact_us, reserve_table, schedule_consultation
+
+6. **RECOMMENDED TEMPLATE** - Based on business type, choose the BEST fit:
+   - corporate-classic: Law firms, accountants, consultants, B2B services, insurance, real estate
+   - modern-professional: Tech companies, SaaS, digital agencies, IT services, startups
+   - bold-starter: Creative agencies, design studios, artists, photographers, marketing agencies
+   - elegant-minimal: Luxury brands, architects, high-end fashion, premium spas, fine dining
+   - warm-friendly: Cafes, restaurants, local shops, family businesses, barbers, bakeries, gyms
+
+7. **CONTENT PRIORITY** - Order sections by importance for this business type:
+   - Barbers/Salons: ["services", "gallery", "testimonials", "about", "contact"]
+   - Restaurants: ["gallery", "services", "about", "testimonials", "contact"] (gallery = food photos, services = menu)
+   - Law Firms: ["about", "services", "testimonials", "gallery", "contact"]
+   - Creative Agencies: ["gallery", "services", "about", "testimonials", "contact"]
+   - Healthcare: ["services", "about", "testimonials", "gallery", "contact"]
+   - Tech/SaaS: ["services", "about", "testimonials", "gallery", "contact"]
+
+## CONTENT EXTRACTION
+
+Extract and organize ALL available content:
 
 1. Hero section: main headline, subheadline, call-to-action text
 2. About section: company description, mission statement, key value propositions (extract 3-5 strong points)
 3. Services section: list of ALL services with titles and detailed descriptions
 4. Contact section: email, phone, address, social links
-5. Gallery/Portfolio: extract ALL image URLs found (product images, portfolio, team photos, etc.)
-6. Instagram feed: if Instagram posts/images are found, extract their image URLs and captions
+5. Gallery/Portfolio: extract ALL image URLs found
+6. Instagram feed: if Instagram posts/images are found, extract them
 7. Testimonials: any customer quotes or reviews with names
-8. Statistics: any numbers/stats mentioned (years in business, clients served, etc.)
+8. Statistics: any numbers/stats mentioned
+
+## ADAPTIVE SECTION TITLES
+
+Use industry-appropriate titles:
+
+| Business Type | Services Title | Gallery Title |
+|--------------|----------------|---------------|
+| Barber/Salon | Behandelingen | Ons Werk |
+| Restaurant/Cafe | Menu | Onze Gerechten |
+| Law Firm | Rechtsgebieden | Resultaten |
+| Creative Agency | Wat Wij Doen | Portfolio |
+| Healthcare | Behandelingen | Onze Praktijk |
+| Construction | Onze Diensten | Recente Projecten |
+| Tech/SaaS | Oplossingen | Hoe Het Werkt |
+| Retail | Collectie | Galerij |
+| Default | Onze Diensten | Galerij |
+
+## ADAPTIVE CTA TEXT
+
+Use industry-appropriate CTA text:
+
+| Business Type | CTA Text |
+|--------------|----------|
+| Barber/Salon | Maak een afspraak |
+| Restaurant | Reserveer nu |
+| Law Firm | Plan een consultatie |
+| Creative Agency | Start uw project |
+| Healthcare | Maak een afspraak |
+| Construction | Vraag een offerte aan |
+| Tech/SaaS | Probeer gratis |
+| Retail | Bekijk collectie |
+| Default | Neem contact op |
 
 Return a JSON object with this exact structure:
 {
+  "businessIntelligence": {
+    "industry": "string - one of the industry categories",
+    "businessType": "string - specific business type",
+    "targetAudience": "string - primary audience",
+    "brandPersonality": "string - brand personality",
+    "primaryAction": "string - primary action type",
+    "contentPriority": ["array of section names in order of importance"],
+    "recommendedTemplate": "string - one of the 5 template IDs",
+    "confidence": 0.85
+  },
+  "adaptedContent": {
+    "servicesTitle": "string - industry-appropriate services title",
+    "galleryTitle": "string - industry-appropriate gallery title",
+    "aboutTitle": "string - industry-appropriate about title (e.g., 'Over Ons', 'Wie We Zijn')",
+    "testimonialsTitle": "string - industry-appropriate (e.g., 'Wat Klanten Zeggen', 'Recensies')",
+    "contactTitle": "string - industry-appropriate (e.g., 'Contact', 'Neem Contact Op')"
+  },
   "hero": {
-    "headline": "string - make it impactful and professional",
+    "headline": "string - make it impactful and industry-appropriate",
     "subheadline": "string - compelling value proposition", 
-    "ctaText": "string - action-oriented button text",
+    "ctaText": "string - industry-appropriate action button text",
     "backgroundImages": ["array of image URLs found that could work as hero backgrounds"]
   },
   "about": {
@@ -44,7 +139,7 @@ Return a JSON object with this exact structure:
     "description": "string - detailed company description",
     "valueProps": ["string", "string", "string"],
     "stats": [
-      { "value": "25+", "label": "Years Experience" }
+      { "value": "25+", "label": "Jaren Ervaring" }
     ]
   },
   "services": [
@@ -52,7 +147,7 @@ Return a JSON object with this exact structure:
   ],
   "gallery": {
     "images": ["array of ALL image URLs found on the site"],
-    "title": "string - section title like 'Our Work' or 'Portfolio'"
+    "title": "string - industry-appropriate section title"
   },
   "instagram": {
     "handle": "string - instagram username if found",
@@ -78,15 +173,15 @@ Return a JSON object with this exact structure:
 CRITICAL EXTRACTION RULES - READ CAREFULLY:
 1. TESTIMONIALS: Only include testimonials if you find 2 or more GENUINE, DISTINCT customer reviews with real names and meaningful quotes (at least 20+ characters). If fewer than 2 real reviews exist, return an EMPTY testimonials array []. Do NOT fabricate or generate fake testimonials.
 
-2. INSTAGRAM: Only include Instagram data if the website has a VISIBLE Instagram feed embed with actual posts. Look for Instagram post URLs, embedded feeds, or clear Instagram content. If no real Instagram content exists, return empty: { "handle": null, "posts": [] }. Do NOT fabricate Instagram posts.
+2. INSTAGRAM: Only include Instagram data if the website has a VISIBLE Instagram feed embed with actual posts. If no real Instagram content exists, return empty: { "handle": null, "posts": [] }. Do NOT fabricate Instagram posts.
 
-3. SERVICES: Only include services that are explicitly mentioned on the website. Minimum 2 distinct services required to populate the services array. If only 1 service, include it in the about section description instead.
+3. SERVICES: Only include services that are explicitly mentioned on the website. Minimum 2 distinct services required.
 
-4. IMAGES: Extract ALL real images from the website. Filter out icons, logos, and tiny images. Only include actual content/atmosphere images.
+4. IMAGES: Extract ALL real images from the website. Filter out icons, logos, and tiny images.
 
-5. NEVER FABRICATE CONTENT: If content doesn't exist on the source website, return empty arrays or null values. Quality over quantity - only extract what actually exists.
+5. NEVER FABRICATE CONTENT: If content doesn't exist on the source website, return empty arrays or null values.
 
-- Make the content feel premium and professional while staying true to the source material`;
+6. BUSINESS INTELLIGENCE IS MANDATORY: You MUST analyze and fill in the businessIntelligence object accurately. This drives the entire website generation.`;
 
     // Extract logo from branding data
     const logoUrl = brandColors?.logo || brandColors?.images?.logo || scrapedContent?.branding?.logo || scrapedContent?.branding?.images?.logo || null;
@@ -175,7 +270,12 @@ ${JSON.stringify(scrapedContent?.metadata || {}, null, 2)}
 LOGO URL (if found):
 ${logoUrl || 'No logo found'}
 
-Please analyze this content thoroughly and return the complete structured JSON schema with ALL available content, especially images and Instagram posts if present.`;
+IMPORTANT: 
+1. First, carefully analyze what TYPE of business this is (barber, restaurant, law firm, agency, etc.)
+2. Then recommend the BEST template for this business type
+3. Set the content priority based on what matters most for this business
+4. Use industry-appropriate section titles and CTA text
+5. Return the complete structured JSON schema with the businessIntelligence object filled in accurately`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -224,13 +324,40 @@ Please analyze this content thoroughly and return the complete structured JSON s
       throw new Error('Invalid AI response format');
     }
 
+    // Ensure businessIntelligence exists with sensible defaults
+    if (!processedSchema.businessIntelligence) {
+      processedSchema.businessIntelligence = {
+        industry: 'other',
+        businessType: 'general',
+        targetAudience: 'local_consumers',
+        brandPersonality: 'professional',
+        primaryAction: 'contact_us',
+        contentPriority: ['services', 'about', 'gallery', 'testimonials', 'contact'],
+        recommendedTemplate: 'corporate-classic',
+        confidence: 0.5
+      };
+    }
+
+    // Ensure adaptedContent exists
+    if (!processedSchema.adaptedContent) {
+      processedSchema.adaptedContent = {
+        servicesTitle: 'Onze Diensten',
+        galleryTitle: 'Galerij',
+        aboutTitle: 'Over Ons',
+        testimonialsTitle: 'Wat Klanten Zeggen',
+        contactTitle: 'Contact'
+      };
+    }
+
     // Ensure extracted images are included even if AI missed them
     if (!processedSchema.gallery) {
-      processedSchema.gallery = { images: [], title: 'Gallery' };
+      processedSchema.gallery = { images: [], title: processedSchema.adaptedContent?.galleryTitle || 'Galerij' };
     }
     if (extractedImages.length > 0 && processedSchema.gallery.images.length === 0) {
       processedSchema.gallery.images = extractedImages;
     }
+
+    console.log('Business Intelligence:', JSON.stringify(processedSchema.businessIntelligence, null, 2));
 
     return new Response(
       JSON.stringify({ success: true, schema: processedSchema }),

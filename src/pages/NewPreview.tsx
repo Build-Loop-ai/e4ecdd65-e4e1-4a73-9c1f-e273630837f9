@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,10 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Globe, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Globe, Loader2, CheckCircle2, Sparkles, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ScanningProgress } from '@/components/preview/ScanningProgress';
+import { INDUSTRY_DISPLAY_NAMES, type IndustryType } from '@/lib/templateStyles';
 
 type Step = 'url' | 'connecting' | 'extracting' | 'processing' | 'template' | 'complete';
 
@@ -35,6 +37,13 @@ export default function NewPreview() {
   const [scrapedData, setScrapedData] = useState<any>(null);
   const [processedSchema, setProcessedSchema] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Auto-select recommended template when processing completes
+  useEffect(() => {
+    if (processedSchema?.businessIntelligence?.recommendedTemplate) {
+      setTemplate(processedSchema.businessIntelligence.recommendedTemplate);
+    }
+  }, [processedSchema]);
 
   const generateSlug = (name: string) => {
     return name
@@ -168,7 +177,17 @@ export default function NewPreview() {
   const serviceCount = processedSchema?.services?.length || 0;
   const companyName = processedSchema?.companyName || clientName;
 
+  // Business intelligence data
+  const businessIntelligence = processedSchema?.businessIntelligence;
+  const recommendedTemplate = businessIntelligence?.recommendedTemplate;
+  const industry = businessIntelligence?.industry as IndustryType | undefined;
+  const businessType = businessIntelligence?.businessType;
+  const industryDisplayName = industry ? INDUSTRY_DISPLAY_NAMES[industry] || industry : null;
+
   const isScanning = step === 'connecting' || step === 'extracting' || step === 'processing';
+
+  // Helper to check if template is recommended
+  const isRecommended = (templateId: string) => templateId === recommendedTemplate;
 
   return (
     <div className="min-h-screen bg-background">
@@ -268,8 +287,20 @@ export default function NewPreview() {
           <Card className="max-w-5xl mx-auto">
             <CardHeader>
               <CardTitle>Choose a Template</CardTitle>
-              <CardDescription>
-                See how {companyName}'s content looks in each template
+              <CardDescription className="flex flex-col gap-2">
+                <span>See how {companyName}'s content looks in each template</span>
+                {industryDisplayName && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      Detected: {industryDisplayName}
+                    </Badge>
+                    {businessType && (
+                      <Badge variant="outline" className="text-xs">
+                        {businessType.replace(/_/g, ' ')}
+                      </Badge>
+                    )}
+                  </div>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -285,6 +316,13 @@ export default function NewPreview() {
                     <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
                       template === 'corporate-classic' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
                     }`}>
+                      {isRecommended('corporate-classic') && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <Badge className="bg-green-500 hover:bg-green-600 text-white text-[10px] px-2 py-0.5 flex items-center gap-1">
+                            <Star className="w-3 h-3" /> AI Pick
+                          </Badge>
+                        </div>
+                      )}
                       <div 
                         className="aspect-[4/3] p-3 relative overflow-hidden"
                         style={{ 
@@ -305,7 +343,7 @@ export default function NewPreview() {
                         <RadioGroupItem value="corporate-classic" id="corporate-classic" className="mt-0.5" />
                         <div className="flex-1">
                           <div className="font-semibold text-sm">Corporate Classic</div>
-                          <div className="text-xs text-muted-foreground">Traditional & professional</div>
+                          <div className="text-xs text-muted-foreground">Law, consulting, B2B</div>
                         </div>
                       </div>
                     </div>
@@ -321,6 +359,13 @@ export default function NewPreview() {
                     <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
                       template === 'modern-professional' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
                     }`}>
+                      {isRecommended('modern-professional') && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <Badge className="bg-green-500 hover:bg-green-600 text-white text-[10px] px-2 py-0.5 flex items-center gap-1">
+                            <Star className="w-3 h-3" /> AI Pick
+                          </Badge>
+                        </div>
+                      )}
                       <div className="aspect-[4/3] bg-black p-3 relative overflow-hidden">
                         <div className="absolute top-2 right-2 w-12 h-12 rounded-full blur-xl opacity-40" style={{ backgroundColor: primaryColor }} />
                         {logo && (
@@ -334,7 +379,7 @@ export default function NewPreview() {
                         <RadioGroupItem value="modern-professional" id="modern-professional" className="mt-0.5" />
                         <div className="flex-1">
                           <div className="font-semibold text-sm">Modern Professional</div>
-                          <div className="text-xs text-muted-foreground">Dark with gradient orbs</div>
+                          <div className="text-xs text-muted-foreground">Tech, SaaS, startups</div>
                         </div>
                       </div>
                     </div>
@@ -350,6 +395,13 @@ export default function NewPreview() {
                     <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
                       template === 'bold-starter' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
                     }`}>
+                      {isRecommended('bold-starter') && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <Badge className="bg-green-500 hover:bg-green-600 text-white text-[10px] px-2 py-0.5 flex items-center gap-1">
+                            <Star className="w-3 h-3" /> AI Pick
+                          </Badge>
+                        </div>
+                      )}
                       <div className="aspect-[4/3] bg-black p-3 relative overflow-hidden">
                         <div className="absolute inset-0 opacity-30" style={{ background: `linear-gradient(135deg, ${primaryColor}50 0%, purple 100%)` }} />
                         <div className="absolute top-2 left-2 w-6 h-6 bg-white/10 rounded-lg backdrop-blur" />
@@ -370,7 +422,7 @@ export default function NewPreview() {
                         <RadioGroupItem value="bold-starter" id="bold-starter" className="mt-0.5" />
                         <div className="flex-1">
                           <div className="font-semibold text-sm">Bold Starter</div>
-                          <div className="text-xs text-muted-foreground">Vibrant for startups</div>
+                          <div className="text-xs text-muted-foreground">Creative, agencies, design</div>
                         </div>
                       </div>
                     </div>
@@ -386,6 +438,13 @@ export default function NewPreview() {
                     <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
                       template === 'elegant-minimal' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
                     }`}>
+                      {isRecommended('elegant-minimal') && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <Badge className="bg-green-500 hover:bg-green-600 text-white text-[10px] px-2 py-0.5 flex items-center gap-1">
+                            <Star className="w-3 h-3" /> AI Pick
+                          </Badge>
+                        </div>
+                      )}
                       <div className="aspect-[4/3] bg-stone-50 p-4 relative overflow-hidden flex flex-col items-center justify-center text-center">
                         <div className="text-xs font-light text-stone-800 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
                           {truncate(headline, 30)}
@@ -396,7 +455,7 @@ export default function NewPreview() {
                         <RadioGroupItem value="elegant-minimal" id="elegant-minimal" className="mt-0.5" />
                         <div className="flex-1">
                           <div className="font-semibold text-sm">Elegant Minimal</div>
-                          <div className="text-xs text-muted-foreground">Luxury & whitespace</div>
+                          <div className="text-xs text-muted-foreground">Luxury, fashion, architecture</div>
                         </div>
                       </div>
                     </div>
@@ -412,6 +471,13 @@ export default function NewPreview() {
                     <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
                       template === 'warm-friendly' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
                     }`}>
+                      {isRecommended('warm-friendly') && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <Badge className="bg-green-500 hover:bg-green-600 text-white text-[10px] px-2 py-0.5 flex items-center gap-1">
+                            <Star className="w-3 h-3" /> AI Pick
+                          </Badge>
+                        </div>
+                      )}
                       <div className="aspect-[4/3] p-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fff7ed 0%, #fce7f3 100%)' }}>
                         {logo && (
                           <div className="bg-white/80 rounded-xl p-1.5 inline-block mb-2 shadow-sm">
@@ -425,7 +491,7 @@ export default function NewPreview() {
                         <RadioGroupItem value="warm-friendly" id="warm-friendly" className="mt-0.5" />
                         <div className="flex-1">
                           <div className="font-semibold text-sm">Warm Friendly</div>
-                          <div className="text-xs text-muted-foreground">Local businesses & cafes</div>
+                          <div className="text-xs text-muted-foreground">Cafes, salons, local shops</div>
                         </div>
                       </div>
                     </div>
