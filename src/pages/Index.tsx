@@ -15,22 +15,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background overflow-hidden">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40">
-        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+      {/* Header - Premium glassmorphic nav */}
+      <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl">
+        <div className="bg-white/90 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 rounded-2xl px-6 h-14 flex items-center justify-between">
           <PitchLogo size="md" />
           {!loading && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {user ? (
-                <Button asChild size="sm">
+                <Button asChild size="sm" className="rounded-xl">
                   <Link to="/dashboard">Dashboard</Link>
                 </Button>
               ) : (
                 <>
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild className="rounded-xl text-foreground/70 hover:text-foreground">
                     <Link to="/auth">Log in</Link>
                   </Button>
-                  <Button size="sm" asChild>
+                  <Button size="sm" asChild className="rounded-xl shadow-md shadow-primary/20">
                     <Link to="/auth">Get Started</Link>
                   </Button>
                 </>
@@ -122,11 +122,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How it works - PRIMARY BACKGROUND */}
-      <section className="relative py-24 md:py-32 px-6 bg-primary overflow-hidden">
-        {/* Subtle lighter areas */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
+      {/* How it works - WHITE BACKGROUND */}
+      <section className="relative py-24 md:py-32 px-6 bg-background overflow-hidden">
+        {/* Subtle accent */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto max-w-5xl relative">
           <motion.div
@@ -136,10 +135,10 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
               How it works
             </h2>
-            <p className="text-lg text-white/70">
+            <p className="text-lg text-muted-foreground">
               Three steps to your next closed deal
             </p>
           </motion.div>
@@ -168,15 +167,15 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="relative p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-colors"
+                className="relative p-8 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all"
               >
-                <span className="text-6xl font-bold text-white/20 block mb-4">
+                <span className="text-6xl font-bold text-primary/20 block mb-4">
                   {item.step}
                 </span>
-                <h3 className="text-xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-semibold text-foreground mb-2">
                   {item.title}
                 </h3>
-                <p className="text-white/70 leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                   {item.description}
                 </p>
               </motion.div>
