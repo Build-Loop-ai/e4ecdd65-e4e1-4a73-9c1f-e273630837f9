@@ -5,10 +5,18 @@ import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { SmartLogo } from './SmartLogo';
-import { FloatingShape } from '@/components/animations/FloatingShape';
 import { WaveDivider } from '@/components/animations/WaveDivider';
-import { TiltCard } from '@/components/animations/TiltCard';
+import { PatternBackground } from './PatternBackground';
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
+import { 
+  getSuitableHeroImages, 
+  shouldUsePatternFallback, 
+  getFallbackPatternType,
+  type ProcessedSchema,
+  type ClassifiedImage,
+  type FallbackPatternType,
+} from '@/lib/businessIntelligence';
+import { getPatternForIndustry } from '@/lib/heroPatterns';
 
 interface HeroSectionProps {
   companyName?: string;
@@ -20,6 +28,10 @@ interface HeroSectionProps {
   isModern?: boolean;
   primaryColor?: string;
   templateId?: TemplateId;
+  // New props for intelligent image handling
+  classifiedImages?: ClassifiedImage[];
+  fallbackPattern?: FallbackPatternType;
+  industry?: string;
 }
 
 export function HeroSection({
@@ -32,9 +44,11 @@ export function HeroSection({
   isModern = false,
   primaryColor,
   templateId,
+  classifiedImages,
+  fallbackPattern,
+  industry,
 }: HeroSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const bgImage = backgroundImages?.[0];
   const template = getTemplateStyle(templateId);
   const effectiveTemplateId = templateId || (isModern ? 'modern-professional' : 'corporate-classic');
 
@@ -47,6 +61,35 @@ export function HeroSection({
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.1]);
 
+  // Determine suitable hero image using classification
+  const getSuitableImage = (): string | null => {
+    if (!backgroundImages?.length) return null;
+    
+    // If we have classified images, filter for suitable hero images
+    if (classifiedImages?.length) {
+      for (const imgUrl of backgroundImages) {
+        const classification = classifiedImages.find(c => c.url === imgUrl);
+        // Only use if classified as 'hero' and doesn't have text
+        if (classification?.classification === 'hero' && !classification.hasText) {
+          return imgUrl;
+        }
+      }
+      // No suitable classified image found
+      return null;
+    }
+    
+    // Fallback: use first image if no classification available (backwards compatibility)
+    return backgroundImages[0] || null;
+  };
+
+  const bgImage = getSuitableImage();
+  const usePattern = !bgImage;
+  
+  // Determine pattern type
+  const patternType = fallbackPattern 
+    ? getPatternForIndustry(industry || 'other')
+    : getPatternForIndustry(industry || 'other');
+
   const getContrastColor = (hexColor: string | undefined) => {
     if (!hexColor) return 'black';
     const hex = hexColor.replace('#', '');
@@ -58,11 +101,10 @@ export function HeroSection({
   };
 
   // ========== ELEGANT MINIMAL - "Atelier" ==========
-  // Maximum whitespace, centered serif text, thin animated line - WITH BACKGROUND IMAGE
   if (effectiveTemplateId === 'elegant-minimal') {
     return (
       <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background image - always present */}
+        {/* Background - image or pattern */}
         <div className="absolute inset-0">
           {bgImage ? (
             <motion.img
@@ -70,6 +112,12 @@ export function HeroSection({
               alt=""
               className="w-full h-full object-cover"
               style={{ scale }}
+            />
+          ) : usePattern ? (
+            <PatternBackground 
+              patternType={patternType}
+              primaryColor={primaryColor}
+              templateId={effectiveTemplateId}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-stone-200 via-stone-100 to-stone-50" />
@@ -85,7 +133,6 @@ export function HeroSection({
         }} />
 
         <motion.div style={{ opacity }} className="container mx-auto max-w-4xl text-center relative z-10 px-6 py-32">
-          {/* Logo - extremely refined */}
           {logo && (
             <motion.div 
               initial={{ opacity: 0 }}
@@ -103,7 +150,6 @@ export function HeroSection({
             </motion.div>
           )}
 
-          {/* Serif headline with ultra-slow reveal */}
           <motion.h1 
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
@@ -114,7 +160,6 @@ export function HeroSection({
             {headline}
           </motion.h1>
 
-          {/* Animated thin line */}
           <motion.div 
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
@@ -123,7 +168,6 @@ export function HeroSection({
             style={{ backgroundColor: primaryColor || '#1a1a1a' }}
           />
 
-          {/* Subheadline */}
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -134,7 +178,6 @@ export function HeroSection({
             {subheadline}
           </motion.p>
 
-          {/* Scroll indicator only - no CTA button for luxury feel */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -156,11 +199,10 @@ export function HeroSection({
   }
 
   // ========== WARM FRIENDLY - "Neighborhood" ==========
-  // Clean, inviting design with subtle warmth - lets the image breathe
   if (effectiveTemplateId === 'warm-friendly') {
     return (
       <section ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Background image with clean dark gradient overlay */}
+        {/* Background - image or pattern */}
         <div className="absolute inset-0">
           {bgImage ? (
             <motion.img
@@ -169,14 +211,20 @@ export function HeroSection({
               className="w-full h-full object-cover"
               style={{ scale }}
             />
+          ) : usePattern ? (
+            <PatternBackground 
+              patternType={patternType}
+              primaryColor={primaryColor}
+              templateId={effectiveTemplateId}
+            />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-stone-800 via-stone-700 to-stone-900" />
           )}
-          {/* Clean gradient overlay - dark at bottom for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+          {/* Overlay for text readability */}
+          {bgImage && <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />}
         </div>
         
-        {/* Subtle accent glow in corner */}
+        {/* Subtle accent glow */}
         <motion.div 
           animate={{ opacity: [0.3, 0.5, 0.3] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
@@ -186,7 +234,6 @@ export function HeroSection({
 
         <motion.div style={{ y, opacity }} className="container mx-auto max-w-5xl relative z-10 px-6 py-32">
           <div className="max-w-3xl">
-            {/* Logo - clean floating card */}
             {logo && (
               <motion.div 
                 initial={{ opacity: 0, y: -20 }}
@@ -206,7 +253,6 @@ export function HeroSection({
               </motion.div>
             )}
 
-            {/* Clean headline */}
             <motion.h1 
               initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
@@ -216,7 +262,6 @@ export function HeroSection({
               {headline}
             </motion.h1>
 
-            {/* Subheadline */}
             <motion.p 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -226,7 +271,6 @@ export function HeroSection({
               {subheadline}
             </motion.p>
 
-            {/* CTA with brand color */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -248,18 +292,16 @@ export function HeroSection({
           </div>
         </motion.div>
 
-        {/* Subtle wave divider */}
         <WaveDivider color="hsl(var(--background))" variant="wave" animated />
       </section>
     );
   }
 
   // ========== BOLD STARTER - "Impact Studio" ==========
-  // Clean massive white headline on black, WITH BACKGROUND IMAGE
   if (effectiveTemplateId === 'bold-starter') {
     return (
       <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
-        {/* Background image - always present */}
+        {/* Background - image or pattern */}
         <div className="absolute inset-0">
           {bgImage ? (
             <motion.img
@@ -268,11 +310,17 @@ export function HeroSection({
               className="w-full h-full object-cover"
               style={{ scale }}
             />
+          ) : usePattern ? (
+            <PatternBackground 
+              patternType={patternType}
+              primaryColor={primaryColor}
+              templateId={effectiveTemplateId}
+            />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-black" />
           )}
           {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-black/70" />
+          {bgImage && <div className="absolute inset-0 bg-black/70" />}
         </div>
 
         {/* Subtle grid pattern */}
@@ -281,7 +329,7 @@ export function HeroSection({
           backgroundSize: '60px 60px',
         }} />
 
-        {/* Subtle gradient orb - not overwhelming */}
+        {/* Subtle gradient orb */}
         <motion.div 
           animate={{ 
             opacity: [0.15, 0.25, 0.15],
@@ -293,7 +341,6 @@ export function HeroSection({
         />
 
         <motion.div style={{ y, opacity }} className="container mx-auto max-w-6xl text-center relative z-10 px-6">
-          {/* Logo */}
           {logo && (
             <motion.div 
               initial={{ opacity: 0, y: -30 }}
@@ -311,7 +358,6 @@ export function HeroSection({
             </motion.div>
           )}
 
-          {/* CLEAN massive white headline - NO gradient, NO duplicate */}
           <motion.h1 
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
@@ -321,7 +367,6 @@ export function HeroSection({
             {headline}
           </motion.h1>
 
-          {/* Subheadline */}
           <motion.p 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -331,7 +376,6 @@ export function HeroSection({
             {subheadline}
           </motion.p>
 
-          {/* CTA with glow */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -352,7 +396,6 @@ export function HeroSection({
           </motion.div>
         </motion.div>
 
-        {/* Scroll indicator */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -376,11 +419,10 @@ export function HeroSection({
   }
 
   // ========== MODERN PROFESSIONAL - "Tech Forward" ==========
-  // Clean centered layout WITH BACKGROUND IMAGE always present
   if (effectiveTemplateId === 'modern-professional') {
     return (
       <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
-        {/* Background image - always present */}
+        {/* Background - image or pattern */}
         <div className="absolute inset-0">
           {bgImage ? (
             <motion.img
@@ -389,11 +431,17 @@ export function HeroSection({
               className="w-full h-full object-cover"
               style={{ scale }}
             />
+          ) : usePattern ? (
+            <PatternBackground 
+              patternType={patternType}
+              primaryColor={primaryColor}
+              templateId={effectiveTemplateId}
+            />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-black" />
           )}
           {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-black/60" />
+          {bgImage && <div className="absolute inset-0 bg-black/60" />}
         </div>
 
         {/* Gradient mesh background with animated orbs */}
@@ -439,7 +487,6 @@ export function HeroSection({
           style={{ y, opacity }}
           className="container mx-auto max-w-5xl text-center relative z-10 px-6"
         >
-          {/* Logo */}
           {logo && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -459,7 +506,6 @@ export function HeroSection({
             </motion.div>
           )}
 
-          {/* Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -469,7 +515,6 @@ export function HeroSection({
             {headline}
           </motion.h1>
 
-          {/* Subheadline */}
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -479,7 +524,6 @@ export function HeroSection({
             {subheadline}
           </motion.p>
 
-          {/* CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -508,7 +552,6 @@ export function HeroSection({
           </motion.div>
         </motion.div>
 
-        {/* Scroll indicator */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -532,7 +575,6 @@ export function HeroSection({
   }
 
   // ========== CORPORATE CLASSIC - Split-screen image+text, Ken Burns ==========
-  // Clean, professional light design with authority
   return (
     <section ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* Subtle professional pattern */}
@@ -550,7 +592,6 @@ export function HeroSection({
             transition={{ duration: 0.8 }}
             className="order-2 lg:order-1"
           >
-            {/* Only show logo if it's a real image, not fallback */}
             {logo && (
               <motion.div 
                 initial={{ opacity: 0 }}
@@ -567,7 +608,6 @@ export function HeroSection({
               </motion.div>
             )}
 
-            {/* Company name badge if no logo */}
             {!logo && companyName && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -632,7 +672,7 @@ export function HeroSection({
             </motion.div>
           </motion.div>
 
-          {/* Right - Image with Ken Burns */}
+          {/* Right - Image or Pattern */}
           <motion.div 
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
@@ -647,6 +687,12 @@ export function HeroSection({
                   className="w-full h-full object-cover"
                   animate={{ scale: [1, 1.08, 1] }}
                   transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
+                />
+              ) : usePattern ? (
+                <PatternBackground 
+                  patternType={patternType}
+                  primaryColor={primaryColor}
+                  templateId={effectiveTemplateId}
                 />
               ) : (
                 <div 

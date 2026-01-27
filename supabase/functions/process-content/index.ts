@@ -64,6 +64,27 @@ Before extracting content, you MUST analyze the business to determine:
    - Healthcare: ["services", "about", "testimonials", "gallery", "contact"]
    - Tech/SaaS: ["services", "about", "testimonials", "gallery", "contact"]
 
+## IMAGE CLASSIFICATION (CRITICAL)
+
+For EVERY image URL found, you MUST analyze and classify it. This is essential for proper image placement.
+
+CLASSIFICATION CATEGORIES:
+- "hero": Wide/landscape images of interiors, exteriors, or abstract visuals WITHOUT embedded text/logos. Must be suitable as a full-width background. High-quality atmospheric shots.
+- "about": Portraits of individuals, headshots, founder photos, single person professional shots
+- "team": Group photos of multiple people together
+- "gallery": Work samples, portfolio pieces, finished products, food photos, project examples
+- "product": Product photography, items for sale, merchandise
+- "service": Images showing services being performed, action shots of work
+- "logo": Company logos, badges, icons, small graphics
+- "unusable": Images with heavy text overlays, poor quality, tiny images, icons, or screenshots with text
+
+CLASSIFICATION RULES:
+1. Images with visible embedded text, logos, or UI elements should NEVER be classified as "hero" - mark hasText: true
+2. Portrait/headshot photos should be classified as "about", NOT "hero"
+3. Screenshots of websites or apps should be "unusable"
+4. Only wide, high-quality, text-free images should be "hero"
+5. If unsure whether an image has text, mark hasText: true to be safe
+
 ## CONTENT EXTRACTION
 
 Extract and organize ALL available content:
@@ -128,11 +149,22 @@ Return a JSON object with this exact structure:
     "testimonialsTitle": "string - industry-appropriate (e.g., 'Wat Klanten Zeggen', 'Recensies')",
     "contactTitle": "string - industry-appropriate (e.g., 'Contact', 'Neem Contact Op')"
   },
+  "classifiedImages": [
+    {
+      "url": "string - the image URL",
+      "classification": "hero|about|team|gallery|product|service|logo|unusable",
+      "confidence": 0.0-1.0,
+      "reasoning": "brief explanation of classification",
+      "hasText": true|false,
+      "subjectType": "portrait|group|interior|exterior|product|abstract|food|action"
+    }
+  ],
   "hero": {
     "headline": "string - make it impactful and industry-appropriate",
     "subheadline": "string - compelling value proposition", 
     "ctaText": "string - industry-appropriate action button text",
-    "backgroundImages": ["array of image URLs found that could work as hero backgrounds"]
+    "backgroundImages": ["array of ONLY images classified as 'hero' with hasText: false"],
+    "fallbackPattern": "tech|beauty|food|legal|creative|medical|construction|retail|fitness|automotive|education|default"
   },
   "about": {
     "title": "string",
@@ -140,7 +172,8 @@ Return a JSON object with this exact structure:
     "valueProps": ["string", "string", "string"],
     "stats": [
       { "value": "25+", "label": "Jaren Ervaring" }
-    ]
+    ],
+    "image": "string url or null - first image classified as 'about' or 'team'"
   },
   "services": [
     { "title": "string", "description": "string", "image": "string url or null" }
@@ -181,7 +214,11 @@ CRITICAL EXTRACTION RULES - READ CAREFULLY:
 
 5. NEVER FABRICATE CONTENT: If content doesn't exist on the source website, return empty arrays or null values.
 
-6. BUSINESS INTELLIGENCE IS MANDATORY: You MUST analyze and fill in the businessIntelligence object accurately. This drives the entire website generation.`;
+6. BUSINESS INTELLIGENCE IS MANDATORY: You MUST analyze and fill in the businessIntelligence object accurately. This drives the entire website generation.
+
+7. IMAGE CLASSIFICATION IS MANDATORY: You MUST classify every image. Only put images in hero.backgroundImages if they are classified as "hero" with hasText: false. Set the fallbackPattern based on the industry if no suitable hero images exist.
+
+8. FALLBACK PATTERN: Always set hero.fallbackPattern to match the industry (e.g., "tech" for technology, "food" for food_hospitality). This ensures beautiful backgrounds even without suitable hero images.`;
 
     // Extract logo from branding data
     const logoUrl = brandColors?.logo || brandColors?.images?.logo || scrapedContent?.branding?.logo || scrapedContent?.branding?.images?.logo || null;
