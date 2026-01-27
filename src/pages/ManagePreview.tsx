@@ -5,10 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import ManageToolbar from '@/components/manage/ManageToolbar';
+import ManageSidebar from '@/components/manage/ManageSidebar';
 import PreviewFrame from '@/components/manage/PreviewFrame';
 import FeedbackPanel from '@/components/manage/FeedbackPanel';
 import QuickEdit from '@/components/manage/QuickEdit';
+import { Globe } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type ClientPreview = Tables<'client_previews'>;
@@ -103,7 +104,7 @@ export default function ManagePreview() {
       });
     } else {
       setPreview({ ...preview, template_id: templateId });
-      setIframeKey(k => k + 1); // Force iframe refresh
+      setIframeKey(k => k + 1);
       toast({ title: 'Template updated' });
     }
   };
@@ -151,10 +152,19 @@ export default function ManagePreview() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-muted/30 flex flex-col">
-        <div className="border-b bg-background p-4">
-          <Skeleton className="h-10 w-64" />
+      <div className="min-h-screen bg-muted/30 flex">
+        {/* Sidebar skeleton */}
+        <div className="w-72 bg-background border-r border-border p-4 space-y-4">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-full" />
+          </div>
         </div>
+        {/* Preview skeleton */}
         <div className="flex-1 flex items-center justify-center p-8">
           <Skeleton className="w-full max-w-5xl aspect-video rounded-lg" />
         </div>
@@ -166,9 +176,12 @@ export default function ManagePreview() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Preview Not Found</h1>
-          <p className="text-muted-foreground mb-4">
-            This preview doesn't exist or you don't have access.
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+            <Globe className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h1 className="text-2xl font-semibold mb-2">Preview Not Found</h1>
+          <p className="text-muted-foreground mb-6 max-w-sm">
+            This preview doesn't exist or you don't have access to it.
           </p>
           <Button onClick={() => navigate('/dashboard')}>
             Back to Dashboard
@@ -179,8 +192,9 @@ export default function ManagePreview() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 flex flex-col">
-      <ManageToolbar
+    <div className="min-h-screen bg-muted/30 flex">
+      {/* Sidebar */}
+      <ManageSidebar
         preview={preview}
         viewport={viewport}
         onViewportChange={setViewport}
@@ -192,14 +206,16 @@ export default function ManagePreview() {
         feedbackCount={feedbackCount}
       />
 
-      <div className="flex-1 flex items-center justify-center p-4 md:p-8 overflow-auto">
+      {/* Main Preview Area */}
+      <main className="flex-1 flex items-center justify-center p-6 lg:p-8 overflow-auto">
         <PreviewFrame
           key={iframeKey}
           slug={preview.slug}
           viewport={viewport}
         />
-      </div>
+      </main>
 
+      {/* Panels */}
       <FeedbackPanel
         previewId={preview.id}
         isOpen={feedbackOpen}
