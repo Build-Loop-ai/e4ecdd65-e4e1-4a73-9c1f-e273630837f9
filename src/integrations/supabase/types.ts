@@ -14,7 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      client_feedback: {
+        Row: {
+          client_email: string | null
+          client_name: string | null
+          created_at: string
+          feedback_text: string
+          id: string
+          is_read: boolean
+          preview_id: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          feedback_text: string
+          id?: string
+          is_read?: boolean
+          preview_id: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string | null
+          created_at?: string
+          feedback_text?: string
+          id?: string
+          is_read?: boolean
+          preview_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_feedback_preview_id_fkey"
+            columns: ["preview_id"]
+            isOneToOne: false
+            referencedRelation: "client_previews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_previews: {
+        Row: {
+          brand_colors: Json | null
+          client_name: string
+          created_at: string
+          id: string
+          original_url: string
+          processed_schema: Json | null
+          scraped_content: Json | null
+          slug: string
+          status: Database["public"]["Enums"]["preview_status"]
+          template_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_colors?: Json | null
+          client_name: string
+          created_at?: string
+          id?: string
+          original_url: string
+          processed_schema?: Json | null
+          scraped_content?: Json | null
+          slug: string
+          status?: Database["public"]["Enums"]["preview_status"]
+          template_id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_colors?: Json | null
+          client_name?: string
+          created_at?: string
+          id?: string
+          original_url?: string
+          processed_schema?: Json | null
+          scraped_content?: Json | null
+          slug?: string
+          status?: Database["public"]["Enums"]["preview_status"]
+          template_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +132,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      preview_status: "draft" | "sent" | "feedback_received"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +259,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      preview_status: ["draft", "sent", "feedback_received"],
+    },
   },
 } as const
