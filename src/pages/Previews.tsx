@@ -8,7 +8,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Globe, ExternalLink, Copy, Trash2, Calendar, Palette } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { StatsCards } from '@/components/dashboard/StatsCards';
 import type { Tables } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -31,7 +30,7 @@ const extractPreviewData = (preview: ClientPreview) => {
   };
 };
 
-export default function Dashboard() {
+export default function Previews() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -115,15 +114,12 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Stats Overview */}
-        <StatsCards />
-
-        {/* Previews Section */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold">Your Previews</h2>
+            <h1 className="text-2xl font-bold">All Previews</h1>
             <p className="text-muted-foreground text-sm">
-              {previews.length} preview{previews.length !== 1 ? 's' : ''} created
+              Manage all your client preview websites
             </p>
           </div>
           <Button asChild>
@@ -136,7 +132,7 @@ export default function Dashboard() {
 
         {loading ? (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <Card key={i} className="overflow-hidden">
                 <Skeleton className="h-40 w-full" />
                 <div className="p-4 space-y-3">
@@ -158,7 +154,7 @@ export default function Dashboard() {
               </div>
               <h3 className="text-xl font-semibold mb-2">No previews yet</h3>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Create your first client preview by entering their website URL. We'll automatically extract their branding and content.
+                Create your first client preview by entering their website URL.
               </p>
               <Button asChild size="lg">
                 <Link to="/new-preview">
@@ -237,7 +233,6 @@ export default function Dashboard() {
 
                   {/* Card Content */}
                   <CardContent className="p-4">
-                    {/* Company Name & URL */}
                     <div className="mb-4">
                       <h4 className="font-semibold text-lg">{data.companyName}</h4>
                       <p className="text-sm text-muted-foreground truncate">
@@ -245,48 +240,39 @@ export default function Dashboard() {
                       </p>
                     </div>
 
-                    {/* Stats Row */}
                     <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {formatDate(preview.created_at)}
                       </div>
                       {data.serviceCount > 0 && (
-                        <div className="flex items-center gap-1">
-                          <span>{data.serviceCount} services</span>
-                        </div>
+                        <span>{data.serviceCount} services</span>
                       )}
                       {data.galleryCount > 0 && (
-                        <div className="flex items-center gap-1">
-                          <span>{data.galleryCount} images</span>
-                        </div>
+                        <span>{data.galleryCount} images</span>
                       )}
                     </div>
 
-                    {/* Color Palette Preview */}
                     <div className="flex items-center gap-2 mb-4">
                       <Palette className="h-3 w-3 text-muted-foreground" />
                       <div className="flex gap-1">
                         <div 
                           className="w-5 h-5 rounded-full border border-border shadow-sm"
                           style={{ backgroundColor: data.primaryColor }}
-                          title={`Primary: ${data.primaryColor}`}
                         />
                         <div 
                           className="w-5 h-5 rounded-full border border-border shadow-sm"
                           style={{ backgroundColor: data.secondaryColor }}
-                          title={`Secondary: ${data.secondaryColor}`}
                         />
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="flex items-center gap-2">
                       <Button
                         variant="default"
                         size="sm"
                         className="flex-1"
-                        onClick={() => navigate(`/manage/${preview.id}`)}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/manage/${preview.id}`); }}
                       >
                         Manage
                       </Button>
@@ -294,7 +280,6 @@ export default function Dashboard() {
                         variant="outline"
                         size="sm"
                         onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}
-                        title="Open preview in new tab"
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
@@ -302,7 +287,6 @@ export default function Dashboard() {
                         variant="outline"
                         size="sm"
                         onClick={(e) => { e.stopPropagation(); copyPreviewLink(preview.slug); }}
-                        title="Copy link"
                       >
                         <Copy className="h-4 w-4" />
                       </Button>
@@ -311,7 +295,6 @@ export default function Dashboard() {
                         size="sm"
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={(e) => { e.stopPropagation(); deletePreview(preview.id); }}
-                        title="Delete preview"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

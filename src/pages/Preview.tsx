@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -23,15 +23,49 @@ import type { Tables } from '@/integrations/supabase/types';
 
 type ClientPreview = Tables<'client_previews'>;
 
+// Track visit to this preview
+const trackVisit = async (previewId: string) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-visit`,
+      {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          preview_id: previewId,
+          referrer: document.referrer || null,
+        }),
+      }
+    );
+    if (!response.ok) {
+      console.log('Visit tracking failed:', await response.text());
+    }
+  } catch (error) {
+    console.log('Visit tracking error:', error);
+  }
+};
+
 export default function Preview() {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
   const [preview, setPreview] = useState<ClientPreview | null>(null);
   const [loading, setLoading] = useState(true);
+  const hasTracked = useRef(false);
 
   useEffect(() => {
     fetchPreview();
   }, [slug]);
+
+  // Track visit when preview loads
+  useEffect(() => {
+    if (preview && !hasTracked.current) {
+      hasTracked.current = true;
+      trackVisit(preview.id);
+    }
+  }, [preview]);
 
   const fetchPreview = async () => {
     if (!slug) return;

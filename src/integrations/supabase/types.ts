@@ -97,6 +97,53 @@ export type Database = {
         }
         Relationships: []
       }
+      preview_visits: {
+        Row: {
+          city: string | null
+          country: string | null
+          device_type: string
+          id: string
+          ip_hash: string | null
+          preview_id: string
+          referrer: string | null
+          session_duration: number | null
+          user_agent: string | null
+          visited_at: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          device_type?: string
+          id?: string
+          ip_hash?: string | null
+          preview_id: string
+          referrer?: string | null
+          session_duration?: number | null
+          user_agent?: string | null
+          visited_at?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          device_type?: string
+          id?: string
+          ip_hash?: string | null
+          preview_id?: string
+          referrer?: string | null
+          session_duration?: number | null
+          user_agent?: string | null
+          visited_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preview_visits_preview_id_fkey"
+            columns: ["preview_id"]
+            isOneToOne: false
+            referencedRelation: "client_previews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
