@@ -14,12 +14,14 @@ interface Testimonial {
 
 interface TestimonialsSectionProps {
   testimonials: Testimonial[];
+  title?: string;
   primaryColor?: string;
   templateId?: TemplateId;
 }
 
 export function TestimonialsSection({
   testimonials,
+  title = 'Wat Klanten Zeggen',
   primaryColor,
   templateId,
 }: TestimonialsSectionProps) {
@@ -53,7 +55,7 @@ export function TestimonialsSection({
               className="text-3xl md:text-4xl font-light tracking-tight mb-6"
               style={{ fontFamily: 'Georgia, serif' }}
             >
-              Wat anderen zeggen
+              {title}
             </h2>
             <motion.div 
               initial={{ scaleX: 0 }}
@@ -133,7 +135,7 @@ export function TestimonialsSection({
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-              Blije klanten 💬
+              {title} 💬
             </h2>
             <div 
               className="w-20 h-1.5 mx-auto rounded-full"
@@ -198,7 +200,7 @@ export function TestimonialsSection({
             viewport={{ once: true }}
             className="text-4xl md:text-5xl font-black text-white tracking-tight"
           >
-            Wat klanten zeggen
+            {title}
           </motion.h2>
         </div>
 
@@ -246,7 +248,7 @@ export function TestimonialsSection({
             className="mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
-              Wat klanten zeggen
+              {title}
             </h2>
             <div 
               className="w-16 h-1"
@@ -354,7 +356,7 @@ export function TestimonialsSection({
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Wat klanten zeggen
+            {title}
           </h2>
           <div 
             className="w-20 h-1 mx-auto"

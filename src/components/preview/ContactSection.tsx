@@ -11,6 +11,7 @@ interface ContactSectionProps {
   address?: string | null;
   instagram?: string | null;
   facebook?: string | null;
+  title?: string;
   isModern?: boolean;
   primaryColor?: string;
   templateId?: TemplateId;
@@ -22,6 +23,7 @@ export function ContactSection({
   address,
   instagram,
   facebook,
+  title = 'Contact',
   isModern = false,
   primaryColor,
   templateId,
@@ -46,7 +48,7 @@ export function ContactSection({
               className="text-3xl md:text-4xl font-light mb-8"
               style={{ fontFamily: 'Georgia, serif' }}
             >
-              Contact
+              {title}
             </h2>
             <motion.div 
               initial={{ scaleX: 0 }}
@@ -137,7 +139,7 @@ export function ContactSection({
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Kom langs! 👋
+              {title} 👋
             </h2>
             <p className="text-muted-foreground text-lg">
               We helpen je graag verder

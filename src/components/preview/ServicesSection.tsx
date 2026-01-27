@@ -14,6 +14,7 @@ interface Service {
 
 interface ServicesSectionProps {
   services: Service[];
+  title?: string;
   isModern?: boolean;
   primaryColor?: string;
   templateId?: TemplateId;
@@ -21,6 +22,7 @@ interface ServicesSectionProps {
 
 export function ServicesSection({
   services,
+  title = 'Onze Diensten',
   isModern = false,
   primaryColor,
   templateId,
@@ -50,7 +52,7 @@ export function ServicesSection({
               className="text-3xl md:text-4xl font-light tracking-tight mb-6"
               style={{ fontFamily: 'Georgia, serif' }}
             >
-              Diensten
+              {title}
             </h2>
             <motion.div 
               initial={{ scaleX: 0 }}
@@ -132,7 +134,7 @@ export function ServicesSection({
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-              Wat wij voor je doen 🎯
+              {title} 🎯
             </h2>
             <div 
               className="w-20 h-1.5 mx-auto rounded-full"
@@ -204,7 +206,7 @@ export function ServicesSection({
               viewport={{ once: true }}
               className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight"
             >
-              Onze expertise
+              {title}
             </motion.h2>
           </div>
         </div>
@@ -307,7 +309,7 @@ export function ServicesSection({
             className="mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
-              Wat wij doen
+              {title}
             </h2>
             <div 
               className="w-20 h-1"
@@ -390,7 +392,7 @@ export function ServicesSection({
           className="text-center mb-16"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-4">
-            Onze Diensten
+            {title}
           </h2>
           <p className="text-slate-600 text-lg max-w-2xl mx-auto">
             Professionele services op maat gemaakt voor uw behoeften

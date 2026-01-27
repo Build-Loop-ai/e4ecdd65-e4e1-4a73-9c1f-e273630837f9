@@ -13,56 +13,15 @@ import { TestimonialsSection } from '@/components/preview/TestimonialsSection';
 import { ContactSection } from '@/components/preview/ContactSection';
 import { FeedbackButton } from '@/components/preview/FeedbackButton';
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
+import { 
+  getSectionOrder, 
+  getAdaptedContent, 
+  getBusinessIntelligence,
+  type ProcessedSchema 
+} from '@/lib/businessIntelligence';
 import type { Tables } from '@/integrations/supabase/types';
 
 type ClientPreview = Tables<'client_previews'>;
-
-interface ProcessedSchema {
-  hero: {
-    headline: string;
-    subheadline: string;
-    ctaText: string;
-    backgroundImages?: string[];
-  };
-  about: {
-    title: string;
-    description: string;
-    valueProps: string[];
-    stats?: Array<{ value: string; label: string }>;
-  };
-  services: Array<{
-    title: string;
-    description: string;
-    image?: string | null;
-  }>;
-  gallery?: {
-    images: string[];
-    title?: string;
-  };
-  instagram?: {
-    handle?: string;
-    posts: Array<{
-      image: string;
-      caption?: string | null;
-      link: string;
-    }>;
-  };
-  testimonials?: Array<{
-    quote: string;
-    author: string;
-    role?: string | null;
-  }>;
-  contact: {
-    email: string | null;
-    phone: string | null;
-    address: string | null;
-    instagram?: string | null;
-    facebook?: string | null;
-  };
-  logo: string | null;
-  companyName: string;
-  tagline?: string;
-}
 
 export default function Preview() {
   const { slug } = useParams<{ slug: string }>();
@@ -128,6 +87,11 @@ export default function Preview() {
   const templateId = (preview.template_id || 'corporate-classic') as TemplateId;
   const template = getTemplateStyle(templateId);
 
+  // Get business intelligence and adapted content
+  const businessIntelligence = getBusinessIntelligence(schema);
+  const adaptedContent = getAdaptedContent(schema);
+  const sectionOrder = getSectionOrder(schema);
+
   // Extract colors from brand colors (Firecrawl branding format)
   const colors = brandColors?.colors || brandColors?.branding?.colors || {};
   const primaryColor = colors?.primary || null;
@@ -148,10 +112,67 @@ export default function Preview() {
     '--brand-text': textColor || 'hsl(var(--foreground))',
   } as React.CSSProperties;
 
-  console.log('Template:', templateId, 'Brand colors:', { primaryColor, secondaryColor });
+  console.log('Template:', templateId, 'Business:', businessIntelligence.businessType, 'Industry:', businessIntelligence.industry);
+  console.log('Section order:', sectionOrder);
+
+  // Build section components map
+  const sectionComponents: Record<string, React.ReactNode> = {
+    about: (
+      <AboutSection
+        key="about"
+        title={adaptedContent.aboutTitle}
+        description={schema?.about?.description || 'Wij bieden uitzonderlijke diensten om uw bedrijf te laten groeien.'}
+        valueProps={schema?.about?.valueProps}
+        stats={schema?.about?.stats}
+        primaryColor={primaryColor}
+        templateId={templateId}
+      />
+    ),
+    services: (
+      <ServicesSection
+        key="services"
+        services={schema?.services || []}
+        title={adaptedContent.servicesTitle}
+        primaryColor={primaryColor}
+        templateId={templateId}
+      />
+    ),
+    gallery: (
+      <GallerySection
+        key="gallery"
+        images={schema?.gallery?.images || []}
+        title={adaptedContent.galleryTitle}
+        primaryColor={primaryColor}
+        templateId={templateId}
+      />
+    ),
+    testimonials: (
+      <TestimonialsSection
+        key="testimonials"
+        testimonials={schema?.testimonials || []}
+        title={adaptedContent.testimonialsTitle}
+        primaryColor={primaryColor}
+        templateId={templateId}
+      />
+    ),
+    contact: (
+      <ContactSection
+        key="contact"
+        email={schema?.contact?.email}
+        phone={schema?.contact?.phone}
+        address={schema?.contact?.address}
+        instagram={schema?.contact?.instagram}
+        facebook={schema?.contact?.facebook}
+        title={adaptedContent.contactTitle}
+        primaryColor={primaryColor}
+        templateId={templateId}
+      />
+    ),
+  };
 
   return (
     <div className="min-h-screen bg-background" style={brandStyles}>
+      {/* Hero is always first */}
       <HeroSection
         companyName={schema?.companyName}
         headline={schema?.hero?.headline || 'Welkom op uw nieuwe website'}
@@ -163,51 +184,14 @@ export default function Preview() {
         templateId={templateId}
       />
 
-      <AboutSection
-        title={schema?.about?.title || 'Over Ons'}
-        description={schema?.about?.description || 'Wij bieden uitzonderlijke diensten om uw bedrijf te laten groeien.'}
-        valueProps={schema?.about?.valueProps}
-        stats={schema?.about?.stats}
-        primaryColor={primaryColor}
-        templateId={templateId}
-      />
+      {/* Render sections in AI-recommended order */}
+      {sectionOrder.map((section) => sectionComponents[section])}
 
-      <ServicesSection
-        services={schema?.services || []}
-        primaryColor={primaryColor}
-        templateId={templateId}
-      />
-
-      {/* Gallery - template-specific layouts */}
-      <GallerySection
-        images={schema?.gallery?.images || []}
-        title={schema?.gallery?.title || 'Ons Werk'}
-        primaryColor={primaryColor}
-        templateId={templateId}
-      />
-
-      {/* Instagram Feed */}
+      {/* Instagram Feed - separate from ordered sections */}
       <InstagramFeed
         handle={schema?.instagram?.handle}
         posts={schema?.instagram?.posts || []}
         primaryColor={primaryColor}
-      />
-
-      {/* Testimonials with horizontal scroll */}
-      <TestimonialsSection
-        testimonials={schema?.testimonials || []}
-        primaryColor={primaryColor}
-        templateId={templateId}
-      />
-
-      <ContactSection
-        email={schema?.contact?.email}
-        phone={schema?.contact?.phone}
-        address={schema?.contact?.address}
-        instagram={schema?.contact?.instagram}
-        facebook={schema?.contact?.facebook}
-        primaryColor={primaryColor}
-        templateId={templateId}
       />
 
       <FeedbackButton previewId={preview.id} primaryColor={primaryColor} />
