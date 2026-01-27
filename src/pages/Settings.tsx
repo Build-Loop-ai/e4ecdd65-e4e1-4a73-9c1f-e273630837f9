@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Loader2, User, Globe, Linkedin, Twitter, Instagram, Mail, Save } from 'lucide-react';
+import { Loader2, User, Globe, Linkedin, Twitter, Instagram, Mail, Save, Upload, X, Camera } from 'lucide-react';
 
 interface CreatorProfile {
   full_name: string | null;
@@ -30,6 +30,8 @@ export default function Settings() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<CreatorProfile>({
     full_name: '',
     avatar_url: '',
@@ -76,6 +78,64 @@ export default function Settings() {
       });
     }
     setLoading(false);
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be smaller than 5MB');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      // Create a unique file name
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          upsert: true,
+          cacheControl: '3600',
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Add cache buster to force refresh
+      const urlWithCacheBuster = `${publicUrl}?t=${Date.now()}`;
+      
+      // Update profile state
+      setProfile(prev => ({ ...prev, avatar_url: urlWithCacheBuster }));
+      toast.success('Avatar uploaded successfully!');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error(error.message || 'Failed to upload avatar');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setProfile(prev => ({ ...prev, avatar_url: '' }));
   };
 
   const handleSave = async () => {
@@ -166,24 +226,66 @@ export default function Settings() {
             {/* Avatar & Name Row */}
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex flex-col items-center gap-3">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={profile.avatar_url || undefined} />
-                  <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-                    {profile.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="w-full max-w-[200px]">
-                  <Label htmlFor="avatar_url" className="text-xs text-muted-foreground">
-                    Avatar URL
-                  </Label>
-                  <Input
-                    id="avatar_url"
-                    placeholder="https://..."
-                    value={profile.avatar_url || ''}
-                    onChange={(e) => updateField('avatar_url', e.target.value)}
-                    className="mt-1"
-                  />
+                {/* Avatar with Upload */}
+                <div className="relative group">
+                  <Avatar className="h-24 w-24 ring-2 ring-border">
+                    <AvatarImage src={profile.avatar_url || undefined} className="object-cover" />
+                    <AvatarFallback className="text-2xl bg-primary/10 text-primary">
+                      {profile.full_name?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  {/* Upload Overlay */}
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-6 w-6 text-white animate-spin" />
+                    ) : (
+                      <Camera className="h-6 w-6 text-white" />
+                    )}
+                  </button>
+
+                  {/* Remove button */}
+                  {profile.avatar_url && (
+                    <button
+                      onClick={handleRemoveAvatar}
+                      className="absolute -top-1 -right-1 p-1 rounded-full bg-destructive text-destructive-foreground shadow-md hover:bg-destructive/90 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+
+                {/* Upload Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="gap-2"
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  {uploading ? 'Uploading...' : 'Upload Photo'}
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  JPG, PNG or GIF. Max 5MB.
+                </p>
               </div>
 
               <div className="flex-1 space-y-4">
@@ -353,7 +455,7 @@ function CreatorPreview({ profile }: { profile: CreatorProfile }) {
   return (
     <div className="flex flex-col sm:flex-row items-center gap-6 text-white">
       <Avatar className="h-16 w-16 border-2 border-white/20">
-        <AvatarImage src={profile.avatar_url || undefined} />
+        <AvatarImage src={profile.avatar_url || undefined} className="object-cover" />
         <AvatarFallback className="bg-white/10 text-white text-lg">
           {profile.full_name?.charAt(0) || '?'}
         </AvatarFallback>
