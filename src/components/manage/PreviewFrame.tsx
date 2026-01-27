@@ -23,7 +23,9 @@ const viewportStyles: Record<Viewport, { width: string; className: string }> = {
 };
 
 export default function PreviewFrame({ slug, viewport }: PreviewFrameProps) {
-  const previewUrl = `/preview/${slug}`;
+  // If slug contains a slash (new format), use it directly as the path
+  // Otherwise use the legacy /preview/:slug format
+  const previewUrl = slug.includes('/') ? `/${slug}` : `/preview/${slug}`;
   const { className } = viewportStyles[viewport];
 
   return (
