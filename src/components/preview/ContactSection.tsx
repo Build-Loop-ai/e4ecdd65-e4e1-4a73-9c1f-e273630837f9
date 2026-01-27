@@ -67,7 +67,11 @@ export function ContactSection({
 
             <Button 
               size="lg"
-              className="group text-lg px-8 py-7 rounded-full font-semibold bg-background text-foreground hover:bg-background/90 shadow-2xl transition-all duration-300"
+              className="group text-lg px-8 py-7 rounded-full font-semibold shadow-2xl transition-all duration-300"
+              style={{
+                backgroundColor: primaryColor || 'hsl(var(--background))',
+                color: primaryColor ? 'white' : 'hsl(var(--foreground))',
+              }}
             >
               Start een gesprek
               <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
