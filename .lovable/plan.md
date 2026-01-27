@@ -1,159 +1,201 @@
 
-# Enhanced Scanning Experience & Live Template Previews
+# Maker View - Full Preview Management Interface
 
 ## Overview
-Transform the website generation flow into a visually immersive experience where users can see exactly what's being extracted in real-time, and then view their actual scraped content rendered in mini template previews before making a selection.
+Create a dedicated "Maker View" page that opens when clicking "View" on the dashboard (instead of opening in a new tab). This view shows the live preview with a floating sidebar/panel containing all the management tools the maker/owner needs to manage, edit, and track their client preview.
 
-## Current State
-- **Scanning/Processing**: Shows a generic spinner with basic text ("Scraping Website...", "Processing Content with AI...")
-- **Template Selection**: Static placeholder boxes with gray rectangles, no actual content shown
-- Users can't see what data is being extracted or how their content will look
+## Current Behavior
+- Clicking "View" on Dashboard opens `/preview/:slug` in a new tab
+- This is the same view clients see - no owner tools
+- Feedback is on a separate page (`/feedback/:previewId`)
+- No way to edit content, change template, or update status inline
 
-## What Changes
+## Proposed Solution
 
-### Part 1: Immersive Scanning Experience
+### New Route: `/manage/:id`
+Create a new protected route that combines:
+1. Live preview display (iframe or embedded component)
+2. Floating maker toolbar with all management actions
+3. Inline editing capabilities
+4. Feedback panel
+5. Quick actions (copy link, share, regenerate)
 
-#### New Visual Extraction Flow
-Create a dynamic, animated scanning interface that shows:
+### Maker View Features
 
-1. **Phase 1 - Website Discovery**
-   - Animated globe/website icon with scanning rays
-   - URL being analyzed with typewriter effect
-   - "Connecting to website..." message
+**Toolbar/Panel Actions:**
+- **Preview Controls**: Toggle between desktop/tablet/mobile views
+- **Share**: Copy client link, open in new tab, mark as "sent"
+- **Template**: Switch between templates and see changes live
+- **Status**: Update status (draft/sent/feedback_received)
+- **Feedback**: View client feedback inline in a slide-out panel
+- **Edit Mode**: Toggle inline editing for headline, about section, etc.
+- **Color Editor**: Tweak brand colors with color pickers
+- **Regenerate**: Re-scrape website or re-process with AI
+- **Delete**: Delete the preview with confirmation
+- **Back to Dashboard**: Return navigation
 
-2. **Phase 2 - Content Extraction (Show Real Data)**
-   - **Logo Found**: Display the actual extracted logo with a fade-in animation
-   - **Colors Detected**: Show color swatches appearing one by one
-   - **Images Found**: Counter animating up (e.g., "12 images found")
-   - **Text Extracted**: Show company name and tagline appearing
-   - Each item appears with a satisfying checkmark animation
-
-3. **Phase 3 - AI Processing**
-   - Show sections being created: "Creating Hero Section...", "Organizing Services...", "Building Gallery..."
-   - Progress indicators for each section
-   - Visual representation of content being organized
-
-#### UI Components Needed
-- `ScanningAnimation` component with multiple phases
-- Real-time data display as it's extracted
-- Animated progress indicators per extraction type
-- Color swatch animations for brand colors
-
-### Part 2: Live Template Previews with Real Content
-
-#### Template Cards with Actual Scraped Content
-Instead of gray placeholder boxes, show mini-renders of the actual content:
-
-**Corporate Classic Preview:**
-- Background: First extracted hero image (or gradient with primary color)
-- Logo: Actual scraped logo (sized down)
-- Headline: First ~20 chars of actual headline
-- Service boxes: Show actual service count/names
-- Color accents: Use extracted primary color
-
-**Modern Professional Preview:**
-- Same data but with modern layout treatment
-- Show horizontal scroll preview with actual gallery images (thumbnails)
-- Animated gradient orbs using extracted brand colors
-- Bold typography preview with actual headline
-
-#### Data to Display in Mini-Previews
-From `processedSchema`:
-- `hero.headline` (truncated)
-- `hero.backgroundImages[0]` (as thumbnail)
-- `companyName`
-- `services.length` count or first service title
-- `gallery.images` (3-4 thumbnails in scroll preview)
-
-From `scrapedData.branding`:
-- `colors.primary` for accents
-- `logo` for company logo
+**Visual Layout:**
+```text
++------------------------------------------+
+|  [Back] PreviewPro - Managing: TimeForHair  |
++------------------------------------------+
+|  [Desktop] [Tablet] [Mobile]   [Share v] |
+|  [Edit Mode] [Feedback (2)]    [Settings]|
++------------------------------------------+
+|                                          |
+|           +------------------+           |
+|           |                  |           |
+|           |   LIVE PREVIEW   |           |
+|           |    (iframe)      |           |
+|           |                  |           |
+|           +------------------+           |
+|                                          |
++------------------------------------------+
+```
 
 ## Technical Implementation
 
-### File 1: Create `src/components/preview/ScanningProgress.tsx`
-New component for the immersive scanning experience:
-- Accepts `phase`, `scrapedData`, `processedSchema` as props
-- Shows different animations/content based on current phase
-- Displays real extracted data as it becomes available
-- Uses framer-motion for smooth animations
-- Shows: logo, colors, image count, company name as they're extracted
+### 1. Create New Page: `src/pages/ManagePreview.tsx`
+- Fetches preview by ID (not slug) with ownership check
+- Renders the preview in a resizable iframe container
+- Includes floating management toolbar
+- Responsive viewport simulator (desktop/tablet/mobile)
 
-### File 2: Update `src/pages/NewPreview.tsx`
-Major updates:
-- Replace simple spinner card with `ScanningProgress` component
-- Pass real-time data to scanning component
-- Update template selection to show actual scraped content
-- Add color extraction display to template cards
-- Use actual images in mini-preview thumbnails
-- Apply brand colors to template accents
+### 2. Update Dashboard: `src/pages/Dashboard.tsx`
+- Change "View" button from `target="_blank"` to navigate to `/manage/:id`
+- Add a separate "Open Preview" external link button
+- Update button labels for clarity
 
-### Scanning Phases (State Machine)
+### 3. Update App Routing: `src/App.tsx`
+- Add new protected route `/manage/:id` -> `ManagePreview`
+
+### 4. Create Management Components
+
+**`src/components/manage/ManageToolbar.tsx`:**
+- Floating toolbar with all action buttons
+- Responsive viewport selector
+- Share dropdown menu
+- Status selector
+
+**`src/components/manage/FeedbackPanel.tsx`:**
+- Slide-out panel showing client feedback
+- Mark as read functionality
+- Feedback count badge
+
+**`src/components/manage/PreviewFrame.tsx`:**
+- Responsive iframe container
+- Device frame styling (optional phone/tablet bezels)
+- Zoom controls
+
+**`src/components/manage/QuickEdit.tsx`:**
+- Modal/drawer for quick content edits
+- Edit headline, about text, CTA text
+- Color picker for brand colors
+- Template switcher
+
+### 5. Data Flow
+
 ```text
-'url' -> 'connecting' -> 'extracting' -> 'processing' -> 'template' -> 'complete'
-                              |               |
-                              v               v
-                        Show extracted    Show sections
-                        data live         being built
+ManagePreview
+    |
+    +-- Fetch preview by ID (with user_id check)
+    |
+    +-- ManageToolbar
+    |       - Status updates
+    |       - Template switch
+    |       - Share actions
+    |       - Edit mode toggle
+    |
+    +-- PreviewFrame
+    |       - Renders /preview/:slug in iframe
+    |       - Viewport simulation
+    |
+    +-- FeedbackPanel (slide-out)
+    |       - List of feedback
+    |       - Mark as read
+    |
+    +-- QuickEdit (modal)
+            - Edit processed_schema fields
+            - Edit brand_colors
+            - Save changes to Supabase
 ```
 
-### Template Preview Updates
-```text
-Template Card Structure:
-- Mini hero with actual bg image or brand gradient
-- Actual logo (scaled down)
-- Actual headline text (truncated)
-- Actual primary color as accent
-- Gallery thumbnails (if modern template)
-- Service count indicator
-```
+## Files to Create/Modify
 
-## Visual Design Details
+### New Files:
+1. **`src/pages/ManagePreview.tsx`** - Main maker view page
+2. **`src/components/manage/ManageToolbar.tsx`** - Floating action toolbar
+3. **`src/components/manage/FeedbackPanel.tsx`** - Inline feedback panel
+4. **`src/components/manage/PreviewFrame.tsx`** - Responsive preview container
+5. **`src/components/manage/QuickEdit.tsx`** - Content/color editor modal
 
-### Scanning Animation Elements
-- Pulsing rings around central icon (like radar)
-- Checkmarks appearing next to completed extractions
-- Data values animating/counting up
-- Smooth transitions between phases
-- Color swatches expanding from a center point
-- Logo fading in with scale animation
+### Modified Files:
+1. **`src/App.tsx`** - Add `/manage/:id` route
+2. **`src/pages/Dashboard.tsx`** - Update "View" button to navigate to manage page
 
-### Template Preview Enhancements
-- Subtle shadow and hover effects
-- Live color theming based on extracted colors
-- Micro-animations on selection
-- "Best for your content" badge if one template suits better
+## Detailed Component Specifications
 
-## Files to Modify/Create
+### ManagePreview.tsx
+- Protected route (requires auth + ownership)
+- State: `preview`, `viewport` ('desktop'|'tablet'|'mobile'), `editMode`, `feedbackOpen`
+- Fetches full preview data including feedback count
+- URL: `/manage/:id` where id is the preview UUID
 
-1. **Create**: `src/components/preview/ScanningProgress.tsx`
-   - New immersive scanning animation component
-   - Multiple phase support
-   - Real-time data display
+### ManageToolbar.tsx
+Props:
+- `preview`: Full preview data
+- `viewport`: Current viewport
+- `onViewportChange`: Viewport setter
+- `onStatusChange`: Update status in DB
+- `onTemplateChange`: Switch template + update DB
+- `onOpenFeedback`: Toggle feedback panel
+- `onEdit`: Open quick edit modal
+- `onShare`: Copy link / open external
+- `onDelete`: Delete with confirmation
+- `feedbackCount`: Number of unread feedback items
 
-2. **Update**: `src/pages/NewPreview.tsx`
-   - Add more granular step states
-   - Integrate ScanningProgress component
-   - Update template selection with real scraped content
-   - Add brand color application to template cards
-   - Show actual images and headlines in mini-previews
+### PreviewFrame.tsx
+Props:
+- `slug`: Preview slug for iframe src
+- `viewport`: Current viewport for sizing
 
-## Expected User Experience
+Viewport sizes:
+- Desktop: 100% width, min 1024px
+- Tablet: 768px centered
+- Mobile: 375px centered with device frame
 
-1. User enters URL and clicks "Analyze Website"
-2. **Connecting phase**: Animated connection visualization
-3. **Extracting phase**: 
-   - Logo appears with checkmark
-   - Color swatches animate in
-   - "15 images found" counter
-   - Company name fades in
-4. **Processing phase**: 
-   - "Creating Hero Section..." with progress
-   - "Organizing Services..." 
-   - "Building Gallery..."
-5. **Template Selection**:
-   - Both templates show actual scraped content
-   - User sees their logo, colors, headline in both layouts
-   - Makes informed decision based on how their content looks
+### FeedbackPanel.tsx
+Props:
+- `previewId`: For fetching feedback
+- `isOpen`: Panel visibility
+- `onClose`: Close handler
+- Inline feedback management (same as existing Feedback page but in a sheet/drawer)
 
-This creates an engaging, premium experience that shows the value of the AI processing and helps users make better template decisions!
+### QuickEdit.tsx
+Props:
+- `preview`: Current preview data
+- `isOpen`: Modal visibility
+- `onClose`: Close handler
+- `onSave`: Save updated data to Supabase
+
+Editable fields:
+- Hero headline & subheadline
+- CTA text
+- About section title & description
+- Primary & secondary colors (color pickers)
+- Template selection
+
+## Expected User Flow
+
+1. User clicks "View" on Dashboard card
+2. Navigates to `/manage/:previewId`
+3. Sees live preview in center with toolbar at top
+4. Can switch between device views (desktop/tablet/mobile)
+5. Can open feedback panel to see/manage client responses
+6. Can click "Edit" to modify content or colors
+7. Can change template and see it update live
+8. Can copy shareable link or open in new tab
+9. Can update status (draft → sent)
+10. "Back to Dashboard" returns to main view
+
+This creates a comprehensive management experience where makers have full control over their previews without leaving the app!
