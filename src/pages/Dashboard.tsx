@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Globe, ExternalLink, Copy, Trash2, MoreHorizontal, Eye } from 'lucide-react';
+import { Plus, ExternalLink, Copy, Trash2, MoreHorizontal, Eye, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatsCards } from '@/components/dashboard/StatsCards';
@@ -54,7 +54,7 @@ export default function Dashboard() {
 
     if (error) {
       toast({
-        title: 'Error loading previews',
+        title: 'Error loading pitches',
         description: error.message,
         variant: 'destructive',
       });
@@ -70,7 +70,7 @@ export default function Dashboard() {
     navigator.clipboard.writeText(url);
     toast({
       title: 'Link copied',
-      description: 'Preview link copied to clipboard.',
+      description: 'Pitch link copied to clipboard.',
     });
   };
 
@@ -83,25 +83,25 @@ export default function Dashboard() {
 
     if (error) {
       toast({
-        title: 'Error deleting preview',
+        title: 'Error deleting pitch',
         description: error.message,
         variant: 'destructive',
       });
     } else {
       setPreviews(previews.filter(p => p.id !== id));
       toast({
-        title: 'Preview deleted',
-        description: 'The preview has been removed.',
+        title: 'Pitch deleted',
+        description: 'The pitch has been removed.',
       });
     }
   };
 
-  const getStatusVariant = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'draft': return 'secondary';
-      case 'sent': return 'default';
-      case 'feedback_received': return 'outline';
-      default: return 'secondary';
+      case 'draft': return 'bg-muted-foreground';
+      case 'sent': return 'bg-primary';
+      case 'feedback_received': return 'bg-success';
+      default: return 'bg-muted-foreground';
     }
   };
 
@@ -119,17 +119,17 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Overview</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Welcome back. Here's what's happening with your previews.
+            Welcome back. Here's what's happening with your pitches.
           </p>
         </div>
 
         {/* Stats Overview */}
         <StatsCards />
 
-        {/* Recent Previews Section */}
+        {/* Recent Pitches Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium text-foreground">Recent Previews</h2>
+            <h2 className="text-lg font-medium text-foreground">Recent Pitches</h2>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/dashboard/previews" className="text-muted-foreground hover:text-foreground">
                 View all
@@ -152,16 +152,18 @@ export default function Dashboard() {
               ))}
             </div>
           ) : previews.length === 0 ? (
-            <div className="p-12 rounded-xl border border-dashed border-border bg-muted/30 text-center">
-              <Globe className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground mb-2">No previews yet</h3>
+            <div className="p-12 rounded-xl border border-dashed border-border bg-card text-center">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <FileText className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-medium text-foreground mb-2">Your first pitch is waiting</h3>
               <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
-                Create your first client preview by entering their website URL.
+                Enter a prospect's website URL and create a stunning preview that wins clients.
               </p>
               <Button asChild>
                 <Link to="/new-preview">
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Preview
+                  New Pitch
                 </Link>
               </Button>
             </div>
@@ -209,9 +211,13 @@ export default function Dashboard() {
                             {formatDate(preview.created_at)}
                           </p>
                         </div>
-                        <Badge variant={getStatusVariant(preview.status)} className="text-[10px] h-5 flex-shrink-0">
-                          {preview.status.replace('_', ' ')}
-                        </Badge>
+                        {/* Status dot */}
+                        <div className="flex items-center gap-1.5">
+                          <div className={`w-2 h-2 rounded-full ${getStatusColor(preview.status)}`} />
+                          <span className="text-[10px] text-muted-foreground capitalize">
+                            {preview.status.replace('_', ' ')}
+                          </span>
+                        </div>
                       </div>
                         
                       {/* Actions */}

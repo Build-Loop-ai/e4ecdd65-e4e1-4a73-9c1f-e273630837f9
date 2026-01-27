@@ -113,11 +113,11 @@ export default function ManageSidebar({
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/dashboard/previews')}
           className="w-full justify-start text-muted-foreground hover:text-foreground mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
+          Back to Pitches
         </Button>
 
         {/* Preview Identity Card */}
@@ -172,7 +172,7 @@ export default function ManageSidebar({
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Quick Actions */}
         <div className="space-y-1">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Quick Actions</p>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Actions</p>
           
           <Button
             variant="ghost"
@@ -305,14 +305,14 @@ export default function ManageSidebar({
               className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="h-4 w-4 mr-3" />
-              Delete Preview
+              Delete Pitch
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete this preview?</AlertDialogTitle>
+              <AlertDialogTitle>Delete this pitch?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently delete the preview for <strong>{companyName}</strong>.
+                This will permanently delete the pitch for <strong>{companyName}</strong>.
                 This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>

@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Globe } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { PitchLogo } from '@/components/ui/PitchLogo';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -57,8 +58,8 @@ export default function Auth() {
       });
     } else {
       toast({
-        title: 'Account created!',
-        description: 'You can now sign in with your credentials.',
+        title: 'Welcome to Pitch!',
+        description: 'Your account has been created.',
       });
       navigate('/dashboard');
     }
@@ -69,21 +70,20 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Globe className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-bold">PreviewPro</span>
+        <div className="flex items-center justify-center mb-8">
+          <PitchLogo size="lg" />
         </div>
         
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle>Welcome</CardTitle>
+        <Card className="border-border shadow-elevated">
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-xl">Welcome back</CardTitle>
             <CardDescription>
-              Create stunning website previews for your clients
+              Win clients with stunning website previews
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
@@ -158,6 +158,10 @@ export default function Auth() {
             </Tabs>
           </CardContent>
         </Card>
+        
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          By continuing, you agree to our terms of service.
+        </p>
       </div>
     </div>
   );

@@ -2,107 +2,116 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ChatGPT x Notion Design System
-   Clean, minimal, professional with dark sidebar
+/* Pitch Design System
+   Premium, confident, trust-worthy SaaS aesthetic
+   Clean whites, indigo accents, generous whitespace
    All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Light theme - Clean whites and subtle grays */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    /* Light theme - Warm off-white with indigo accents */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 222 47% 11%;
 
-    /* Teal accent inspired by ChatGPT */
-    --primary: 160 84% 39%;
+    /* Primary: Deep Indigo */
+    --primary: 239 84% 67%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
+    /* Accent: Violet for highlights */
+    --accent: 270 95% 75%;
+    --accent-foreground: 222 47% 11%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 160 84% 39%;
+    /* Success: Emerald */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 214 20% 91%;
+    --input: 214 20% 91%;
+    --ring: 239 84% 67%;
 
     --radius: 0.75rem;
 
-    /* Light sidebar - clean and airy */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 40%;
-    --sidebar-primary: 160 84% 39%;
+    /* Light sidebar - clean and professional */
+    --sidebar-background: 210 20% 96%;
+    --sidebar-foreground: 215 16% 47%;
+    --sidebar-primary: 239 84% 67%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 94%;
-    --sidebar-accent-foreground: 0 0% 15%;
-    --sidebar-border: 0 0% 92%;
-    --sidebar-ring: 160 84% 39%;
-    --sidebar-muted: 0 0% 55%;
+    --sidebar-accent: 210 20% 93%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 20% 91%;
+    --sidebar-ring: 239 84% 67%;
+    --sidebar-muted: 215 16% 57%;
 
-    /* Chart colors */
-    --chart-1: 160 84% 39%;
-    --chart-2: 200 80% 50%;
-    --chart-3: 280 65% 60%;
-    --chart-4: 35 90% 55%;
+    /* Chart colors - Indigo-based palette */
+    --chart-1: 239 84% 67%;
+    --chart-2: 270 95% 75%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 35 92% 55%;
     --chart-5: 340 75% 55%;
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 95%;
+    --background: 222 47% 7%;
+    --foreground: 210 20% 98%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 95%;
+    --card: 222 47% 10%;
+    --card-foreground: 210 20% 98%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 20% 98%;
 
-    --primary: 160 84% 45%;
+    --primary: 239 84% 67%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 222 47% 15%;
+    --secondary-foreground: 210 20% 98%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 222 47% 15%;
+    --muted-foreground: 215 16% 57%;
 
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 270 95% 75%;
+    --accent-foreground: 210 20% 98%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 160 84% 45%;
+    --success: 160 84% 45%;
+    --success-foreground: 0 0% 100%;
 
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 65%;
-    --sidebar-primary: 160 84% 45%;
+    --border: 222 47% 18%;
+    --input: 222 47% 18%;
+    --ring: 239 84% 67%;
+
+    --sidebar-background: 222 47% 10%;
+    --sidebar-foreground: 215 16% 65%;
+    --sidebar-primary: 239 84% 67%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 160 84% 45%;
-    --sidebar-muted: 0 0% 45%;
+    --sidebar-accent: 222 47% 15%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 222 47% 18%;
+    --sidebar-ring: 239 84% 67%;
+    --sidebar-muted: 215 16% 50%;
 
-    --chart-1: 160 84% 45%;
-    --chart-2: 200 80% 55%;
-    --chart-3: 280 65% 65%;
-    --chart-4: 35 90% 60%;
+    --chart-1: 239 84% 67%;
+    --chart-2: 270 95% 75%;
+    --chart-3: 160 84% 45%;
+    --chart-4: 35 92% 60%;
     --chart-5: 340 75% 60%;
   }
 }
@@ -122,7 +131,7 @@
     scroll-behavior: smooth;
   }
 
-  /* Custom scrollbar - Notion style */
+  /* Custom scrollbar - Minimal style */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -133,17 +142,17 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.3);
+    background: hsl(var(--muted-foreground) / 0.2);
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.5);
+    background: hsl(var(--muted-foreground) / 0.4);
   }
 }
 
 @layer utilities {
-  /* Notion-style focus ring */
+  /* Focus ring - Indigo accent */
   .focus-ring {
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }

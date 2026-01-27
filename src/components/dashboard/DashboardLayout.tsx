@@ -1,7 +1,8 @@
 import { ReactNode, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, BarChart3, LogOut, Menu, X, Plus, Sparkles } from 'lucide-react';
+import { LayoutDashboard, FileText, BarChart3, LogOut, Menu, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PitchLogo } from '@/components/ui/PitchLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +12,7 @@ interface DashboardLayoutProps {
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
-  { to: '/dashboard/previews', icon: FileText, label: 'Previews' },
+  { to: '/dashboard/previews', icon: FileText, label: 'My Pitches' },
   { to: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
 ];
 
@@ -35,19 +36,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      {/* Sidebar - Light and clean */}
+      {/* Sidebar - Light and professional */}
       <aside className={cn(
         "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 lg:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Logo */}
-        <div className="h-16 px-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-semibold text-foreground">PreviewPro</span>
-          </div>
+        <div className="h-16 px-4 flex items-center justify-between border-b border-sidebar-border">
+          <PitchLogo size="md" />
           <Button 
             variant="ghost" 
             size="icon" 
@@ -58,14 +54,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </Button>
         </div>
 
-        {/* New Preview Button */}
-        <div className="p-3">
+        {/* New Pitch Button */}
+        <div className="p-4">
           <Button 
             onClick={() => navigate('/new-preview')}
-            className="w-full justify-start gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+            className="w-full justify-start gap-2"
           >
             <Plus className="h-4 w-4" />
-            New Preview
+            New Pitch
           </Button>
         </div>
 
@@ -91,7 +87,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
 
         {/* User section */}
-        <div className="p-3 border-t border-sidebar-border">
+        <div className="p-4 border-t border-sidebar-border">
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
               {user?.email?.charAt(0).toUpperCase()}
@@ -129,12 +125,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-              <Sparkles className="h-3 w-3 text-primary-foreground" />
-            </div>
-            <span className="font-semibold">PreviewPro</span>
-          </div>
+          <PitchLogo size="sm" />
         </header>
 
         {/* Page content */}
