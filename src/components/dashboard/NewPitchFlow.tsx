@@ -143,7 +143,7 @@ export function NewPitchFlow({ isOpen, onClose, onComplete }: NewPitchFlowProps)
     try {
       const slug = generateSlug(clientName);
 
-      const { error } = await supabase.from('client_previews').insert({
+      const { data: insertedPreview, error } = await supabase.from('client_previews').insert({
         user_id: user.id,
         slug,
         client_name: clientName,
@@ -153,16 +153,21 @@ export function NewPitchFlow({ isOpen, onClose, onComplete }: NewPitchFlowProps)
         processed_schema: processedSchema,
         brand_colors: scrapedData?.branding || null,
         status: 'draft',
-      });
+      }).select('id').single();
 
       if (error) throw error;
 
       setStep('complete');
       
+      // Navigate to the preview after a brief success animation
       setTimeout(() => {
         onComplete();
         onClose();
-      }, 1500);
+        // Navigate to the manage/preview page
+        if (insertedPreview?.id) {
+          navigate(`/manage/${insertedPreview.id}`);
+        }
+      }, 800);
     } catch (error) {
       toast({
         title: 'Error saving pitch',
