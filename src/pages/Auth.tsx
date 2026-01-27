@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowRight, Sparkles, Check } from 'lucide-react';
+import { Loader2, ArrowRight, Check } from 'lucide-react';
 import { PitchLogo } from '@/components/ui/PitchLogo';
 import { motion, AnimatePresence } from 'framer-motion';
 import heroGradient from '@/assets/hero-gradient.png';
+import pitchLogo from '@/assets/pitch-logo.png';
 
 const features = [
   'Scan any website in seconds',
@@ -89,9 +90,7 @@ export default function Auth() {
         <div className="relative z-10 flex flex-col justify-between p-12 w-full">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:bg-white/30 transition-colors">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
+            <img src={pitchLogo} alt="Pitch" className="w-10 h-10 object-contain" />
             <span className="text-xl font-semibold text-white tracking-tight">Pitch</span>
           </Link>
           
