@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Previews from "./pages/Previews";
+import Analytics from "./pages/Analytics";
 import NewPreview from "./pages/NewPreview";
 import Preview from "./pages/Preview";
 import Feedback from "./pages/Feedback";
@@ -29,6 +31,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/previews"
+              element={
+                <ProtectedRoute>
+                  <Previews />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/analytics"
+              element={
+                <ProtectedRoute>
+                  <Analytics />
                 </ProtectedRoute>
               }
             />
