@@ -1,79 +1,75 @@
 
+## What’s actually happening (root cause)
+The “Failed to send a request to the Edge Function” on **Analyze Website** is coming from the **process-content** backend function call (not the scrape call).
 
-## Outreach SaaS - Website Preview Generator
+Your frontend calls:
+- `firecrawl-scrape` via custom `fetch` (works; network shows 200)
+- then calls `process-content` via `supabase.functions.invoke(...)` (fails with “Failed to fetch”)
 
-A tool that helps you win clients by showing them exactly how their new website could look, using their existing content.
+When `supabase.functions.invoke` runs in the browser, it automatically sends extra headers like:
+- `x-client-info`
+- `x-supabase-client-platform`
 
----
+But your backend function CORS currently allows only:
+`authorization, x-client-info, apikey, content-type`
 
-### How It Works
+So the browser’s CORS preflight fails (because `x-supabase-client-platform` isn’t allowed), and the browser reports it as a generic network error (“Failed to fetch”), which Supabase surfaces as “Failed to send a request to the Edge Function”.
 
-1. **User pastes a client's URL** → System scrapes logo, images, text, and brand colors
-2. **AI analyzes the content** → Generates a structured schema with all dynamic data
-3. **Preview is generated** → Content is rendered in a professional template
-4. **Share with client** → Unique link shows the client their potential new site
-5. **Client requests changes** → Feedback loop to refine the proposal
-
----
-
-### Core Features
-
-**🔐 Authentication & Dashboard**
-- User signup/login with email
-- Clean, minimal dashboard to manage all client previews
-- Overview of recent scrapes and client responses
-
-**🕷️ Website Scraping**
-- Paste any URL to scrape content
-- Extract: logo, hero images, headlines, body text, contact info
-- AI-powered brand color detection
-- Progress indicator during scraping
-
-**🤖 AI Content Processing**
-- Automatically organize scraped content into sections (hero, about, services, contact)
-- Smart text cleanup and formatting
-- Generate placeholder content for missing sections
-
-**🎨 Website Templates**
-- 2 professionally designed templates to start:
-  - **Corporate Classic** - Clean layout for business/professional services
-  - **Modern Professional** - Bold typography for consultants/agencies
-- Templates dynamically populated with scraped content
-
-**🔗 Shareable Client Previews**
-- Unique URL for each client (e.g., `/preview/acme-corp`)
-- Client sees their content in the new template
-- "Request Changes" button for client feedback
-- Feedback stored and visible in your dashboard
-
-**📊 Client Management**
-- List of all scraped sites organized by client
-- Status tracking (draft, sent, feedback received)
-- View client's change requests
+This also explains why:
+- backend logs show only “booted” and nothing else (the function never actually runs)
+- calling the function server-to-server (my curl test) works fine
 
 ---
 
-### User Journey
+## Implementation plan (what I will change)
 
-**For the SaaS User (You):**
-1. Sign up → Land on dashboard
-2. Click "New Preview" → Paste client's website URL
-3. Watch scraping progress → Review extracted content
-4. Choose template → Preview the result
-5. Copy shareable link → Send to client
+### 1) Fix CORS headers for `process-content`
+Update `supabase/functions/process-content/index.ts`:
 
-**For the Client:**
-1. Receive link via email/message
-2. View their content in a beautiful new template
-3. Click "Request Changes" → Submit feedback
-4. You see feedback in your dashboard
+- Expand `corsHeaders['Access-Control-Allow-Headers']` to include:
+  - `x-supabase-client-platform`
+  - (optionally) `x-supabase-client-version` if present in some clients
+- Keep OPTIONS preflight handling as-is.
+
+Target header string:
+- `authorization, x-client-info, apikey, content-type, x-supabase-client-platform`
+
+### 2) (Optional but recommended) Align CORS headers across all backend functions
+Update `firecrawl-scrape` too to use the same broader allow-list, so future calls (or future usage of `supabase.functions.invoke` there) won’t hit the same issue.
+
+### 3) Add minimal request logging to `process-content`
+Add a couple of safe logs:
+- “process-content started”
+- payload sizes (e.g., length of markdown) — not the full content
+This makes future debugging much faster without leaking user data.
+
+### 4) Verify end-to-end from the UI
+After changes land, I’ll validate the full flow:
+1. Open `/new-preview`
+2. Run Analyze on a known URL
+3. Confirm:
+   - scrape step succeeds
+   - processing step succeeds
+   - template selection appears
+
+### 5) Improve error messaging (small UX tweak)
+If the backend call fails again for any other reason, update the toast to include:
+- which step failed (Scrape vs AI Processing)
+- the actionable hint if it’s a CORS/network issue
 
 ---
 
-### Technical Approach
+## Files that will be modified
+- `supabase/functions/process-content/index.ts` (required)
+- `supabase/functions/firecrawl-scrape/index.ts` (optional but recommended)
+- `src/pages/NewPreview.tsx` (optional UX improvement only)
 
-- **Backend**: Lovable Cloud with database & edge functions
-- **Scraping**: Firecrawl integration for reliable content extraction
-- **AI Processing**: Lovable AI to structure and organize content
-- **Storage**: Database tables for users, scraped sites, client feedback, and assets
+---
 
+## Expected result after fix
+Clicking **Analyze Website** should reliably proceed past “Processing Content with AI…” and reach **Choose a Template** without the red error toast.
+
+---
+
+## Risks / edge cases
+- If the scraped HTML is extremely large, processing might still be slow; but that would produce a *different* error pattern (timeouts or 500s) and the function logs would show it. The current issue is almost certainly CORS/preflight because the request never reaches the function handler.
