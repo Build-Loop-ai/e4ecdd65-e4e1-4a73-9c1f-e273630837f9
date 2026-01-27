@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,9 +70,9 @@ export default function Auth() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md">
-        <div className="flex items-center justify-center mb-8">
+        <Link to="/" className="flex items-center justify-center mb-8 hover:opacity-80 transition-opacity">
           <PitchLogo size="lg" />
-        </div>
+        </Link>
         
         <Card className="border-border shadow-elevated">
           <CardHeader className="text-center pb-2">
