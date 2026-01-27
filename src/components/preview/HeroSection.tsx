@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { SmartLogo } from './SmartLogo';
 
 interface HeroSectionProps {
   companyName?: string;
@@ -27,6 +28,19 @@ export function HeroSection({
 }: HeroSectionProps) {
   const bgImage = backgroundImages?.[0];
 
+  // Calculate contrast color for CTA button
+  const getContrastColor = (hexColor: string | undefined) => {
+    if (!hexColor) return 'black';
+    const hex = hexColor.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5 ? 'black' : 'white';
+  };
+
+  const ctaTextColor = primaryColor ? getContrastColor(primaryColor) : 'black';
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -41,6 +55,7 @@ export function HeroSection({
             src={bgImage} 
             alt="" 
             className="w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
         </motion.div>
@@ -81,7 +96,7 @@ export function HeroSection({
 
       {/* Content */}
       <div className="container mx-auto max-w-6xl text-center relative z-10 px-6">
-        {/* Logo */}
+        {/* Logo - using SmartLogo for proper rendering */}
         {logo && (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
@@ -89,11 +104,12 @@ export function HeroSection({
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mb-12 flex justify-center"
           >
-            <img 
+            <SmartLogo 
               src={logo} 
               alt={companyName || 'Logo'} 
-              className="h-16 md:h-20 w-auto object-contain filter brightness-0 invert"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              className="h-16 md:h-20 w-auto object-contain"
+              onDark={true}
+              fallbackText={companyName}
             />
           </motion.div>
         )}
@@ -151,7 +167,7 @@ export function HeroSection({
             className="group text-lg px-10 py-7 rounded-full font-semibold shadow-2xl transition-all duration-500 hover:scale-105"
             style={{
               backgroundColor: primaryColor || 'white',
-              color: primaryColor ? 'white' : 'black',
+              color: ctaTextColor,
             }}
           >
             {ctaText}

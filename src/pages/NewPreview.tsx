@@ -297,12 +297,14 @@ export default function NewPreview() {
                         {/* Logo */}
                         <div className="mb-3">
                           {logo ? (
-                            <img 
-                              src={logo} 
-                              alt="Logo" 
-                              className="h-6 object-contain brightness-0 invert"
-                              onError={(e) => e.currentTarget.style.display = 'none'}
-                            />
+                            <div className="bg-white/10 backdrop-blur-sm rounded p-1.5 inline-block">
+                              <img 
+                                src={logo} 
+                                alt="Logo" 
+                                className="h-6 object-contain max-w-[80px]"
+                                onError={(e) => e.currentTarget.style.display = 'none'}
+                              />
+                            </div>
                           ) : (
                             <div className="w-16 h-4 bg-white/30 rounded" />
                           )}
@@ -391,12 +393,14 @@ export default function NewPreview() {
                         {/* Logo */}
                         <div className="relative z-10 mb-2">
                           {logo ? (
-                            <img 
-                              src={logo} 
-                              alt="Logo" 
-                              className="h-5 object-contain brightness-0 invert"
-                              onError={(e) => e.currentTarget.style.display = 'none'}
-                            />
+                            <div className="bg-white/10 backdrop-blur-sm rounded p-1 inline-block">
+                              <img 
+                                src={logo} 
+                                alt="Logo" 
+                                className="h-5 object-contain max-w-[60px]"
+                                onError={(e) => e.currentTarget.style.display = 'none'}
+                              />
+                            </div>
                           ) : (
                             <div className="w-6 h-6 bg-white/20 rounded-full" />
                           )}
