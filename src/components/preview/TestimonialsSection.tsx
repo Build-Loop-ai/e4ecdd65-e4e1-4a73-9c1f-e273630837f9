@@ -39,6 +39,23 @@ export function TestimonialsSection({
   // Require minimum 2 valid testimonials to show section
   if (validTestimonials.length < 2) return null;
 
+  // Helper to get symmetrical count for grid layouts
+  const getSymmetricalCount = (count: number, maxCols: number = 3) => {
+    if (maxCols === 3) {
+      if (count <= 2) return 2;
+      if (count === 3) return 3;
+      if (count === 4) return 4; // 2x2
+      if (count === 5) return 4; // Drop 1
+      if (count >= 6) return 6; // 2x3 or 3x2
+      return 6;
+    }
+    // For 2-column
+    if (count <= 2) return 2;
+    if (count === 3) return 2;
+    if (count >= 4) return 4;
+    return 4;
+  };
+
   // ========== ELEGANT MINIMAL - Fade between quotes on scroll ==========
   if (templateId === 'elegant-minimal') {
     return (
@@ -143,9 +160,17 @@ export function TestimonialsSection({
             />
           </motion.div>
 
-          {/* Speech bubble cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {validTestimonials.slice(0, 6).map((testimonial, index) => (
+          {/* Speech bubble cards - symmetrical */}
+          {(() => {
+            const symmetricalCount = getSymmetricalCount(validTestimonials.length, 3);
+            const displayTestimonials = validTestimonials.slice(0, symmetricalCount);
+            const gridCols = symmetricalCount <= 2 ? 'md:grid-cols-2' : 
+                             symmetricalCount === 3 ? 'md:grid-cols-3' :
+                             symmetricalCount === 4 ? 'md:grid-cols-2' :
+                             'md:grid-cols-2 lg:grid-cols-3';
+            return (
+              <div className={`grid ${gridCols} gap-8`}>
+                {displayTestimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -179,8 +204,10 @@ export function TestimonialsSection({
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       </section>
     );

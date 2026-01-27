@@ -35,6 +35,30 @@ export function ServicesSection({
   // Require minimum 2 services to show dedicated section
   if (!services || services.length < 2) return null;
 
+  // Helper function to get symmetrical display count and grid columns
+  const getSymmetricalLayout = (count: number, maxCols: number = 3) => {
+    // For grid with max 3 columns: valid symmetrical counts are 2, 3, 4, 6, 9, 12
+    // For grid with max 2 columns: valid symmetrical counts are 2, 4, 6, 8
+    if (maxCols === 3) {
+      if (count <= 2) return { limit: 2, cols: 'md:grid-cols-2' };
+      if (count === 3) return { limit: 3, cols: 'md:grid-cols-3' };
+      if (count === 4) return { limit: 4, cols: 'md:grid-cols-2' }; // 2x2 grid
+      if (count === 5) return { limit: 4, cols: 'md:grid-cols-2' }; // Drop 1 for 2x2
+      if (count === 6) return { limit: 6, cols: 'md:grid-cols-2 lg:grid-cols-3' }; // 2x3 or 3x2
+      if (count === 7) return { limit: 6, cols: 'md:grid-cols-2 lg:grid-cols-3' }; // Drop 1
+      if (count === 8) return { limit: 6, cols: 'md:grid-cols-2 lg:grid-cols-3' }; // Drop 2
+      if (count >= 9) return { limit: 9, cols: 'md:grid-cols-3' }; // 3x3
+      return { limit: 6, cols: 'md:grid-cols-2 lg:grid-cols-3' };
+    }
+    // For 2-column layouts
+    if (count <= 2) return { limit: 2, cols: 'md:grid-cols-2' };
+    if (count === 3) return { limit: 2, cols: 'md:grid-cols-2' }; // Drop 1 for 2
+    if (count === 4) return { limit: 4, cols: 'md:grid-cols-2' };
+    if (count === 5) return { limit: 4, cols: 'md:grid-cols-2' };
+    if (count >= 6) return { limit: 6, cols: 'md:grid-cols-2' };
+    return { limit: 4, cols: 'md:grid-cols-2' };
+  };
+
   // ========== ELEGANT MINIMAL - Numbered list with animated underline on hover ==========
   if (effectiveTemplateId === 'elegant-minimal') {
     return (
@@ -122,6 +146,9 @@ export function ServicesSection({
 
   // ========== WARM FRIENDLY - Rounded icon cards with wobble hover effect ==========
   if (effectiveTemplateId === 'warm-friendly') {
+    const layout = getSymmetricalLayout(services.length, 3);
+    const displayServices = services.slice(0, layout.limit);
+
     return (
       <section ref={containerRef} className="py-24 bg-gradient-to-b from-orange-50/50 to-background">
         <div className="container mx-auto max-w-6xl px-6">
@@ -142,9 +169,9 @@ export function ServicesSection({
             />
           </motion.div>
 
-          {/* Wobble cards grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, index) => (
+          {/* Wobble cards grid - symmetrical */}
+          <div className={`grid ${layout.cols} gap-6`}>
+            {displayServices.map((service, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
@@ -279,6 +306,19 @@ export function ServicesSection({
 
   // ========== MODERN PROFESSIONAL - Bento grid with mixed sizes ==========
   if (effectiveTemplateId === 'modern-professional') {
+    // For bento grid, limit to symmetrical counts that work well
+    const getSymmetricalBentoCount = (count: number) => {
+      if (count <= 2) return 2;
+      if (count === 3) return 3;
+      if (count === 4) return 4;
+      if (count === 5) return 4; // Drop 1
+      if (count >= 6) return 6;
+      return 4;
+    };
+
+    const displayCount = getSymmetricalBentoCount(services.length);
+    const displayServices = services.slice(0, displayCount);
+
     const getBentoClass = (index: number, total: number) => {
       // Create varied sizes based on index
       if (total >= 4) {
@@ -317,9 +357,9 @@ export function ServicesSection({
             />
           </motion.div>
 
-          {/* Bento grid */}
+          {/* Bento grid - symmetrical */}
           <div className="grid md:grid-cols-3 gap-6">
-            {services.map((service, index) => (
+            {displayServices.map((service, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 40 }}
@@ -374,6 +414,9 @@ export function ServicesSection({
   }
 
   // ========== CORPORATE CLASSIC - Clean professional cards ==========
+  const corporateLayout = getSymmetricalLayout(services.length, 3);
+  const corporateServices = services.slice(0, corporateLayout.limit);
+
   return (
     <section ref={containerRef} className="py-28 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden">
       {/* Subtle pattern */}
@@ -399,9 +442,9 @@ export function ServicesSection({
           </p>
         </motion.div>
 
-        {/* Cards grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
+        {/* Cards grid - symmetrical */}
+        <div className={`grid ${corporateLayout.cols} gap-8`}>
+          {corporateServices.map((service, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
