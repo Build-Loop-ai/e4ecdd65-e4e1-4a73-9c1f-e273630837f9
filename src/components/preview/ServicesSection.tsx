@@ -1,6 +1,12 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { useRef } from 'react';
+
 interface Service {
   title: string;
   description: string;
+  image?: string | null;
 }
 
 interface ServicesSectionProps {
@@ -14,97 +20,104 @@ export function ServicesSection({
   isModern = false,
   primaryColor,
 }: ServicesSectionProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   if (services.length === 0) return null;
 
-  if (isModern) {
-    return (
-      <section className="py-24 px-4 bg-foreground text-background">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">
-              Onze Diensten
-            </h2>
-            <p className="text-background/60 text-lg">
-              Wat wij voor u kunnen betekenen
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            {services.map((service, index) => (
-              <div 
-                key={index} 
-                className="group relative p-8 rounded-3xl bg-background/5 border border-background/10 hover:bg-background/10 transition-all duration-500 overflow-hidden"
-              >
-                {/* Hover gradient */}
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{
-                    background: primaryColor 
-                      ? `linear-gradient(135deg, ${primaryColor}20 0%, transparent 100%)`
-                      : 'linear-gradient(135deg, hsl(var(--primary) / 0.2) 0%, transparent 100%)'
-                  }}
-                />
-                
-                <div className="relative z-10">
-                  <div 
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-white font-bold text-xl"
-                    style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
-                  >
-                    {index + 1}
-                  </div>
-                  <h3 className="text-2xl font-bold mb-3 text-background">
-                    {service.title}
-                  </h3>
-                  <p className="text-background/70 leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Corporate Classic style
   return (
-    <section 
-      className="py-20 px-4"
-      style={{
-        background: primaryColor 
-          ? `linear-gradient(180deg, ${primaryColor}08 0%, transparent 100%)`
-          : 'linear-gradient(180deg, hsl(var(--muted)) 0%, transparent 100%)'
-      }}
-    >
-      <div className="container mx-auto max-w-5xl">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Onze Diensten</h2>
+    <section ref={containerRef} className="py-32 bg-background relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div 
+          className="absolute top-0 right-0 w-1/2 h-full opacity-[0.02]"
+          style={{
+            background: `radial-gradient(circle at 100% 0%, ${primaryColor || 'hsl(var(--primary))'} 0%, transparent 70%)`
+          }}
+        />
+      </div>
+
+      <div className="container mx-auto max-w-7xl px-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
+            Wat wij doen
+          </h2>
           <div 
-            className="w-16 h-1 mx-auto"
+            className="w-20 h-1.5"
             style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
           />
-        </div>
-        
+        </motion.div>
+
+        {/* Services grid - masonry style */}
         <div className="grid md:grid-cols-2 gap-8">
           {services.map((service, index) => (
-            <div 
-              key={index} 
-              className="bg-background p-8 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-border/50"
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.7, delay: index * 0.1 }}
+              className={`group relative ${index % 3 === 0 ? 'md:col-span-2' : ''}`}
             >
-              <div className="flex items-start gap-4">
-                <div 
-                  className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold"
-                  style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
-                >
-                  {index + 1}
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{service.description}</p>
+              <div 
+                className={`relative rounded-3xl overflow-hidden transition-all duration-500 ${
+                  index % 3 === 0 ? 'aspect-[2/1]' : 'aspect-[4/3]'
+                }`}
+              >
+                {/* Background - image or gradient */}
+                {service.image ? (
+                  <>
+                    <img 
+                      src={service.image} 
+                      alt={service.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                  </>
+                ) : (
+                  <div 
+                    className="absolute inset-0 transition-all duration-500"
+                    style={{
+                      background: `linear-gradient(135deg, ${primaryColor || 'hsl(var(--primary))'}15 0%, ${primaryColor || 'hsl(var(--primary))'}05 100%)`
+                    }}
+                  />
+                )}
+
+                {/* Content overlay */}
+                <div className="absolute inset-0 p-8 md:p-10 flex flex-col justify-end">
+                  {/* Number indicator */}
+                  <motion.div 
+                    className="absolute top-8 left-8 text-6xl md:text-8xl font-black opacity-10"
+                    style={{ color: service.image ? 'white' : (primaryColor || 'hsl(var(--primary))') }}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </motion.div>
+
+                  <h3 className={`text-2xl md:text-3xl font-bold mb-3 ${service.image ? 'text-white' : 'text-foreground'}`}>
+                    {service.title}
+                  </h3>
+                  <p className={`text-base md:text-lg leading-relaxed max-w-xl ${service.image ? 'text-white/80' : 'text-muted-foreground'}`}>
+                    {service.description}
+                  </p>
+
+                  {/* Hover indicator */}
+                  <motion.div 
+                    className="absolute bottom-8 right-8 w-12 h-12 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
+                  >
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </motion.div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
