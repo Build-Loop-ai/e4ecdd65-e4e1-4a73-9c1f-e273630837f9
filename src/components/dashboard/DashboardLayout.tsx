@@ -5,11 +5,9 @@ import { Button } from '@/components/ui/button';
 import { PitchLogo } from '@/components/ui/PitchLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { NewPitchFlow } from './NewPitchFlow';
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  onPitchCreated?: () => void;
 }
 
 const navItems = [
@@ -18,21 +16,14 @@ const navItems = [
   { to: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
 ];
 
-export function DashboardLayout({ children, onPitchCreated }: DashboardLayoutProps) {
+export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [newPitchOpen, setNewPitchOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
-  };
-
-  const handlePitchComplete = () => {
-    onPitchCreated?.();
-    // Refresh the page data
-    window.location.reload();
   };
 
   return (
@@ -66,7 +57,7 @@ export function DashboardLayout({ children, onPitchCreated }: DashboardLayoutPro
         {/* New Pitch Button */}
         <div className="p-4">
           <Button 
-            onClick={() => setNewPitchOpen(true)}
+            onClick={() => navigate('/dashboard/new')}
             className="w-full justify-start gap-2"
           >
             <Plus className="h-4 w-4" />
@@ -144,13 +135,6 @@ export function DashboardLayout({ children, onPitchCreated }: DashboardLayoutPro
           </div>
         </main>
       </div>
-
-      {/* New Pitch Flow */}
-      <NewPitchFlow 
-        isOpen={newPitchOpen} 
-        onClose={() => setNewPitchOpen(false)}
-        onComplete={handlePitchComplete}
-      />
     </div>
   );
 }
