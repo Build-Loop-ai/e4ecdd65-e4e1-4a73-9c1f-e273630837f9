@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Previews from "./pages/Previews";
 import Analytics from "./pages/Analytics";
 import NewPreview from "./pages/NewPreview";
+import NewPitch from "./pages/NewPitch";
 import Preview from "./pages/Preview";
 import Feedback from "./pages/Feedback";
 import ManagePreview from "./pages/ManagePreview";
@@ -48,6 +49,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/new"
+              element={
+                <ProtectedRoute>
+                  <NewPitch />
                 </ProtectedRoute>
               }
             />
