@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { PitchLogo } from '@/components/ui/PitchLogo';
 import { motion } from 'framer-motion';
+import heroGradient from '@/assets/hero-gradient.png';
 
 const trustedBy = [
   'Studio Pixel', 'Webcraft Co', 'Digital Maven', 'Starter Labs', 'Artisan Dev'
@@ -39,11 +40,15 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero - clean gradient */}
+      {/* Hero - with gradient background image */}
       <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 px-6 overflow-hidden">
-        {/* Simple purple to white gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-primary/5 to-background" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/10 rounded-full blur-3xl" />
+        {/* Background image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroGradient})` }}
+        />
+        {/* Fade to white at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
         
         <div className="container mx-auto max-w-4xl relative">
           <motion.div 
@@ -57,35 +62,35 @@ const Index = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 border border-white/30 backdrop-blur-sm mb-8"
             >
-              <Zap className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-primary">The outreach tool for web designers</span>
+              <Zap className="h-4 w-4 text-white" />
+              <span className="text-sm font-medium text-white">The outreach tool for web designers</span>
             </motion.div>
 
             {/* Main headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground tracking-tight leading-[1.1] mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-6">
               Turn any website into a
-              <span className="block text-primary">
+              <span className="block text-white/90">
                 winning proposal
               </span>
             </h1>
 
             {/* Subheadline */}
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-10 leading-relaxed">
               Scan your prospect's site. Our AI rebuilds it with stunning templates. 
               Share a preview link that closes the deal.
             </p>
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
-              <Button size="lg" asChild className="h-12 px-6 text-base shadow-lg shadow-primary/20 group">
+              <Button size="lg" variant="secondary" asChild className="h-12 px-6 text-base shadow-lg group">
                 <Link to={user ? "/dashboard" : "/auth"}>
                   Start for free
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="h-12 px-6 text-base" asChild>
+              <Button size="lg" variant="outline" className="h-12 px-6 text-base bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white" asChild>
                 <Link to="/auth">
                   <Play className="h-4 w-4 mr-2" />
                   See how it works
@@ -94,7 +99,7 @@ const Index = () => {
             </div>
 
             {/* Trust line */}
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-white/70">
               Free forever · No credit card · 2 min setup
             </p>
           </motion.div>
