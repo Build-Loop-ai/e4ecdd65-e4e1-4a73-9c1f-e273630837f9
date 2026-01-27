@@ -5,7 +5,6 @@ import { ViewsChart } from '@/components/dashboard/ViewsChart';
 import { DeviceBreakdown } from '@/components/dashboard/DeviceBreakdown';
 import { RecentVisitors } from '@/components/dashboard/RecentVisitors';
 import { TopPreviews } from '@/components/dashboard/TopPreviews';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAnalytics, type DateRange } from '@/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
@@ -16,32 +15,26 @@ const dateRanges: { value: DateRange; label: string }[] = [
   { value: '30d', label: '30 days' },
 ];
 
-function StatCard({ 
-  icon: Icon, 
-  label, 
-  value, 
-  subtext 
-}: { 
-  icon: React.ElementType; 
-  label: string; 
-  value: string | number; 
+interface MetricCardProps {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
   subtext?: string;
-}) {
+}
+
+function MetricCard({ icon: Icon, label, value, subtext }: MetricCardProps) {
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Icon className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-foreground">{value}</p>
-            <p className="text-sm text-muted-foreground">{label}</p>
-            {subtext && <p className="text-xs text-muted-foreground/70">{subtext}</p>}
-          </div>
+    <div className="p-5 rounded-xl border border-border bg-card">
+      <div className="flex items-center gap-3">
+        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Icon className="h-4 w-4 text-primary" />
         </div>
-      </CardContent>
-    </Card>
+        <div>
+          <p className="text-xl font-semibold text-foreground">{value}</p>
+          <p className="text-xs text-muted-foreground">{label}</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -67,18 +60,18 @@ export default function Analytics() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Analytics</h1>
             <p className="text-muted-foreground text-sm mt-1">
               Track who's viewing your preview websites
             </p>
           </div>
           
           {/* Date range selector */}
-          <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
+          <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
             {dateRanges.map((range) => (
               <Button
                 key={range.value}
@@ -86,8 +79,10 @@ export default function Analytics() {
                 size="sm"
                 onClick={() => setDateRange(range.value)}
                 className={cn(
-                  "px-4",
-                  dateRange === range.value && "bg-background shadow-sm"
+                  "px-3 h-8 text-sm font-normal",
+                  dateRange === range.value 
+                    ? "bg-background shadow-sm text-foreground" 
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {range.label}
@@ -96,22 +91,21 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Stats cards */}
+        {/* Metric cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard
+          <MetricCard
             icon={Eye}
-            label="Total Views"
+            label={`Views · Last ${dateRange === '7d' ? '7' : dateRange === '14d' ? '14' : '30'} days`}
             value={totalViews.toLocaleString()}
-            subtext={`Last ${dateRange === '7d' ? '7' : dateRange === '14d' ? '14' : '30'} days`}
           />
-          <StatCard
+          <MetricCard
             icon={Users}
-            label="Total Visits"
+            label="Total visits"
             value={uniqueVisitors.toLocaleString()}
           />
-          <StatCard
+          <MetricCard
             icon={Clock}
-            label="Avg. Session"
+            label="Avg. session"
             value={formatDuration(avgSessionDuration)}
           />
         </div>

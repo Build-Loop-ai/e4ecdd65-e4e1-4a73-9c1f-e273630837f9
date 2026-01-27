@@ -1,5 +1,4 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Monitor, Smartphone, Tablet } from 'lucide-react';
 
@@ -9,7 +8,7 @@ interface DeviceBreakdownProps {
 }
 
 const COLORS = {
-  desktop: 'hsl(var(--primary))',
+  desktop: 'hsl(var(--chart-1))',
   mobile: 'hsl(var(--chart-2))',
   tablet: 'hsl(var(--chart-3))',
 };
@@ -23,14 +22,10 @@ const ICONS = {
 export function DeviceBreakdown({ data, loading }: DeviceBreakdownProps) {
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-40" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[200px] w-full" />
-        </CardContent>
-      </Card>
+      <div className="p-6 rounded-xl border border-border bg-card">
+        <Skeleton className="h-5 w-36 mb-6" />
+        <Skeleton className="h-[180px] w-full" />
+      </div>
     );
   }
 
@@ -42,35 +37,32 @@ export function DeviceBreakdown({ data, loading }: DeviceBreakdownProps) {
     percentage: total > 0 ? Math.round((item.count / total) * 100) : 0,
   }));
 
-  if (data.length === 0) {
+  if (data.length === 0 || total === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Device Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center h-[200px]">
+      <div className="p-6 rounded-xl border border-border bg-card">
+        <h3 className="text-sm font-medium text-foreground mb-6">Device breakdown</h3>
+        <div className="h-[180px] flex items-center justify-center">
           <p className="text-muted-foreground text-sm">No data yet</p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Device Breakdown</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[200px]">
+    <div className="p-6 rounded-xl border border-border bg-card">
+      <h3 className="text-sm font-medium text-foreground mb-6">Device breakdown</h3>
+      
+      <div className="flex items-center gap-8">
+        <div className="h-[140px] w-[140px] flex-shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={formattedData}
                 cx="50%"
                 cy="50%"
-                innerRadius={50}
-                outerRadius={70}
-                paddingAngle={5}
+                innerRadius={40}
+                outerRadius={60}
+                paddingAngle={3}
                 dataKey="count"
               >
                 {formattedData.map((entry) => (
@@ -85,6 +77,7 @@ export function DeviceBreakdown({ data, loading }: DeviceBreakdownProps) {
                   backgroundColor: 'hsl(var(--card))',
                   border: '1px solid hsl(var(--border))',
                   borderRadius: '8px',
+                  padding: '8px 12px',
                 }}
                 formatter={(value: number, name: string) => [`${value} visits`, name]}
               />
@@ -93,22 +86,25 @@ export function DeviceBreakdown({ data, loading }: DeviceBreakdownProps) {
         </div>
         
         {/* Legend */}
-        <div className="flex justify-center gap-6 mt-4">
+        <div className="flex-1 space-y-3">
           {formattedData.map((item) => {
             const Icon = ICONS[item.device_type as keyof typeof ICONS] || Monitor;
             return (
-              <div key={item.device_type} className="flex items-center gap-2">
-                <div 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: COLORS[item.device_type as keyof typeof COLORS] }}
-                />
-                <Icon className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{item.percentage}%</span>
+              <div key={item.device_type} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-2.5 h-2.5 rounded-full" 
+                    style={{ backgroundColor: COLORS[item.device_type as keyof typeof COLORS] }}
+                  />
+                  <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-sm text-foreground">{item.name}</span>
+                </div>
+                <span className="text-sm font-medium text-foreground">{item.percentage}%</span>
               </div>
             );
           })}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

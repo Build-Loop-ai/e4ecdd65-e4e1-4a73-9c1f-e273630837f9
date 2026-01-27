@@ -1,5 +1,4 @@
-import { Eye, FileText, MessageSquare, TrendingUp } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Eye, FileText, MessageSquare, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDashboardStats } from '@/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
@@ -10,47 +9,51 @@ interface StatCardProps {
   icon: React.ElementType;
   trend?: number;
   loading?: boolean;
+  description?: string;
 }
 
-function StatCard({ title, value, icon: Icon, trend, loading }: StatCardProps) {
+function StatCard({ title, value, icon: Icon, trend, loading, description }: StatCardProps) {
   if (loading) {
     return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-10 w-10 rounded-lg" />
-            <Skeleton className="h-4 w-16" />
-          </div>
-          <Skeleton className="h-8 w-20 mt-4" />
-          <Skeleton className="h-4 w-24 mt-2" />
-        </CardContent>
-      </Card>
+      <div className="p-6 rounded-xl border border-border bg-card">
+        <div className="flex items-start justify-between mb-4">
+          <Skeleton className="h-10 w-10 rounded-lg" />
+          <Skeleton className="h-5 w-12" />
+        </div>
+        <Skeleton className="h-8 w-24 mb-1" />
+        <Skeleton className="h-4 w-20" />
+      </div>
     );
   }
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Icon className="h-5 w-5 text-primary" />
+    <div className="p-6 rounded-xl border border-border bg-card hover:shadow-card transition-shadow">
+      <div className="flex items-start justify-between mb-4">
+        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Icon className="h-5 w-5 text-primary" />
+        </div>
+        {trend !== undefined && (
+          <div className={cn(
+            "flex items-center gap-0.5 text-xs font-medium px-2 py-1 rounded-full",
+            trend >= 0 
+              ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950" 
+              : "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950"
+          )}>
+            {trend >= 0 ? (
+              <ArrowUpRight className="h-3 w-3" />
+            ) : (
+              <ArrowDownRight className="h-3 w-3" />
+            )}
+            {Math.abs(trend)}%
           </div>
-          {trend !== undefined && (
-            <div className={cn(
-              "flex items-center gap-1 text-xs font-medium",
-              trend >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
-            )}>
-              <TrendingUp className={cn("h-3 w-3", trend < 0 && "rotate-180")} />
-              {Math.abs(trend)}%
-            </div>
-          )}
-        </div>
-        <div className="mt-4">
-          <p className="text-2xl font-bold text-foreground">{value}</p>
-          <p className="text-sm text-muted-foreground mt-1">{title}</p>
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+      <p className="text-2xl font-semibold text-foreground tracking-tight">{value}</p>
+      <p className="text-sm text-muted-foreground mt-1">{title}</p>
+      {description && (
+        <p className="text-xs text-muted-foreground/70 mt-0.5">{description}</p>
+      )}
+    </div>
   );
 }
 
@@ -64,24 +67,28 @@ export function StatsCards() {
         value={totalViews.toLocaleString()}
         icon={Eye}
         loading={isLoading}
+        description="All time"
       />
       <StatCard
-        title="Views This Week"
+        title="This Week"
         value={weekViews.toLocaleString()}
         icon={TrendingUp}
         loading={isLoading}
+        description="Last 7 days"
       />
       <StatCard
         title="Active Previews"
-        value={`${activePreviews}/${totalPreviews}`}
+        value={`${activePreviews} / ${totalPreviews}`}
         icon={FileText}
         loading={isLoading}
+        description="Sent to clients"
       />
       <StatCard
         title="Unread Feedback"
         value={unreadFeedback}
         icon={MessageSquare}
         loading={isLoading}
+        description="Awaiting review"
       />
     </div>
   );

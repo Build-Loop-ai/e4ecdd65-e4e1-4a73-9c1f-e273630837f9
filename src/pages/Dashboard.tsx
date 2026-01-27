@@ -2,13 +2,19 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Globe, ExternalLink, Copy, Trash2, Calendar, Palette } from 'lucide-react';
+import { Plus, Globe, ExternalLink, Copy, Trash2, MoreHorizontal, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatsCards } from '@/components/dashboard/StatsCards';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { Tables } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -24,10 +30,7 @@ const extractPreviewData = (preview: ClientPreview) => {
     headline: schema?.hero?.headline || 'No headline',
     heroImage: schema?.hero?.backgroundImages?.[0] || null,
     logo: branding?.logo || branding?.images?.logo || schema?.logo || null,
-    primaryColor: branding?.colors?.primary || '#3b82f6',
-    secondaryColor: branding?.colors?.secondary || '#1e293b',
-    serviceCount: schema?.services?.length || 0,
-    galleryCount: schema?.gallery?.images?.length || 0,
+    primaryColor: branding?.colors?.primary || 'hsl(var(--primary))',
   };
 };
 
@@ -61,16 +64,18 @@ export default function Dashboard() {
     setLoading(false);
   };
 
-  const copyPreviewLink = (slug: string) => {
+  const copyPreviewLink = (slug: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     const url = `${window.location.origin}/preview/${slug}`;
     navigator.clipboard.writeText(url);
     toast({
-      title: 'Link copied!',
-      description: 'Share this link with your client.',
+      title: 'Link copied',
+      description: 'Preview link copied to clipboard.',
     });
   };
 
-  const deletePreview = async (id: string) => {
+  const deletePreview = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     const { error } = await supabase
       .from('client_previews')
       .delete()
@@ -91,237 +96,178 @@ export default function Dashboard() {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'draft':
-        return 'secondary';
-      case 'sent':
-        return 'default';
-      case 'feedback_received':
-        return 'destructive';
-      default:
-        return 'secondary';
+      case 'draft': return 'secondary';
+      case 'sent': return 'default';
+      case 'feedback_received': return 'outline';
+      default: return 'secondary';
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('nl-NL', {
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
-      year: 'numeric',
+      day: 'numeric',
     });
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Overview</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Welcome back. Here's what's happening with your previews.
+          </p>
+        </div>
+
         {/* Stats Overview */}
         <StatsCards />
 
-        {/* Previews Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold">Your Previews</h2>
-            <p className="text-muted-foreground text-sm">
-              {previews.length} preview{previews.length !== 1 ? 's' : ''} created
-            </p>
+        {/* Recent Previews Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-medium text-foreground">Recent Previews</h2>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/dashboard/previews" className="text-muted-foreground hover:text-foreground">
+                View all
+              </Link>
+            </Button>
           </div>
-          <Button asChild>
-            <Link to="/new-preview">
-              <Plus className="h-4 w-4 mr-2" />
-              New Preview
-            </Link>
-          </Button>
-        </div>
 
-        {loading ? (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-40 w-full" />
-                <div className="p-4 space-y-3">
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <div className="flex gap-2">
-                    <Skeleton className="h-8 w-20" />
-                    <Skeleton className="h-8 w-20" />
+          {loading ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="p-4 rounded-xl border border-border bg-card">
+                  <div className="flex items-start gap-3">
+                    <Skeleton className="h-12 w-12 rounded-lg" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
                   </div>
                 </div>
-              </Card>
-            ))}
-          </div>
-        ) : previews.length === 0 ? (
-          <Card className="text-center py-16 bg-muted/30 border-dashed">
-            <CardContent>
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                <Globe className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">No previews yet</h3>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Create your first client preview by entering their website URL. We'll automatically extract their branding and content.
+              ))}
+            </div>
+          ) : previews.length === 0 ? (
+            <div className="p-12 rounded-xl border border-dashed border-border bg-muted/30 text-center">
+              <Globe className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No previews yet</h3>
+              <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
+                Create your first client preview by entering their website URL.
               </p>
-              <Button asChild size="lg">
+              <Button asChild>
                 <Link to="/new-preview">
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Preview
+                  Create Preview
                 </Link>
               </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {previews.map((preview) => {
-              const data = extractPreviewData(preview);
-              
-              return (
-                <Card 
-                  key={preview.id} 
-                  className="overflow-hidden group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30 cursor-pointer"
-                  onClick={() => navigate(`/manage/${preview.id}`)}
-                >
-                  {/* Visual Preview Header */}
-                  <div 
-                    className="h-44 relative overflow-hidden"
-                    style={{
-                      background: data.heroImage 
-                        ? `linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${data.heroImage}) center/cover`
-                        : `linear-gradient(135deg, ${data.secondaryColor} 0%, ${data.primaryColor}66 100%)`
-                    }}
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {previews.slice(0, 6).map((preview) => {
+                const data = extractPreviewData(preview);
+                
+                return (
+                  <div
+                    key={preview.id}
+                    className="group p-4 rounded-xl border border-border bg-card hover:shadow-card hover:border-border/80 transition-all cursor-pointer"
+                    onClick={() => navigate(`/manage/${preview.id}`)}
                   >
-                    {/* Logo */}
-                    <div className="absolute top-4 left-4">
-                      {data.logo ? (
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2">
-                          <img 
-                            src={data.logo} 
-                            alt={data.companyName}
-                            className="h-8 w-auto max-w-[100px] object-contain"
-                            onError={(e) => e.currentTarget.style.display = 'none'}
-                          />
-                        </div>
-                      ) : (
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg px-3 py-2">
-                          <span className="text-white font-bold text-sm">
+                    <div className="flex items-start gap-3">
+                      {/* Logo/Avatar */}
+                      <div 
+                        className="h-12 w-12 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden"
+                        style={{ 
+                          backgroundColor: data.heroImage ? undefined : 'hsl(var(--muted))',
+                          backgroundImage: data.heroImage ? `url(${data.heroImage})` : undefined,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                        }}
+                      >
+                        {!data.heroImage && (
+                          <span className="text-sm font-semibold text-muted-foreground">
                             {data.companyName.slice(0, 2).toUpperCase()}
                           </span>
+                        )}
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3 className="font-medium text-foreground truncate">
+                              {data.companyName}
+                            </h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {formatDate(preview.created_at)}
+                            </p>
+                          </div>
+                          <Badge variant={getStatusVariant(preview.status)} className="text-[10px] h-5 flex-shrink-0">
+                            {preview.status.replace('_', ' ')}
+                          </Badge>
                         </div>
-                      )}
-                    </div>
-
-                    {/* Status Badge */}
-                    <div className="absolute top-4 right-4">
-                      <Badge variant={getStatusColor(preview.status)} className="capitalize">
-                        {preview.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-
-                    {/* Headline Preview */}
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <p className="text-white/70 text-xs mb-1 uppercase tracking-wide">
-                        {preview.template_id === 'modern-professional' ? 'Modern' : 
-                         preview.template_id === 'bold-starter' ? 'Bold' :
-                         preview.template_id === 'elegant-minimal' ? 'Elegant' :
-                         preview.template_id === 'warm-friendly' ? 'Warm' : 'Classic'}
-                      </p>
-                      <h3 className="text-white font-bold text-lg leading-tight line-clamp-2">
-                        {data.headline.length > 50 ? data.headline.slice(0, 50) + '...' : data.headline}
-                      </h3>
-                    </div>
-
-                    {/* Brand Colors Strip */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1 flex">
-                      <div className="flex-1" style={{ backgroundColor: data.primaryColor }} />
-                      <div className="flex-1" style={{ backgroundColor: data.secondaryColor }} />
+                        
+                        {/* Actions */}
+                        <div className="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}
+                          >
+                            <Eye className="h-3 w-3 mr-1" />
+                            View
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={(e) => copyPreviewLink(preview.slug, e)}
+                          >
+                            <Copy className="h-3 w-3 mr-1" />
+                            Copy
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MoreHorizontal className="h-3.5 w-3.5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                              <DropdownMenuItem onClick={() => navigate(`/manage/${preview.id}`)}>
+                                Manage
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}>
+                                <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                                Open preview
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                onClick={(e) => deletePreview(preview.id, e)}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  {/* Card Content */}
-                  <CardContent className="p-4">
-                    {/* Company Name & URL */}
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-lg">{data.companyName}</h4>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {preview.original_url}
-                      </p>
-                    </div>
-
-                    {/* Stats Row */}
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(preview.created_at)}
-                      </div>
-                      {data.serviceCount > 0 && (
-                        <div className="flex items-center gap-1">
-                          <span>{data.serviceCount} services</span>
-                        </div>
-                      )}
-                      {data.galleryCount > 0 && (
-                        <div className="flex items-center gap-1">
-                          <span>{data.galleryCount} images</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Color Palette Preview */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <Palette className="h-3 w-3 text-muted-foreground" />
-                      <div className="flex gap-1">
-                        <div 
-                          className="w-5 h-5 rounded-full border border-border shadow-sm"
-                          style={{ backgroundColor: data.primaryColor }}
-                          title={`Primary: ${data.primaryColor}`}
-                        />
-                        <div 
-                          className="w-5 h-5 rounded-full border border-border shadow-sm"
-                          style={{ backgroundColor: data.secondaryColor }}
-                          title={`Secondary: ${data.secondaryColor}`}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => navigate(`/manage/${preview.id}`)}
-                      >
-                        Manage
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}
-                        title="Open preview in new tab"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); copyPreviewLink(preview.slug); }}
-                        title="Copy link"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={(e) => { e.stopPropagation(); deletePreview(preview.id); }}
-                        title="Delete preview"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );

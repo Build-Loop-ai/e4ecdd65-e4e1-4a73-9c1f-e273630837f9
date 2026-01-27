@@ -1,10 +1,9 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, BarChart3, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileText, BarChart3, LogOut, Menu, X, Plus, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -17,7 +16,7 @@ const navItems = [
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -31,59 +30,89 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Dark like ChatGPT */}
       <aside className={cn(
-        "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-card border-r border-border flex flex-col transition-transform lg:translate-x-0",
+        "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar flex flex-col transition-transform duration-300 lg:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         {/* Logo */}
-        <div className="p-6 border-b border-border flex items-center justify-between">
-          <h1 className="text-xl font-bold text-foreground">PreviewPro</h1>
+        <div className="h-16 px-4 flex items-center justify-between border-b border-sidebar-border">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-semibold text-sidebar-accent-foreground">PreviewPro</span>
+          </div>
           <Button 
             variant="ghost" 
             size="icon" 
-            className="lg:hidden"
+            className="lg:hidden text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent"
             onClick={() => setSidebarOpen(false)}
           >
             <X className="h-5 w-5" />
           </Button>
         </div>
 
+        {/* New Preview Button */}
+        <div className="p-3">
+          <Button 
+            onClick={() => navigate('/new-preview')}
+            className="w-full justify-start gap-2 bg-sidebar-accent hover:bg-sidebar-accent/80 text-sidebar-accent-foreground border border-sidebar-border"
+          >
+            <Plus className="h-4 w-4" />
+            New Preview
+          </Button>
+        </div>
+
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 px-3 py-2 space-y-1">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.to === '/dashboard'}
               className={({ isActive }) => cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 isActive 
-                  ? "bg-primary text-primary-foreground" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
               onClick={() => setSidebarOpen(false)}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-4 w-4" />
               {item.label}
             </NavLink>
           ))}
         </nav>
 
-        {/* Bottom actions */}
-        <div className="p-4 border-t border-border space-y-1">
+        {/* User section */}
+        <div className="p-3 border-t border-sidebar-border">
+          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+            <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center text-sm font-medium text-sidebar-accent-foreground">
+              {user?.email?.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-sidebar-accent-foreground truncate">
+                {user?.email?.split('@')[0]}
+              </p>
+              <p className="text-xs text-sidebar-muted truncate">
+                {user?.email}
+              </p>
+            </div>
+          </div>
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+            size="sm"
+            className="w-full justify-start gap-2 text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent"
             onClick={handleSignOut}
           >
-            <LogOut className="h-5 w-5" />
-            Sign Out
+            <LogOut className="h-4 w-4" />
+            Sign out
           </Button>
         </div>
       </aside>
@@ -91,20 +120,28 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile header */}
-        <header className="lg:hidden sticky top-0 z-30 bg-background border-b border-border p-4 flex items-center gap-4">
+        <header className="lg:hidden sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border h-14 px-4 flex items-center gap-3">
           <Button 
             variant="ghost" 
             size="icon"
+            className="h-9 w-9"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-lg font-bold">PreviewPro</h1>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+              <Sparkles className="h-3 w-3 text-primary-foreground" />
+            </div>
+            <span className="font-semibold">PreviewPro</span>
+          </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
-          {children}
+        <main className="flex-1 p-6 lg:p-8 overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>
