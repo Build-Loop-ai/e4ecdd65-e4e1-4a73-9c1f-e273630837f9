@@ -85,18 +85,65 @@ IMPORTANT:
     const logoUrl = brandColors?.logo || brandColors?.images?.logo || scrapedContent?.branding?.logo || scrapedContent?.branding?.images?.logo || null;
     console.log('Logo URL found:', logoUrl);
 
-    // Extract images from HTML if available
+    // Extract ALL images from HTML - comprehensive extraction for atmosphere photos
     const htmlContent = scrapedContent?.html || '';
-    const imageMatches = htmlContent.match(/(?:src|data-src|data-full-res)=["']([^"']+\.(?:jpg|jpeg|png|webp|gif)[^"']*)/gi) || [];
-    const extractedImages = imageMatches
-      .map((match: string) => {
-        const urlMatch = match.match(/["']([^"']+)/);
-        return urlMatch ? urlMatch[1] : null;
-      })
-      .filter((url: string | null): url is string => url !== null && !url.includes('thumb') && !url.includes('icon'))
-      .slice(0, 30);
-
-    console.log('Extracted images count:', extractedImages.length);
+    
+    // Multiple patterns to catch all image sources
+    const patterns = [
+      /src=["']([^"']+\.(?:jpg|jpeg|png|webp|gif)[^"']*)/gi,
+      /data-src=["']([^"']+\.(?:jpg|jpeg|png|webp|gif)[^"']*)/gi,
+      /data-lazy-src=["']([^"']+\.(?:jpg|jpeg|png|webp|gif)[^"']*)/gi,
+      /data-original=["']([^"']+\.(?:jpg|jpeg|png|webp|gif)[^"']*)/gi,
+      /data-full-res=["']([^"']+\.(?:jpg|jpeg|png|webp|gif)[^"']*)/gi,
+      /srcset=["']([^"']+\.(?:jpg|jpeg|png|webp|gif)[^\s"']*)/gi,
+      /background(?:-image)?:\s*url\(["']?([^"')]+\.(?:jpg|jpeg|png|webp|gif)[^"')]*)/gi,
+      /content=["']([^"']+\.(?:jpg|jpeg|png|webp|gif)[^"']*)/gi,
+    ];
+    
+    const allImageUrls = new Set<string>();
+    
+    for (const pattern of patterns) {
+      const matches = htmlContent.matchAll(pattern);
+      for (const match of matches) {
+        if (match[1]) {
+          let url = match[1].trim();
+          // Handle relative URLs
+          if (url.startsWith('//')) {
+            url = 'https:' + url;
+          }
+          // Filter out tiny images, icons, and tracking pixels
+          if (
+            url.length > 10 &&
+            !url.includes('favicon') &&
+            !url.includes('icon') &&
+            !url.includes('logo') &&
+            !url.includes('thumb') &&
+            !url.includes('1x1') &&
+            !url.includes('pixel') &&
+            !url.includes('tracking') &&
+            !url.includes('analytics') &&
+            !url.includes('badge') &&
+            !url.includes('button') &&
+            !url.includes('sprite') &&
+            (url.startsWith('http') || url.startsWith('/'))
+          ) {
+            allImageUrls.add(url);
+          }
+        }
+      }
+    }
+    
+    // Also extract from markdown image syntax
+    const markdownContent = scrapedContent?.markdown || '';
+    const mdImageMatches = markdownContent.matchAll(/!\[.*?\]\(([^)]+)\)/gi);
+    for (const match of mdImageMatches) {
+      if (match[1] && match[1].startsWith('http')) {
+        allImageUrls.add(match[1]);
+      }
+    }
+    
+    const extractedImages = Array.from(allImageUrls).slice(0, 50);
+    console.log('Extracted atmosphere photos count:', extractedImages.length);
 
     const userPrompt = `Here is the scraped website content to analyze:
 
