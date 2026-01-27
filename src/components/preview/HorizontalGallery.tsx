@@ -22,17 +22,18 @@ export function HorizontalGallery({
 
   const x = useTransform(scrollYProgress, [0, 1], ["0%", "-30%"]);
 
-  if (!images || images.length === 0) return null;
-
   // Filter out invalid images
-  const validImages = images.filter(img => 
+  const validImages = images?.filter(img => 
     img && 
     !img.includes('favicon') && 
     !img.includes('icon') &&
+    !img.includes('placeholder') &&
+    !img.includes('default') &&
     (img.startsWith('http') || img.startsWith('/'))
-  ).slice(0, 12);
+  ).slice(0, 12) || [];
 
-  if (validImages.length === 0) return null;
+  // Require minimum 3 valid images to show gallery section
+  if (validImages.length < 3) return null;
 
   return (
     <section ref={containerRef} className="py-24 overflow-hidden bg-foreground">

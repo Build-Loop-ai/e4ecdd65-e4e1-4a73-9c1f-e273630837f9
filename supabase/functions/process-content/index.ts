@@ -75,11 +75,18 @@ Return a JSON object with this exact structure:
   "tagline": "string - short brand tagline if available"
 }
 
-IMPORTANT: 
-- Extract ALL images you can find, especially from Instagram embeds, galleries, sliders, and portfolio sections
-- Look for Instagram feed embeds - these often have multiple post images
-- Extract real testimonials if available, otherwise omit the testimonials array
-- Make the content feel premium and professional`;
+CRITICAL EXTRACTION RULES - READ CAREFULLY:
+1. TESTIMONIALS: Only include testimonials if you find 2 or more GENUINE, DISTINCT customer reviews with real names and meaningful quotes (at least 20+ characters). If fewer than 2 real reviews exist, return an EMPTY testimonials array []. Do NOT fabricate or generate fake testimonials.
+
+2. INSTAGRAM: Only include Instagram data if the website has a VISIBLE Instagram feed embed with actual posts. Look for Instagram post URLs, embedded feeds, or clear Instagram content. If no real Instagram content exists, return empty: { "handle": null, "posts": [] }. Do NOT fabricate Instagram posts.
+
+3. SERVICES: Only include services that are explicitly mentioned on the website. Minimum 2 distinct services required to populate the services array. If only 1 service, include it in the about section description instead.
+
+4. IMAGES: Extract ALL real images from the website. Filter out icons, logos, and tiny images. Only include actual content/atmosphere images.
+
+5. NEVER FABRICATE CONTENT: If content doesn't exist on the source website, return empty arrays or null values. Quality over quantity - only extract what actually exists.
+
+- Make the content feel premium and professional while staying true to the source material`;
 
     // Extract logo from branding data
     const logoUrl = brandColors?.logo || brandColors?.images?.logo || scrapedContent?.branding?.logo || scrapedContent?.branding?.images?.logo || null;

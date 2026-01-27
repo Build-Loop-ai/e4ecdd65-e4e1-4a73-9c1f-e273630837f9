@@ -22,7 +22,8 @@ export function ServicesSection({
 }: ServicesSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  if (services.length === 0) return null;
+  // Require minimum 2 services to show dedicated section
+  if (!services || services.length < 2) return null;
 
   return (
     <section ref={containerRef} className="py-32 bg-background relative overflow-hidden">

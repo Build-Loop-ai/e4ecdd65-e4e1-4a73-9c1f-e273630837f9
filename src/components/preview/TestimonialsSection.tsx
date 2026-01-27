@@ -27,7 +27,13 @@ export function TestimonialsSection({
 
   const x = useTransform(scrollYProgress, [0, 1], ["10%", "-20%"]);
 
-  if (!testimonials || testimonials.length === 0) return null;
+  // Filter testimonials with meaningful content (at least 20 characters)
+  const validTestimonials = testimonials?.filter(t => 
+    t.quote && t.quote.length >= 20 && t.author && t.author.length >= 2
+  ) || [];
+
+  // Require minimum 2 valid testimonials to show section
+  if (validTestimonials.length < 2) return null;
 
   return (
     <section ref={containerRef} className="py-24 overflow-hidden bg-muted/30">
@@ -53,7 +59,7 @@ export function TestimonialsSection({
         style={{ x }}
         className="flex gap-8 pl-6"
       >
-        {testimonials.map((testimonial, index) => (
+        {validTestimonials.map((testimonial, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, scale: 0.9 }}
