@@ -229,7 +229,10 @@ export default function Dashboard() {
                     {/* Headline Preview */}
                     <div className="absolute bottom-4 left-4 right-4">
                       <p className="text-white/70 text-xs mb-1 uppercase tracking-wide">
-                        {preview.template_id === 'modern-professional' ? 'Modern' : 'Classic'}
+                        {preview.template_id === 'modern-professional' ? 'Modern' : 
+                         preview.template_id === 'bold-starter' ? 'Bold' :
+                         preview.template_id === 'elegant-minimal' ? 'Elegant' :
+                         preview.template_id === 'warm-friendly' ? 'Warm' : 'Classic'}
                       </p>
                       <h3 className="text-white font-bold text-lg leading-tight line-clamp-2">
                         {data.headline.length > 50 ? data.headline.slice(0, 50) + '...' : data.headline}

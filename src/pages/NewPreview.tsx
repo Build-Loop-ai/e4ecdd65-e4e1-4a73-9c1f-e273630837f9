@@ -265,7 +265,7 @@ export default function NewPreview() {
 
         {/* Template Selection Step with Live Content */}
         {step === 'template' && (
-          <Card className="max-w-4xl mx-auto">
+          <Card className="max-w-5xl mx-auto">
             <CardHeader>
               <CardTitle>Choose a Template</CardTitle>
               <CardDescription>
@@ -274,8 +274,8 @@ export default function NewPreview() {
             </CardHeader>
             <CardContent className="space-y-6">
               <RadioGroup value={template} onValueChange={setTemplate}>
-                <div className="grid md:grid-cols-2 gap-6">
-                  {/* Corporate Classic Template Preview with REAL content */}
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Corporate Classic */}
                   <label
                     htmlFor="corporate-classic"
                     className={`group cursor-pointer transition-all duration-300 ${
@@ -285,90 +285,33 @@ export default function NewPreview() {
                     <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
                       template === 'corporate-classic' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
                     }`}>
-                      {/* Mini Template Preview with ACTUAL scraped content */}
                       <div 
-                        className="aspect-[4/3] p-4 relative overflow-hidden"
+                        className="aspect-[4/3] p-3 relative overflow-hidden"
                         style={{ 
                           background: heroImage 
                             ? `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url(${heroImage}) center/cover`
                             : `linear-gradient(135deg, ${secondaryColor} 0%, ${primaryColor}33 100%)`
                         }}
                       >
-                        {/* Logo */}
-                        <div className="mb-3">
-                          {logo ? (
-                            <div className="bg-white/10 backdrop-blur-sm rounded p-1.5 inline-block">
-                              <img 
-                                src={logo} 
-                                alt="Logo" 
-                                className="h-6 object-contain max-w-[80px]"
-                                onError={(e) => e.currentTarget.style.display = 'none'}
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-16 h-4 bg-white/30 rounded" />
-                          )}
-                        </div>
-                        
-                        {/* Actual headline */}
-                        <div className="text-white mb-2">
-                          <div className="text-sm font-bold leading-tight">
-                            {truncate(headline, 40)}
-                          </div>
-                        </div>
-
-                        {/* Service count indicator */}
-                        {serviceCount > 0 && (
-                          <div className="flex gap-1 mb-2">
-                            {Array.from({ length: Math.min(serviceCount, 3) }).map((_, i) => (
-                              <div 
-                                key={i}
-                                className="w-8 h-8 rounded"
-                                style={{ backgroundColor: `${primaryColor}44` }}
-                              />
-                            ))}
-                            {serviceCount > 3 && (
-                              <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-white text-xs">
-                                +{serviceCount - 3}
-                              </div>
-                            )}
+                        {logo && (
+                          <div className="bg-white/10 backdrop-blur-sm rounded p-1 inline-block mb-2">
+                            <img src={logo} alt="Logo" className="h-4 object-contain max-w-[60px]" onError={(e) => e.currentTarget.style.display = 'none'} />
                           </div>
                         )}
-
-                        {/* Color accent bar */}
-                        <div 
-                          className="absolute bottom-0 left-0 right-0 h-1"
-                          style={{ backgroundColor: primaryColor }}
-                        />
+                        <div className="text-white text-xs font-bold leading-tight mb-1">{truncate(headline, 30)}</div>
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5" style={{ backgroundColor: primaryColor }} />
                       </div>
-
-                      {/* Template Info */}
-                      <div className="p-4 bg-background flex items-start gap-3">
-                        <RadioGroupItem value="corporate-classic" id="corporate-classic" className="mt-1" />
+                      <div className="p-3 bg-background flex items-start gap-2">
+                        <RadioGroupItem value="corporate-classic" id="corporate-classic" className="mt-0.5" />
                         <div className="flex-1">
-                          <div className="font-semibold">Corporate Classic</div>
-                          <div className="text-sm text-muted-foreground">
-                            Clean, professional layout
-                          </div>
-                          {/* Brand colors preview */}
-                          <div className="flex gap-1.5 mt-2">
-                            <div 
-                              className="w-4 h-4 rounded-full border border-border"
-                              style={{ backgroundColor: primaryColor }}
-                              title="Primary color"
-                            />
-                            <div 
-                              className="w-4 h-4 rounded-full border border-border"
-                              style={{ backgroundColor: secondaryColor }}
-                              title="Secondary color"
-                            />
-                          </div>
+                          <div className="font-semibold text-sm">Corporate Classic</div>
+                          <div className="text-xs text-muted-foreground">Traditional & professional</div>
                         </div>
                       </div>
                     </div>
                   </label>
 
-                  {/* Modern Professional Template Preview with REAL content */}
+                  {/* Modern Professional */}
                   <label
                     htmlFor="modern-professional"
                     className={`group cursor-pointer transition-all duration-300 ${
@@ -378,96 +321,111 @@ export default function NewPreview() {
                     <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
                       template === 'modern-professional' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
                     }`}>
-                      {/* Mini Template Preview */}
-                      <div className="aspect-[4/3] bg-black p-4 relative overflow-hidden">
-                        {/* Animated gradient orbs using brand colors */}
-                        <div 
-                          className="absolute top-2 right-2 w-16 h-16 rounded-full blur-xl opacity-40"
-                          style={{ backgroundColor: primaryColor }}
-                        />
-                        <div 
-                          className="absolute bottom-4 left-2 w-12 h-12 rounded-full blur-xl opacity-30"
-                          style={{ backgroundColor: secondaryColor }}
-                        />
-
-                        {/* Logo */}
-                        <div className="relative z-10 mb-2">
-                          {logo ? (
-                            <div className="bg-white/10 backdrop-blur-sm rounded p-1 inline-block">
-                              <img 
-                                src={logo} 
-                                alt="Logo" 
-                                className="h-5 object-contain max-w-[60px]"
-                                onError={(e) => e.currentTarget.style.display = 'none'}
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-6 h-6 bg-white/20 rounded-full" />
-                          )}
-                        </div>
-
-                        {/* Bold headline */}
-                        <div className="relative z-10 mb-3">
-                          <div className="text-white text-base font-bold leading-tight">
-                            {truncate(headline, 30)}
+                      <div className="aspect-[4/3] bg-black p-3 relative overflow-hidden">
+                        <div className="absolute top-2 right-2 w-12 h-12 rounded-full blur-xl opacity-40" style={{ backgroundColor: primaryColor }} />
+                        {logo && (
+                          <div className="bg-white/10 backdrop-blur-sm rounded p-1 inline-block mb-2">
+                            <img src={logo} alt="Logo" className="h-4 object-contain max-w-[60px]" onError={(e) => e.currentTarget.style.display = 'none'} />
                           </div>
-                        </div>
-
-                        {/* Horizontal scroll preview with ACTUAL gallery images */}
-                        <div className="flex gap-2 mb-2 overflow-hidden relative z-10">
-                          {galleryImages.length > 0 ? (
-                            galleryImages.map((img: any, i: number) => (
-                              <div 
-                                key={i}
-                                className="w-10 h-14 bg-white/10 rounded flex-shrink-0 overflow-hidden"
-                              >
-                                <img 
-                                  src={img.url || img} 
-                                  alt="" 
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => e.currentTarget.style.display = 'none'}
-                                />
-                              </div>
-                            ))
-                          ) : (
-                            <>
-                              <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
-                              <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
-                              <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
-                            </>
-                          )}
-                        </div>
-
-                        {/* CTA with brand color */}
-                        <div 
-                          className="relative z-10 h-6 w-20 rounded text-white text-xs flex items-center justify-center"
-                          style={{ backgroundColor: primaryColor }}
-                        >
-                          Contact
+                        )}
+                        <div className="text-white text-xs font-bold leading-tight">{truncate(headline, 25)}</div>
+                      </div>
+                      <div className="p-3 bg-background flex items-start gap-2">
+                        <RadioGroupItem value="modern-professional" id="modern-professional" className="mt-0.5" />
+                        <div className="flex-1">
+                          <div className="font-semibold text-sm">Modern Professional</div>
+                          <div className="text-xs text-muted-foreground">Dark with gradient orbs</div>
                         </div>
                       </div>
+                    </div>
+                  </label>
 
-                      {/* Template Info */}
-                      <div className="p-4 bg-background flex items-start gap-3">
-                        <RadioGroupItem value="modern-professional" id="modern-professional" className="mt-1" />
+                  {/* Bold Starter */}
+                  <label
+                    htmlFor="bold-starter"
+                    className={`group cursor-pointer transition-all duration-300 ${
+                      template === 'bold-starter' ? 'scale-[1.02]' : 'hover:scale-[1.01]'
+                    }`}
+                  >
+                    <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
+                      template === 'bold-starter' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
+                    }`}>
+                      <div className="aspect-[4/3] bg-black p-3 relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-30" style={{ background: `linear-gradient(135deg, ${primaryColor}50 0%, purple 100%)` }} />
+                        <div className="absolute top-2 left-2 w-6 h-6 bg-white/10 rounded-lg backdrop-blur" />
+                        <div className="relative z-10 mt-4">
+                          <div 
+                            className="text-xs font-black leading-tight"
+                            style={{
+                              background: `linear-gradient(135deg, white 0%, ${primaryColor} 100%)`,
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                            }}
+                          >
+                            {truncate(headline, 25)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-background flex items-start gap-2">
+                        <RadioGroupItem value="bold-starter" id="bold-starter" className="mt-0.5" />
                         <div className="flex-1">
-                          <div className="font-semibold">Modern Professional</div>
-                          <div className="text-sm text-muted-foreground">
-                            Bold design with animations
+                          <div className="font-semibold text-sm">Bold Starter</div>
+                          <div className="text-xs text-muted-foreground">Vibrant for startups</div>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Elegant Minimal */}
+                  <label
+                    htmlFor="elegant-minimal"
+                    className={`group cursor-pointer transition-all duration-300 ${
+                      template === 'elegant-minimal' ? 'scale-[1.02]' : 'hover:scale-[1.01]'
+                    }`}
+                  >
+                    <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
+                      template === 'elegant-minimal' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
+                    }`}>
+                      <div className="aspect-[4/3] bg-stone-50 p-4 relative overflow-hidden flex flex-col items-center justify-center text-center">
+                        <div className="text-xs font-light text-stone-800 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
+                          {truncate(headline, 30)}
+                        </div>
+                        <div className="w-8 h-px mt-2" style={{ backgroundColor: primaryColor }} />
+                      </div>
+                      <div className="p-3 bg-background flex items-start gap-2">
+                        <RadioGroupItem value="elegant-minimal" id="elegant-minimal" className="mt-0.5" />
+                        <div className="flex-1">
+                          <div className="font-semibold text-sm">Elegant Minimal</div>
+                          <div className="text-xs text-muted-foreground">Luxury & whitespace</div>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Warm Friendly */}
+                  <label
+                    htmlFor="warm-friendly"
+                    className={`group cursor-pointer transition-all duration-300 ${
+                      template === 'warm-friendly' ? 'scale-[1.02]' : 'hover:scale-[1.01]'
+                    }`}
+                  >
+                    <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
+                      template === 'warm-friendly' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
+                    }`}>
+                      <div className="aspect-[4/3] p-4 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #fff7ed 0%, #fce7f3 100%)' }}>
+                        {logo && (
+                          <div className="bg-white/80 rounded-xl p-1.5 inline-block mb-2 shadow-sm">
+                            <img src={logo} alt="Logo" className="h-5 object-contain max-w-[70px]" onError={(e) => e.currentTarget.style.display = 'none'} />
                           </div>
-                          {/* Brand colors preview */}
-                          <div className="flex gap-1.5 mt-2">
-                            <div 
-                              className="w-4 h-4 rounded-full border border-border"
-                              style={{ backgroundColor: primaryColor }}
-                              title="Primary color"
-                            />
-                            <div 
-                              className="w-4 h-4 rounded-full border border-border"
-                              style={{ backgroundColor: secondaryColor }}
-                              title="Secondary color"
-                            />
-                          </div>
+                        )}
+                        <div className="text-stone-800 text-xs font-bold leading-tight">{truncate(headline, 30)}</div>
+                        <div className="absolute bottom-3 left-3 w-6 h-6 rounded-full shadow-md" style={{ backgroundColor: primaryColor }} />
+                      </div>
+                      <div className="p-3 bg-background flex items-start gap-2">
+                        <RadioGroupItem value="warm-friendly" id="warm-friendly" className="mt-0.5" />
+                        <div className="flex-1">
+                          <div className="font-semibold text-sm">Warm Friendly</div>
+                          <div className="text-xs text-muted-foreground">Local businesses & cafes</div>
                         </div>
                       </div>
                     </div>
