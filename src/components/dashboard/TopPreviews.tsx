@@ -1,6 +1,4 @@
 import { Eye, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface TopPreview {
@@ -17,19 +15,20 @@ interface TopPreviewsProps {
 export function TopPreviews({ previews, loading }: TopPreviewsProps) {
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="p-6 rounded-xl border border-border bg-card">
+        <Skeleton className="h-5 w-28 mb-6" />
+        <div className="space-y-4">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="space-y-2">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-2 w-full" />
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-10" />
+              </div>
+              <Skeleton className="h-1.5 w-full rounded-full" />
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -37,52 +36,46 @@ export function TopPreviews({ previews, loading }: TopPreviewsProps) {
 
   if (previews.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Top Previews</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <TrendingUp className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-            <p className="text-muted-foreground text-sm">No views yet</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="p-6 rounded-xl border border-border bg-card">
+        <h3 className="text-sm font-medium text-foreground mb-6">Top previews</h3>
+        <div className="py-12 text-center">
+          <TrendingUp className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">No views yet</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Top Previews</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="p-6 rounded-xl border border-border bg-card">
+      <h3 className="text-sm font-medium text-foreground mb-6">Top previews</h3>
+      
+      <div className="space-y-4">
         {previews.map((preview, index) => {
           const percentage = (preview.views / maxViews) * 100;
           
           return (
             <div key={preview.preview_id} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-muted-foreground w-4">
-                    {index + 1}.
-                  </span>
-                  <span className="text-sm font-medium text-foreground truncate max-w-[150px]">
-                    {preview.client_name}
-                  </span>
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-muted-foreground w-4 flex-shrink-0">{index + 1}.</span>
+                  <span className="font-medium text-foreground truncate">{preview.client_name}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Eye className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {preview.views}
-                  </span>
+                <div className="flex items-center gap-1 text-muted-foreground flex-shrink-0">
+                  <Eye className="h-3 w-3" />
+                  <span>{preview.views}</span>
                 </div>
               </div>
-              <Progress value={percentage} className="h-2" />
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary rounded-full transition-all duration-500"
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
             </div>
           );
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
