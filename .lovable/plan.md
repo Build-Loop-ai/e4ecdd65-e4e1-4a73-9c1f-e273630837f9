@@ -1,201 +1,268 @@
 
-# Maker View - Full Preview Management Interface
+# Adding 3 New Templates - Distinct Styles for Different Business Types
 
 ## Overview
-Create a dedicated "Maker View" page that opens when clicking "View" on the dashboard (instead of opening in a new tab). This view shows the live preview with a floating sidebar/panel containing all the management tools the maker/owner needs to manage, edit, and track their client preview.
+Add 3 new carefully designed templates that cater to different business types and aesthetic preferences. Each template will have a distinct visual identity while using the same modular section components with template-specific variations.
 
-## Current Behavior
-- Clicking "View" on Dashboard opens `/preview/:slug` in a new tab
-- This is the same view clients see - no owner tools
-- Feedback is on a separate page (`/feedback/:previewId`)
-- No way to edit content, change template, or update status inline
+## Current State
+- **2 templates**: `modern-professional` (dark/gradient) and `corporate-classic` (clean/traditional)
+- Templates are differentiated by an `isModern` boolean flag
+- Section components accept `isModern` and `primaryColor` props for styling variations
+- Template selection shows live mini-previews with actual scraped content
 
-## Proposed Solution
+## The 3 New Templates
 
-### New Route: `/manage/:id`
-Create a new protected route that combines:
-1. Live preview display (iframe or embedded component)
-2. Floating maker toolbar with all management actions
-3. Inline editing capabilities
-4. Feedback panel
-5. Quick actions (copy link, share, regenerate)
+### 1. Bold Starter (`bold-starter`)
+**Target audience**: Startups, tech companies, creative agencies, bold personal brands
 
-### Maker View Features
+**Visual characteristics**:
+- Full-bleed hero sections with large typography
+- Vibrant gradient backgrounds (using primary + accent colors)
+- Asymmetric layouts and overlapping elements
+- Large, bold headlines with gradient text effects
+- Floating animated elements and glassmorphism cards
+- Dark mode feel with neon accent highlights
 
-**Toolbar/Panel Actions:**
-- **Preview Controls**: Toggle between desktop/tablet/mobile views
-- **Share**: Copy client link, open in new tab, mark as "sent"
-- **Template**: Switch between templates and see changes live
-- **Status**: Update status (draft/sent/feedback_received)
-- **Feedback**: View client feedback inline in a slide-out panel
-- **Edit Mode**: Toggle inline editing for headline, about section, etc.
-- **Color Editor**: Tweak brand colors with color pickers
-- **Regenerate**: Re-scrape website or re-process with AI
-- **Delete**: Delete the preview with confirmation
-- **Back to Dashboard**: Return navigation
+**Key differentiators**:
+- Text gradients using brand colors
+- Services displayed as floating cards with glassmorphism
+- Testimonials with large quote marks and bold typography
+- Contact section with animated background elements
 
-**Visual Layout:**
-```text
-+------------------------------------------+
-|  [Back] PreviewPro - Managing: TimeForHair  |
-+------------------------------------------+
-|  [Desktop] [Tablet] [Mobile]   [Share v] |
-|  [Edit Mode] [Feedback (2)]    [Settings]|
-+------------------------------------------+
-|                                          |
-|           +------------------+           |
-|           |                  |           |
-|           |   LIVE PREVIEW   |           |
-|           |    (iframe)      |           |
-|           |                  |           |
-|           +------------------+           |
-|                                          |
-+------------------------------------------+
-```
+### 2. Elegant Minimal (`elegant-minimal`)
+**Target audience**: Luxury brands, photographers, architects, high-end services, wellness/spa
+
+**Visual characteristics**:
+- Maximum whitespace, minimal elements
+- Thin typography, serif fonts for headings
+- Subtle, refined animations (fade + slight movement)
+- Muted color palette with single accent color
+- Full-width images with minimal overlays
+- Clean lines and geometric accents
+
+**Key differentiators**:
+- Light backgrounds with subtle texture
+- Services in a clean single-column layout
+- Gallery with generous spacing between images
+- Contact section with elegant typography
+
+### 3. Warm Friendly (`warm-friendly`)
+**Target audience**: Cafes, restaurants, local businesses, family services, healthcare, education
+
+**Visual characteristics**:
+- Warm, inviting color treatment (soft gradients)
+- Rounded corners everywhere
+- Friendly, approachable typography
+- Soft shadows and warm highlights
+- Photos with warm filters/overlays
+- Personal, welcoming feel
+
+**Key differentiators**:
+- Rounded cards with soft shadows
+- Services in a cozy grid layout with icons
+- Testimonials with avatar photos
+- Contact with a friendly "come visit us" feel
 
 ## Technical Implementation
 
-### 1. Create New Page: `src/pages/ManagePreview.tsx`
-- Fetches preview by ID (not slug) with ownership check
-- Renders the preview in a resizable iframe container
-- Includes floating management toolbar
-- Responsive viewport simulator (desktop/tablet/mobile)
+### Phase 1: Update Template Type System
 
-### 2. Update Dashboard: `src/pages/Dashboard.tsx`
-- Change "View" button from `target="_blank"` to navigate to `/manage/:id`
-- Add a separate "Open Preview" external link button
-- Update button labels for clarity
+**Modify: `src/pages/Preview.tsx`**
+- Replace `isModern` boolean with a `templateStyle` string
+- Add template-specific style configuration object
+- Pass template style to all section components
 
-### 3. Update App Routing: `src/App.tsx`
-- Add new protected route `/manage/:id` -> `ManagePreview`
+**Create: `src/lib/templateStyles.ts`**
+- Define template configurations with:
+  - Layout variations (section arrangements)
+  - Typography styles (font weights, sizes)
+  - Animation presets
+  - Color treatment rules
+  - Border radius values
+  - Background patterns
 
-### 4. Create Management Components
+### Phase 2: Update Section Components
 
-**`src/components/manage/ManageToolbar.tsx`:**
-- Floating toolbar with all action buttons
-- Responsive viewport selector
-- Share dropdown menu
-- Status selector
+Each section component needs to handle 5 template styles:
 
-**`src/components/manage/FeedbackPanel.tsx`:**
-- Slide-out panel showing client feedback
-- Mark as read functionality
-- Feedback count badge
+**Modify: `src/components/preview/HeroSection.tsx`**
+- `modern-professional`: Current dark gradient with orbs
+- `corporate-classic`: Clean image with overlay
+- `bold-starter`: Full gradient background, gradient text headlines, floating elements
+- `elegant-minimal`: Large whitespace, thin serif headline, subtle fade-in
+- `warm-friendly`: Soft gradient overlay, rounded CTA, warm tones
 
-**`src/components/manage/PreviewFrame.tsx`:**
-- Responsive iframe container
-- Device frame styling (optional phone/tablet bezels)
-- Zoom controls
+**Modify: `src/components/preview/AboutSection.tsx`**
+- `bold-starter`: Asymmetric layout, gradient accent bar
+- `elegant-minimal`: Centered, serif headings, maximum whitespace
+- `warm-friendly`: Rounded corners, soft shadows, icon accents
 
-**`src/components/manage/QuickEdit.tsx`:**
-- Modal/drawer for quick content edits
-- Edit headline, about text, CTA text
-- Color picker for brand colors
-- Template switcher
+**Modify: `src/components/preview/ServicesSection.tsx`**
+- `bold-starter`: Glassmorphism cards, neon borders on hover
+- `elegant-minimal`: Single column, minimal cards, thin borders
+- `warm-friendly`: Soft rounded cards with icons, warm shadows
 
-### 5. Data Flow
+**Modify: `src/components/preview/ContactSection.tsx`**
+- `bold-starter`: Dark background with animated gradient
+- `elegant-minimal`: Light background, thin typography, centered
+- `warm-friendly`: Warm background, rounded buttons, friendly copy
+
+**Modify: `src/components/preview/HorizontalGallery.tsx`**
+- `bold-starter`: Overlapping images, gradient overlays
+- `elegant-minimal`: Large spacing, subtle shadows
+- `warm-friendly`: Soft rounded corners, warm filter
+
+**Modify: `src/components/preview/TestimonialsSection.tsx`**
+- `bold-starter`: Large quote marks, gradient accents
+- `elegant-minimal`: Clean cards, subtle typography
+- `warm-friendly`: Avatar photos, rounded cards, warm background
+
+### Phase 3: Update Template Selection UI
+
+**Modify: `src/pages/NewPreview.tsx`**
+- Add 3 new template cards with live content previews
+- Arrange in a 2x3 or 3x2 grid for better selection
+- Each card shows template's unique visual style:
+  - Bold Starter: Gradient background, bold text
+  - Elegant Minimal: White/cream, thin text, lots of space
+  - Warm Friendly: Soft colors, rounded elements
+
+**Modify: `src/components/manage/ManageToolbar.tsx`**
+- Add 3 new options to template dropdown
+- Update labels: "Bold", "Elegant", "Warm"
+
+**Modify: `src/components/manage/QuickEdit.tsx`**
+- Add 3 new template selection buttons
+- Show appropriate visual preview for each
+
+**Modify: `src/pages/Dashboard.tsx`**
+- Update template label display to show all 5 template names
+
+## Template Style Configuration
 
 ```text
-ManagePreview
-    |
-    +-- Fetch preview by ID (with user_id check)
-    |
-    +-- ManageToolbar
-    |       - Status updates
-    |       - Template switch
-    |       - Share actions
-    |       - Edit mode toggle
-    |
-    +-- PreviewFrame
-    |       - Renders /preview/:slug in iframe
-    |       - Viewport simulation
-    |
-    +-- FeedbackPanel (slide-out)
-    |       - List of feedback
-    |       - Mark as read
-    |
-    +-- QuickEdit (modal)
-            - Edit processed_schema fields
-            - Edit brand_colors
-            - Save changes to Supabase
+TEMPLATE_STYLES = {
+  'modern-professional': {
+    name: 'Modern Professional',
+    shortName: 'Modern',
+    description: 'Contemporary design with gradient accents',
+    hero: { dark: true, gradientOrbs: true },
+    borderRadius: 'rounded-xl',
+    fontWeight: 'bold',
+  },
+  'corporate-classic': {
+    name: 'Corporate Classic',
+    shortName: 'Classic',
+    description: 'Traditional, professional corporate styling',
+    hero: { dark: true, imageOverlay: true },
+    borderRadius: 'rounded-lg',
+    fontWeight: 'semibold',
+  },
+  'bold-starter': {
+    name: 'Bold Starter',
+    shortName: 'Bold',
+    description: 'Vibrant gradients for startups and creatives',
+    hero: { dark: true, fullGradient: true, gradientText: true },
+    borderRadius: 'rounded-2xl',
+    fontWeight: 'black',
+  },
+  'elegant-minimal': {
+    name: 'Elegant Minimal',
+    shortName: 'Elegant',
+    description: 'Refined luxury with maximum whitespace',
+    hero: { dark: false, serif: true },
+    borderRadius: 'rounded-sm',
+    fontWeight: 'light',
+  },
+  'warm-friendly': {
+    name: 'Warm Friendly',
+    shortName: 'Warm',
+    description: 'Approachable design for local businesses',
+    hero: { dark: false, warmOverlay: true },
+    borderRadius: 'rounded-3xl',
+    fontWeight: 'medium',
+  },
+}
 ```
 
-## Files to Create/Modify
+## Files to Create
 
-### New Files:
-1. **`src/pages/ManagePreview.tsx`** - Main maker view page
-2. **`src/components/manage/ManageToolbar.tsx`** - Floating action toolbar
-3. **`src/components/manage/FeedbackPanel.tsx`** - Inline feedback panel
-4. **`src/components/manage/PreviewFrame.tsx`** - Responsive preview container
-5. **`src/components/manage/QuickEdit.tsx`** - Content/color editor modal
+1. **`src/lib/templateStyles.ts`**
+   - Template configuration object
+   - Helper functions for getting template-specific styles
+   - Type definitions for template IDs
 
-### Modified Files:
-1. **`src/App.tsx`** - Add `/manage/:id` route
-2. **`src/pages/Dashboard.tsx`** - Update "View" button to navigate to manage page
+## Files to Modify
 
-## Detailed Component Specifications
+1. **`src/pages/Preview.tsx`**
+   - Import template styles
+   - Pass template style to all sections
 
-### ManagePreview.tsx
-- Protected route (requires auth + ownership)
-- State: `preview`, `viewport` ('desktop'|'tablet'|'mobile'), `editMode`, `feedbackOpen`
-- Fetches full preview data including feedback count
-- URL: `/manage/:id` where id is the preview UUID
+2. **`src/components/preview/HeroSection.tsx`**
+   - Add `templateId` prop
+   - Implement 5 visual variations
 
-### ManageToolbar.tsx
-Props:
-- `preview`: Full preview data
-- `viewport`: Current viewport
-- `onViewportChange`: Viewport setter
-- `onStatusChange`: Update status in DB
-- `onTemplateChange`: Switch template + update DB
-- `onOpenFeedback`: Toggle feedback panel
-- `onEdit`: Open quick edit modal
-- `onShare`: Copy link / open external
-- `onDelete`: Delete with confirmation
-- `feedbackCount`: Number of unread feedback items
+3. **`src/components/preview/AboutSection.tsx`**
+   - Add `templateId` prop
+   - Implement layout/style variations
 
-### PreviewFrame.tsx
-Props:
-- `slug`: Preview slug for iframe src
-- `viewport`: Current viewport for sizing
+4. **`src/components/preview/ServicesSection.tsx`**
+   - Add `templateId` prop
+   - Implement card style variations
 
-Viewport sizes:
-- Desktop: 100% width, min 1024px
-- Tablet: 768px centered
-- Mobile: 375px centered with device frame
+5. **`src/components/preview/ContactSection.tsx`**
+   - Add `templateId` prop
+   - Implement style variations
 
-### FeedbackPanel.tsx
-Props:
-- `previewId`: For fetching feedback
-- `isOpen`: Panel visibility
-- `onClose`: Close handler
-- Inline feedback management (same as existing Feedback page but in a sheet/drawer)
+6. **`src/components/preview/HorizontalGallery.tsx`**
+   - Add `templateId` prop
+   - Implement spacing/style variations
 
-### QuickEdit.tsx
-Props:
-- `preview`: Current preview data
-- `isOpen`: Modal visibility
-- `onClose`: Close handler
-- `onSave`: Save updated data to Supabase
+7. **`src/components/preview/TestimonialsSection.tsx`**
+   - Add `templateId` prop
+   - Implement card style variations
 
-Editable fields:
-- Hero headline & subheadline
-- CTA text
-- About section title & description
-- Primary & secondary colors (color pickers)
-- Template selection
+8. **`src/pages/NewPreview.tsx`**
+   - Add 3 new template mini-previews
+   - Update grid layout for 5 templates
 
-## Expected User Flow
+9. **`src/components/manage/ManageToolbar.tsx`**
+   - Add 3 new template options
 
-1. User clicks "View" on Dashboard card
-2. Navigates to `/manage/:previewId`
-3. Sees live preview in center with toolbar at top
-4. Can switch between device views (desktop/tablet/mobile)
-5. Can open feedback panel to see/manage client responses
-6. Can click "Edit" to modify content or colors
-7. Can change template and see it update live
-8. Can copy shareable link or open in new tab
-9. Can update status (draft → sent)
-10. "Back to Dashboard" returns to main view
+10. **`src/components/manage/QuickEdit.tsx`**
+    - Add 3 new template buttons
 
-This creates a comprehensive management experience where makers have full control over their previews without leaving the app!
+11. **`src/pages/Dashboard.tsx`**
+    - Update template label mapping
+
+## Visual Summary of Templates
+
+```text
++-------------------+-------------------+-------------------+
+|  MODERN PROF.     |  CORPORATE CLASSIC|  BOLD STARTER     |
+|  Dark + Gradients |  Clean + Image BG |  Vibrant Gradients|
+|  Tech/Agency      |  Business/Corp    |  Startup/Creative |
++-------------------+-------------------+-------------------+
+|  ELEGANT MINIMAL  |  WARM FRIENDLY    |
+|  White + Serif    |  Soft + Rounded   |
+|  Luxury/Design    |  Local/Family Biz |
++-------------------+-------------------+
+```
+
+## Template Mini-Preview Visual Differences
+
+In the selection UI, each template preview will show:
+
+- **Bold Starter**: Gradient background (primary->secondary), large white text, floating elements
+- **Elegant Minimal**: Cream/white background, thin centered text, lots of padding
+- **Warm Friendly**: Soft warm gradient, rounded corners everywhere, friendly feel
+
+## Expected Result
+Users will have 5 distinct template options that cover a wide range of business types:
+1. Tech companies and agencies (Modern Professional)
+2. Traditional businesses (Corporate Classic)
+3. Startups and creatives (Bold Starter)
+4. Luxury and design brands (Elegant Minimal)
+5. Local and family businesses (Warm Friendly)
+
+Each template uses the same scraped content but presents it with a completely different visual personality.
