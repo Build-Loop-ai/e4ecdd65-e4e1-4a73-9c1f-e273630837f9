@@ -130,7 +130,7 @@ export function ContactSection({
   // ========== WARM FRIENDLY - Rounded card with warm shadows ==========
   if (effectiveTemplateId === 'warm-friendly') {
     return (
-      <section className="py-24 px-6 bg-gradient-to-b from-background to-orange-50/50">
+      <section className="py-24 px-6 bg-white">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}

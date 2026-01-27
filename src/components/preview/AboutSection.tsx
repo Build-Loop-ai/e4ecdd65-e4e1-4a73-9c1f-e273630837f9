@@ -135,7 +135,7 @@ export function AboutSection({
   // ========== WARM FRIENDLY ==========
   if (effectiveTemplateId === 'warm-friendly') {
     return (
-      <section ref={ref} className="py-28 px-6 bg-gradient-to-b from-background via-orange-50/20 to-background overflow-hidden">
+      <section ref={ref} className="py-28 px-6 bg-orange-50/40 overflow-hidden">
         <div className="container mx-auto max-w-6xl">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Left - Content */}
@@ -431,7 +431,7 @@ export function AboutSection({
 
   // ========== CORPORATE CLASSIC ==========
   return (
-    <section ref={ref} className="py-36 px-6 bg-white relative overflow-hidden">
+    <section ref={ref} className="py-36 px-6 bg-background relative overflow-hidden">
       {/* Subtle decorative line */}
       <motion.div 
         initial={{ height: 0 }}

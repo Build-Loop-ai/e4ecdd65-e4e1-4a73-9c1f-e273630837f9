@@ -125,7 +125,7 @@ export function GallerySection({
     const displayImages = validImages.slice(0, layout.limit);
 
     return (
-      <section ref={containerRef} className="py-24 overflow-hidden bg-gradient-to-b from-background to-orange-50/50">
+      <section ref={containerRef} className="py-24 overflow-hidden bg-white">
         <div className="container mx-auto px-6 mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -311,7 +311,7 @@ export function GallerySection({
 
   // ========== CORPORATE CLASSIC - Static grid with staggered fade-in ==========
   return (
-    <section ref={containerRef} className="py-32 bg-muted/30">
+    <section ref={containerRef} className="py-32 bg-slate-50">
       <div className="container mx-auto px-6 max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
