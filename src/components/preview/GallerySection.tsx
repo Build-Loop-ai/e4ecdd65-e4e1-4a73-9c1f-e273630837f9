@@ -105,15 +105,24 @@ export function GallerySection({
       return rotations[index % rotations.length];
     };
 
-    // Determine grid layout based on image count
-    const getGridClass = () => {
+    // Get symmetrical image count and grid layout
+    const getSymmetricalLayout = () => {
       const count = validImages.length;
-      if (count <= 2) return 'grid-cols-1 sm:grid-cols-2 max-w-2xl';
-      if (count === 3) return 'grid-cols-1 sm:grid-cols-3 max-w-4xl';
-      if (count === 4) return 'grid-cols-2 lg:grid-cols-4 max-w-5xl';
-      if (count <= 6) return 'grid-cols-2 md:grid-cols-3 max-w-5xl';
-      return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-6xl';
+      // Force symmetrical counts: 1, 2, 3, 4, 6, 8, 9, 12
+      if (count === 1) return { cols: 'grid-cols-1 max-w-md', limit: 1 };
+      if (count === 2) return { cols: 'grid-cols-2 max-w-2xl', limit: 2 };
+      if (count === 3) return { cols: 'grid-cols-3 max-w-4xl', limit: 3 };
+      if (count === 4) return { cols: 'grid-cols-2 sm:grid-cols-4 max-w-5xl', limit: 4 };
+      if (count === 5) return { cols: 'grid-cols-2 sm:grid-cols-4 max-w-5xl', limit: 4 }; // Drop 1 for symmetry
+      if (count === 6) return { cols: 'grid-cols-2 sm:grid-cols-3 max-w-5xl', limit: 6 };
+      if (count === 7) return { cols: 'grid-cols-2 sm:grid-cols-3 max-w-5xl', limit: 6 }; // Drop 1 for symmetry
+      if (count === 8) return { cols: 'grid-cols-2 sm:grid-cols-4 max-w-6xl', limit: 8 };
+      if (count >= 9) return { cols: 'grid-cols-3 sm:grid-cols-3 max-w-5xl', limit: 9 }; // 3x3 grid
+      return { cols: 'grid-cols-2 sm:grid-cols-4 max-w-6xl', limit: 8 };
     };
+
+    const layout = getSymmetricalLayout();
+    const displayImages = validImages.slice(0, layout.limit);
 
     return (
       <section ref={containerRef} className="py-24 overflow-hidden bg-gradient-to-b from-background to-orange-50/50">
@@ -136,8 +145,8 @@ export function GallerySection({
         </div>
 
         {/* Polaroid gallery - responsive grid */}
-        <div className={`grid ${getGridClass()} gap-8 px-6 mx-auto`}>
-          {validImages.map((image, index) => (
+        <div className={`grid ${layout.cols} gap-8 px-6 mx-auto`}>
+          {displayImages.map((image, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30, rotate: getRandomRotation(index) }}
