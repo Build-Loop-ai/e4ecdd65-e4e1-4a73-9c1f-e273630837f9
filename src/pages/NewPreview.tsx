@@ -12,8 +12,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Globe, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ScanningProgress } from '@/components/preview/ScanningProgress';
 
-type Step = 'url' | 'scraping' | 'processing' | 'template' | 'complete';
+type Step = 'url' | 'connecting' | 'extracting' | 'processing' | 'template' | 'complete';
+
+// Helper to truncate text
+const truncate = (text: string, maxLength: number) => {
+  if (!text) return '';
+  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+};
 
 export default function NewPreview() {
   const { user } = useAuth();
@@ -47,11 +54,15 @@ export default function NewPreview() {
     }
 
     setIsLoading(true);
-    setStep('scraping');
+    setStep('connecting');
     setProgress(10);
 
     try {
+      // Simulate connection delay for visual effect
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       // Step 1: Scrape the website
+      setStep('extracting');
       setProgress(20);
       const scrapeResult = await firecrawlApi.scrape(url, {
         formats: ['markdown', 'html', 'links', 'branding'],
@@ -89,7 +100,7 @@ export default function NewPreview() {
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
-      const stepHint = step === 'scraping' ? 'during website scraping' : 'during AI processing';
+      const stepHint = step === 'extracting' ? 'during website scraping' : 'during AI processing';
       toast({
         title: `Error ${stepHint}`,
         description: errorMessage.includes('Failed to fetch') 
@@ -147,6 +158,18 @@ export default function NewPreview() {
     }
   };
 
+  // Extract data for template previews
+  const primaryColor = scrapedData?.branding?.colors?.primary || '#3b82f6';
+  const secondaryColor = scrapedData?.branding?.colors?.secondary || '#1e293b';
+  const logo = scrapedData?.branding?.logo || scrapedData?.branding?.images?.logo;
+  const headline = processedSchema?.hero?.headline || 'Your Headline Here';
+  const heroImage = processedSchema?.hero?.backgroundImages?.[0];
+  const galleryImages = processedSchema?.gallery?.images?.slice(0, 4) || [];
+  const serviceCount = processedSchema?.services?.length || 0;
+  const companyName = processedSchema?.companyName || clientName;
+
+  const isScanning = step === 'connecting' || step === 'extracting' || step === 'processing';
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
@@ -160,7 +183,7 @@ export default function NewPreview() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Create New Preview</h1>
           <p className="text-muted-foreground">
@@ -175,8 +198,8 @@ export default function NewPreview() {
               <Globe className="h-4 w-4" />
               <span className="text-sm">Enter URL</span>
             </div>
-            <div className={`flex items-center gap-2 ${step === 'scraping' || step === 'processing' ? 'text-primary' : 'text-muted-foreground'}`}>
-              <Loader2 className={`h-4 w-4 ${(step === 'scraping' || step === 'processing') && isLoading ? 'animate-spin' : ''}`} />
+            <div className={`flex items-center gap-2 ${isScanning ? 'text-primary' : 'text-muted-foreground'}`}>
+              <Loader2 className={`h-4 w-4 ${isScanning && isLoading ? 'animate-spin' : ''}`} />
               <span className="text-sm">Analyze</span>
             </div>
             <div className={`flex items-center gap-2 ${step === 'template' ? 'text-primary' : 'text-muted-foreground'}`}>
@@ -188,7 +211,7 @@ export default function NewPreview() {
               <span className="text-sm">Done</span>
             </div>
           </div>
-          {(step === 'scraping' || step === 'processing') && (
+          {isScanning && (
             <Progress value={progress} className="h-2" />
           )}
         </div>
@@ -230,36 +253,29 @@ export default function NewPreview() {
           </Card>
         )}
 
-        {/* Scraping/Processing Step */}
-        {(step === 'scraping' || step === 'processing') && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-              <h3 className="text-lg font-semibold mb-2">
-                {step === 'scraping' ? 'Scraping Website...' : 'Processing Content with AI...'}
-              </h3>
-              <p className="text-muted-foreground">
-                {step === 'scraping' 
-                  ? 'Extracting logos, images, text, and brand colors'
-                  : 'Organizing content into structured sections'}
-              </p>
-            </CardContent>
-          </Card>
+        {/* Immersive Scanning Step */}
+        {isScanning && (
+          <ScanningProgress
+            phase={step as 'connecting' | 'extracting' | 'processing'}
+            url={url}
+            scrapedData={scrapedData}
+            processedSchema={processedSchema}
+          />
         )}
 
-        {/* Template Selection Step */}
+        {/* Template Selection Step with Live Content */}
         {step === 'template' && (
           <Card className="max-w-4xl mx-auto">
             <CardHeader>
               <CardTitle>Choose a Template</CardTitle>
               <CardDescription>
-                Select how you want your client's content to be displayed
+                See how {companyName}'s content looks in each template
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <RadioGroup value={template} onValueChange={setTemplate}>
                 <div className="grid md:grid-cols-2 gap-6">
-                  {/* Corporate Classic Template Preview */}
+                  {/* Corporate Classic Template Preview with REAL content */}
                   <label
                     htmlFor="corporate-classic"
                     className={`group cursor-pointer transition-all duration-300 ${
@@ -269,46 +285,88 @@ export default function NewPreview() {
                     <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
                       template === 'corporate-classic' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
                     }`}>
-                      {/* Mini Template Preview */}
-                      <div className="aspect-[4/3] bg-gradient-to-b from-slate-900 to-slate-800 p-4 relative overflow-hidden">
-                        {/* Mini Hero */}
-                        <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-lg p-3 mb-2">
-                          <div className="w-8 h-2 bg-white/20 rounded mb-2" />
-                          <div className="w-16 h-3 bg-white/40 rounded mb-1" />
-                          <div className="w-12 h-2 bg-white/20 rounded" />
+                      {/* Mini Template Preview with ACTUAL scraped content */}
+                      <div 
+                        className="aspect-[4/3] p-4 relative overflow-hidden"
+                        style={{ 
+                          background: heroImage 
+                            ? `linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.8)), url(${heroImage}) center/cover`
+                            : `linear-gradient(135deg, ${secondaryColor} 0%, ${primaryColor}33 100%)`
+                        }}
+                      >
+                        {/* Logo */}
+                        <div className="mb-3">
+                          {logo ? (
+                            <img 
+                              src={logo} 
+                              alt="Logo" 
+                              className="h-6 object-contain brightness-0 invert"
+                              onError={(e) => e.currentTarget.style.display = 'none'}
+                            />
+                          ) : (
+                            <div className="w-16 h-4 bg-white/30 rounded" />
+                          )}
                         </div>
-                        {/* Mini About Section */}
-                        <div className="bg-white/5 rounded-lg p-2 mb-2">
-                          <div className="w-10 h-2 bg-white/30 rounded mb-1" />
-                          <div className="flex gap-1">
-                            <div className="w-6 h-6 bg-white/10 rounded" />
-                            <div className="w-6 h-6 bg-white/10 rounded" />
-                            <div className="w-6 h-6 bg-white/10 rounded" />
+                        
+                        {/* Actual headline */}
+                        <div className="text-white mb-2">
+                          <div className="text-sm font-bold leading-tight">
+                            {truncate(headline, 40)}
                           </div>
                         </div>
-                        {/* Mini Services Grid */}
-                        <div className="grid grid-cols-3 gap-1">
-                          <div className="aspect-square bg-white/10 rounded" />
-                          <div className="aspect-square bg-white/10 rounded" />
-                          <div className="aspect-square bg-white/10 rounded" />
-                        </div>
-                        {/* Decorative gradient */}
-                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-900/80 to-transparent" />
+
+                        {/* Service count indicator */}
+                        {serviceCount > 0 && (
+                          <div className="flex gap-1 mb-2">
+                            {Array.from({ length: Math.min(serviceCount, 3) }).map((_, i) => (
+                              <div 
+                                key={i}
+                                className="w-8 h-8 rounded"
+                                style={{ backgroundColor: `${primaryColor}44` }}
+                              />
+                            ))}
+                            {serviceCount > 3 && (
+                              <div className="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-white text-xs">
+                                +{serviceCount - 3}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Color accent bar */}
+                        <div 
+                          className="absolute bottom-0 left-0 right-0 h-1"
+                          style={{ backgroundColor: primaryColor }}
+                        />
                       </div>
+
                       {/* Template Info */}
                       <div className="p-4 bg-background flex items-start gap-3">
                         <RadioGroupItem value="corporate-classic" id="corporate-classic" className="mt-1" />
-                        <div>
+                        <div className="flex-1">
                           <div className="font-semibold">Corporate Classic</div>
                           <div className="text-sm text-muted-foreground">
-                            Clean, professional layout with subtle gradients
+                            Clean, professional layout
+                          </div>
+                          {/* Brand colors preview */}
+                          <div className="flex gap-1.5 mt-2">
+                            <div 
+                              className="w-4 h-4 rounded-full border border-border"
+                              style={{ backgroundColor: primaryColor }}
+                              title="Primary color"
+                            />
+                            <div 
+                              className="w-4 h-4 rounded-full border border-border"
+                              style={{ backgroundColor: secondaryColor }}
+                              title="Secondary color"
+                            />
                           </div>
                         </div>
                       </div>
                     </div>
                   </label>
 
-                  {/* Modern Professional Template Preview */}
+                  {/* Modern Professional Template Preview with REAL content */}
                   <label
                     htmlFor="modern-professional"
                     className={`group cursor-pointer transition-all duration-300 ${
@@ -320,35 +378,91 @@ export default function NewPreview() {
                     }`}>
                       {/* Mini Template Preview */}
                       <div className="aspect-[4/3] bg-black p-4 relative overflow-hidden">
-                        {/* Animated shapes */}
-                        <div className="absolute top-2 right-2 w-16 h-16 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-full blur-lg" />
-                        <div className="absolute bottom-4 left-2 w-12 h-12 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-full blur-lg" />
-                        {/* Mini Hero with bold typography */}
+                        {/* Animated gradient orbs using brand colors */}
+                        <div 
+                          className="absolute top-2 right-2 w-16 h-16 rounded-full blur-xl opacity-40"
+                          style={{ backgroundColor: primaryColor }}
+                        />
+                        <div 
+                          className="absolute bottom-4 left-2 w-12 h-12 rounded-full blur-xl opacity-30"
+                          style={{ backgroundColor: secondaryColor }}
+                        />
+
+                        {/* Logo */}
+                        <div className="relative z-10 mb-2">
+                          {logo ? (
+                            <img 
+                              src={logo} 
+                              alt="Logo" 
+                              className="h-5 object-contain brightness-0 invert"
+                              onError={(e) => e.currentTarget.style.display = 'none'}
+                            />
+                          ) : (
+                            <div className="w-6 h-6 bg-white/20 rounded-full" />
+                          )}
+                        </div>
+
+                        {/* Bold headline */}
                         <div className="relative z-10 mb-3">
-                          <div className="w-6 h-6 bg-white/20 rounded-full mb-2" />
-                          <div className="w-20 h-4 bg-white rounded mb-1" />
-                          <div className="w-14 h-2 bg-white/40 rounded" />
+                          <div className="text-white text-base font-bold leading-tight">
+                            {truncate(headline, 30)}
+                          </div>
                         </div>
-                        {/* Horizontal scroll preview */}
-                        <div className="flex gap-2 mb-2 overflow-hidden">
-                          <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
-                          <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
-                          <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
-                          <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
+
+                        {/* Horizontal scroll preview with ACTUAL gallery images */}
+                        <div className="flex gap-2 mb-2 overflow-hidden relative z-10">
+                          {galleryImages.length > 0 ? (
+                            galleryImages.map((img: any, i: number) => (
+                              <div 
+                                key={i}
+                                className="w-10 h-14 bg-white/10 rounded flex-shrink-0 overflow-hidden"
+                              >
+                                <img 
+                                  src={img.url || img} 
+                                  alt="" 
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => e.currentTarget.style.display = 'none'}
+                                />
+                              </div>
+                            ))
+                          ) : (
+                            <>
+                              <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
+                              <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
+                              <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
+                            </>
+                          )}
                         </div>
-                        {/* Mini cards */}
-                        <div className="flex gap-1">
-                          <div className="flex-1 h-8 bg-white/10 rounded border border-white/20" />
-                          <div className="flex-1 h-8 bg-white/10 rounded border border-white/20" />
+
+                        {/* CTA with brand color */}
+                        <div 
+                          className="relative z-10 h-6 w-20 rounded text-white text-xs flex items-center justify-center"
+                          style={{ backgroundColor: primaryColor }}
+                        >
+                          Contact
                         </div>
                       </div>
+
                       {/* Template Info */}
                       <div className="p-4 bg-background flex items-start gap-3">
                         <RadioGroupItem value="modern-professional" id="modern-professional" className="mt-1" />
-                        <div>
+                        <div className="flex-1">
                           <div className="font-semibold">Modern Professional</div>
                           <div className="text-sm text-muted-foreground">
-                            Bold design with animations & horizontal scrolls
+                            Bold design with animations
+                          </div>
+                          {/* Brand colors preview */}
+                          <div className="flex gap-1.5 mt-2">
+                            <div 
+                              className="w-4 h-4 rounded-full border border-border"
+                              style={{ backgroundColor: primaryColor }}
+                              title="Primary color"
+                            />
+                            <div 
+                              className="w-4 h-4 rounded-full border border-border"
+                              style={{ backgroundColor: secondaryColor }}
+                              title="Secondary color"
+                            />
                           </div>
                         </div>
                       </div>
