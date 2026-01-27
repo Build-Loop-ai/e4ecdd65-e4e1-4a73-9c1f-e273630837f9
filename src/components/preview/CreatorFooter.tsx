@@ -78,7 +78,8 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
   }
 
   const hasLinks = profile.website_url || profile.linkedin_url || profile.twitter_url || profile.instagram_url;
-  const brandColor = primaryColor || '#3b82f6';
+  // Use a neutral indigo/purple color for footer instead of client's brand color
+  const footerAccent = '#4F46E5';
 
   const SocialLink = ({ href, icon: Icon, label }: { href: string; icon: any; label: string }) => (
     <motion.a
@@ -91,7 +92,7 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
       }}
       whileHover={{ 
         scale: 1.1, 
-        backgroundColor: brandColor + '40',
+        backgroundColor: footerAccent + '40',
       }}
       whileTap={{ scale: 0.95 }}
       aria-label={label}
@@ -102,12 +103,12 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
 
   return (
     <footer className="relative overflow-hidden">
-      {/* Dark gradient background */}
+      {/* Dark gradient background - using neutral colors */}
       <div 
         className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
         style={{
-          backgroundImage: `radial-gradient(ellipse at top right, ${brandColor}15 0%, transparent 50%),
-                           radial-gradient(ellipse at bottom left, ${brandColor}10 0%, transparent 50%)`
+          backgroundImage: `radial-gradient(ellipse at top right, ${footerAccent}15 0%, transparent 50%),
+                           radial-gradient(ellipse at bottom left, ${footerAccent}10 0%, transparent 50%)`
         }}
       />
 
@@ -140,7 +141,7 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
                 <AvatarImage src={profile.avatar_url || undefined} className="object-cover" />
                 <AvatarFallback 
                   className="text-2xl font-bold text-white"
-                  style={{ backgroundColor: brandColor + '60' }}
+                  style={{ backgroundColor: footerAccent + '60' }}
                 >
                   {profile.full_name?.charAt(0) || profile.business_name?.charAt(0) || '?'}
                 </AvatarFallback>
@@ -197,7 +198,7 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
                     asChild
                     className="rounded-full px-6 py-5 font-semibold shadow-lg transition-all gap-2"
                     style={{
-                      backgroundColor: brandColor,
+                      backgroundColor: footerAccent,
                       color: '#fff',
                     }}
                   >
@@ -216,7 +217,7 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
           <div 
             className="h-px w-full mb-8"
             style={{
-              background: `linear-gradient(90deg, transparent, ${brandColor}30, transparent)`
+              background: `linear-gradient(90deg, transparent, ${footerAccent}30, transparent)`
             }}
           />
 
