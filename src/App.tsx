@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import NewPreview from "./pages/NewPreview";
 import Preview from "./pages/Preview";
 import Feedback from "./pages/Feedback";
+import ManagePreview from "./pages/ManagePreview";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Feedback />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manage/:id"
+              element={
+                <ProtectedRoute>
+                  <ManagePreview />
                 </ProtectedRoute>
               }
             />

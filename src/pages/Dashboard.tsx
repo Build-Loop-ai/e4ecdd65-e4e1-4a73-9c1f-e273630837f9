@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Globe, ExternalLink, MessageSquare, LogOut, Copy, Trash2, Calendar, Palette } from 'lucide-react';
+import { Plus, Globe, ExternalLink, LogOut, Copy, Trash2, Calendar, Palette } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -32,6 +32,7 @@ const extractPreviewData = (preview: ClientPreview) => {
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [previews, setPreviews] = useState<ClientPreview[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -293,30 +294,32 @@ export default function Dashboard() {
                         variant="default"
                         size="sm"
                         className="flex-1"
-                        asChild
+                        onClick={() => navigate(`/manage/${preview.id}`)}
                       >
-                        <Link to={`/preview/${preview.slug}`} target="_blank">
-                          <ExternalLink className="h-4 w-4 mr-1" />
-                          View
-                        </Link>
+                        Manage
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/preview/${preview.slug}`, '_blank')}
+                        title="Open preview in new tab"
+                      >
+                        <ExternalLink className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => copyPreviewLink(preview.slug)}
+                        title="Copy link"
                       >
                         <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`/feedback/${preview.id}`}>
-                          <MessageSquare className="h-4 w-4" />
-                        </Link>
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="sm"
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => deletePreview(preview.id)}
+                        title="Delete preview"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
