@@ -29,31 +29,59 @@ export default function PreviewFrame({ slug, viewport }: PreviewFrameProps) {
   return (
     <div
       className={cn(
-        'relative bg-background rounded-lg shadow-elevated overflow-hidden transition-all duration-300 w-full border border-border',
+        'relative bg-background rounded-2xl overflow-hidden transition-all duration-300 w-full',
         className,
-        viewport !== 'desktop' && 'border-4 border-muted rounded-[2rem]'
+        viewport === 'desktop' 
+          ? 'shadow-elevated border border-border' 
+          : 'shadow-2xl'
       )}
       style={{
-        height: viewport === 'desktop' ? 'calc(100vh - 180px)' : 'calc(100vh - 200px)',
+        height: viewport === 'desktop' ? 'calc(100vh - 64px)' : 'calc(100vh - 100px)',
       }}
     >
-      {/* Device notch for mobile */}
-      {viewport === 'mobile' && (
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-muted rounded-b-2xl z-10" />
-      )}
-
-      {/* Tablet camera for tablet */}
-      {viewport === 'tablet' && (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-muted-foreground/30 rounded-full z-10" />
+      {/* Device frame for mobile/tablet */}
+      {viewport !== 'desktop' && (
+        <div className="absolute inset-0 pointer-events-none z-10">
+          {/* Top bezel */}
+          <div className={cn(
+            'absolute top-0 left-0 right-0 bg-foreground/5 backdrop-blur-sm flex items-center justify-center',
+            viewport === 'mobile' ? 'h-8' : 'h-6'
+          )}>
+            {viewport === 'mobile' && (
+              <div className="w-20 h-5 bg-foreground/10 rounded-full" />
+            )}
+            {viewport === 'tablet' && (
+              <div className="w-2.5 h-2.5 bg-foreground/20 rounded-full" />
+            )}
+          </div>
+          
+          {/* Bottom bezel for mobile */}
+          {viewport === 'mobile' && (
+            <div className="absolute bottom-0 left-0 right-0 h-6 bg-foreground/5 flex items-center justify-center">
+              <div className="w-24 h-1 bg-foreground/20 rounded-full" />
+            </div>
+          )}
+          
+          {/* Side bezels */}
+          <div className={cn(
+            'absolute top-0 bottom-0 left-0 bg-foreground/5',
+            viewport === 'mobile' ? 'w-2' : 'w-1.5'
+          )} />
+          <div className={cn(
+            'absolute top-0 bottom-0 right-0 bg-foreground/5',
+            viewport === 'mobile' ? 'w-2' : 'w-1.5'
+          )} />
+        </div>
       )}
 
       <iframe
         src={previewUrl}
-        className="w-full h-full border-0"
+        className={cn(
+          'w-full h-full border-0 bg-background',
+          viewport === 'mobile' && 'pt-8 pb-6 px-2',
+          viewport === 'tablet' && 'pt-6 px-1.5'
+        )}
         title="Preview"
-        style={{
-          paddingTop: viewport === 'mobile' ? '24px' : viewport === 'tablet' ? '16px' : 0,
-        }}
       />
     </div>
   );
