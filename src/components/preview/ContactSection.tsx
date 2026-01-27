@@ -222,7 +222,7 @@ export function ContactSection({
                   className="rounded-full px-6 sm:px-8 py-5 sm:py-6 font-semibold shadow-lg transition-all hover:scale-105 text-sm sm:text-base"
                   style={{ 
                     backgroundColor: primaryColor || '#f97316',
-                    color: 'white'
+                    color: getButtonTextColor(primaryColor || '#f97316')
                   }}
                 >
                   Neem contact op
@@ -299,7 +299,7 @@ export function ContactSection({
               className="group text-lg px-14 py-8 rounded-xl font-bold transition-all hover:scale-105"
               style={{
                 backgroundColor: primaryColor || '#3b82f6',
-                color: 'white',
+                color: getButtonTextColor(primaryColor || '#3b82f6'),
                 boxShadow: `0 0 80px -20px ${primaryColor || '#3b82f6'}, 0 0 40px -10px ${primaryColor || '#3b82f6'}`,
               }}
             >
@@ -389,7 +389,7 @@ export function ContactSection({
                 className="text-base px-8 py-6 rounded-xl font-semibold transition-all hover:scale-105"
                 style={{
                   backgroundColor: primaryColor || '#3b82f6',
-                  color: 'white',
+                  color: getButtonTextColor(primaryColor || '#3b82f6'),
                 }}
               >
                 Start een gesprek
@@ -423,7 +423,7 @@ export function ContactSection({
                       className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: primaryColor || '#3b82f6' }}
                     >
-                      <Mail className="w-4 h-4 text-white" />
+                      <Mail className="w-4 h-4" style={{ color: getButtonTextColor(primaryColor || '#3b82f6') }} />
                     </div>
                     <div>
                       <p className="text-white/50 text-sm">Email</p>
@@ -441,7 +441,7 @@ export function ContactSection({
                       className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: primaryColor || '#3b82f6' }}
                     >
-                      <Phone className="w-4 h-4 text-white" />
+                      <Phone className="w-4 h-4" style={{ color: getButtonTextColor(primaryColor || '#3b82f6') }} />
                     </div>
                     <div>
                       <p className="text-white/50 text-sm">Telefoon</p>
@@ -456,7 +456,7 @@ export function ContactSection({
                       className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: primaryColor || '#3b82f6' }}
                     >
-                      <MapPin className="w-4 h-4 text-white" />
+                      <MapPin className="w-4 h-4" style={{ color: getButtonTextColor(primaryColor || '#3b82f6') }} />
                     </div>
                     <div>
                       <p className="text-white/50 text-sm">Locatie</p>
@@ -519,7 +519,7 @@ export function ContactSection({
               className="text-base px-8 py-6 rounded-lg font-semibold"
               style={{
                 backgroundColor: primaryColor || 'hsl(var(--primary))',
-                color: 'white',
+                color: getButtonTextColor(primaryColor || '#6366f1'),
               }}
             >
               Stuur een bericht
@@ -544,7 +544,7 @@ export function ContactSection({
                   className="w-12 h-12 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
                 >
-                  <Mail className="w-5 h-5 text-white" />
+                  <Mail className="w-5 h-5" style={{ color: getButtonTextColor(primaryColor || '#6366f1') }} />
                 </div>
                 <div>
                   <p className="text-background/50 text-sm">Email</p>
@@ -562,7 +562,7 @@ export function ContactSection({
                   className="w-12 h-12 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
                 >
-                  <Phone className="w-5 h-5 text-white" />
+                  <Phone className="w-5 h-5" style={{ color: getButtonTextColor(primaryColor || '#6366f1') }} />
                 </div>
                 <div>
                   <p className="text-background/50 text-sm">Telefoon</p>
@@ -577,7 +577,7 @@ export function ContactSection({
                   className="w-12 h-12 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
                 >
-                  <MapPin className="w-5 h-5 text-white" />
+                  <MapPin className="w-5 h-5" style={{ color: getButtonTextColor(primaryColor || '#6366f1') }} />
                 </div>
                 <div>
                   <p className="text-background/50 text-sm">Adres</p>
