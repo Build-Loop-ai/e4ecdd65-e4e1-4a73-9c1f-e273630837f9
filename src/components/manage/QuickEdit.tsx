@@ -274,21 +274,6 @@ export default function QuickEdit({ preview, isOpen, onClose, onSave }: QuickEdi
           <TabsContent value="template" className="space-y-4 mt-4">
             <div className="grid grid-cols-2 gap-4">
               <button
-                onClick={() => setTemplateId('modern-professional')}
-                className={`p-4 rounded-lg border-2 text-left transition-all ${
-                  templateId === 'modern-professional'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <div className="h-24 rounded bg-gradient-to-br from-blue-500 to-purple-600 mb-3" />
-                <h4 className="font-semibold">Modern Professional</h4>
-                <p className="text-sm text-muted-foreground">
-                  Clean, contemporary design with gradient accents
-                </p>
-              </button>
-
-              <button
                 onClick={() => setTemplateId('corporate-classic')}
                 className={`p-4 rounded-lg border-2 text-left transition-all ${
                   templateId === 'corporate-classic'
@@ -296,10 +281,77 @@ export default function QuickEdit({ preview, isOpen, onClose, onSave }: QuickEdi
                     : 'border-border hover:border-primary/50'
                 }`}
               >
-                <div className="h-24 rounded bg-gradient-to-br from-slate-700 to-slate-900 mb-3" />
+                <div className="h-20 rounded bg-gradient-to-br from-slate-700 to-slate-900 mb-3" />
                 <h4 className="font-semibold">Corporate Classic</h4>
-                <p className="text-sm text-muted-foreground">
-                  Traditional, professional corporate styling
+                <p className="text-xs text-muted-foreground">
+                  Traditional, professional styling
+                </p>
+              </button>
+
+              <button
+                onClick={() => setTemplateId('modern-professional')}
+                className={`p-4 rounded-lg border-2 text-left transition-all ${
+                  templateId === 'modern-professional'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div className="h-20 rounded bg-gradient-to-br from-blue-500 to-purple-600 mb-3" />
+                <h4 className="font-semibold">Modern Professional</h4>
+                <p className="text-xs text-muted-foreground">
+                  Contemporary with gradient accents
+                </p>
+              </button>
+
+              <button
+                onClick={() => setTemplateId('bold-starter')}
+                className={`p-4 rounded-lg border-2 text-left transition-all ${
+                  templateId === 'bold-starter'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div className="h-20 rounded bg-black relative overflow-hidden mb-3">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/50 to-purple-500/50" />
+                  <div className="absolute top-2 left-2 w-8 h-8 bg-white/10 rounded-lg backdrop-blur" />
+                </div>
+                <h4 className="font-semibold">Bold Starter</h4>
+                <p className="text-xs text-muted-foreground">
+                  Vibrant gradients for startups
+                </p>
+              </button>
+
+              <button
+                onClick={() => setTemplateId('elegant-minimal')}
+                className={`p-4 rounded-lg border-2 text-left transition-all ${
+                  templateId === 'elegant-minimal'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div className="h-20 rounded bg-stone-50 border border-stone-200 flex items-center justify-center mb-3">
+                  <div className="w-16 h-px bg-stone-300" />
+                </div>
+                <h4 className="font-semibold">Elegant Minimal</h4>
+                <p className="text-xs text-muted-foreground">
+                  Refined luxury with whitespace
+                </p>
+              </button>
+
+              <button
+                onClick={() => setTemplateId('warm-friendly')}
+                className={`p-4 rounded-lg border-2 text-left transition-all col-span-2 ${
+                  templateId === 'warm-friendly'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <div className="h-20 rounded bg-gradient-to-br from-orange-50 to-rose-50 flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 bg-orange-400 rounded-2xl" />
+                </div>
+                <h4 className="font-semibold">Warm Friendly</h4>
+                <p className="text-xs text-muted-foreground">
+                  Approachable design for local businesses
                 </p>
               </button>
             </div>

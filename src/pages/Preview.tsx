@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { HeroSection } from '@/components/preview/HeroSection';
 import { AboutSection } from '@/components/preview/AboutSection';
@@ -13,6 +12,7 @@ import { InstagramFeed } from '@/components/preview/InstagramFeed';
 import { TestimonialsSection } from '@/components/preview/TestimonialsSection';
 import { ContactSection } from '@/components/preview/ContactSection';
 import { FeedbackButton } from '@/components/preview/FeedbackButton';
+import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
 import type { Tables } from '@/integrations/supabase/types';
 
 type ClientPreview = Tables<'client_previews'>;
@@ -125,7 +125,8 @@ export default function Preview() {
 
   const schema = preview.processed_schema as unknown as ProcessedSchema;
   const brandColors = preview.brand_colors as any;
-  const isModern = preview.template_id === 'modern-professional';
+  const templateId = (preview.template_id || 'corporate-classic') as TemplateId;
+  const template = getTemplateStyle(templateId);
 
   // Extract colors from brand colors (Firecrawl branding format)
   const colors = brandColors?.colors || brandColors?.branding?.colors || {};
@@ -147,7 +148,7 @@ export default function Preview() {
     '--brand-text': textColor || 'hsl(var(--foreground))',
   } as React.CSSProperties;
 
-  console.log('Brand colors extracted:', { primaryColor, secondaryColor, accentColor, backgroundColor, textColor });
+  console.log('Template:', templateId, 'Brand colors:', { primaryColor, secondaryColor });
 
   return (
     <div className="min-h-screen bg-background" style={brandStyles}>
@@ -158,8 +159,8 @@ export default function Preview() {
         ctaText={schema?.hero?.ctaText || 'Aan de slag'}
         logo={logo}
         backgroundImages={schema?.hero?.backgroundImages}
-        isModern={isModern}
         primaryColor={primaryColor}
+        templateId={templateId}
       />
 
       <AboutSection
@@ -167,14 +168,14 @@ export default function Preview() {
         description={schema?.about?.description || 'Wij bieden uitzonderlijke diensten om uw bedrijf te laten groeien.'}
         valueProps={schema?.about?.valueProps}
         stats={schema?.about?.stats}
-        isModern={isModern}
         primaryColor={primaryColor}
+        templateId={templateId}
       />
 
       <ServicesSection
         services={schema?.services || []}
-        isModern={isModern}
         primaryColor={primaryColor}
+        templateId={templateId}
       />
 
       {/* Gallery with horizontal scroll */}
@@ -182,6 +183,7 @@ export default function Preview() {
         images={schema?.gallery?.images || []}
         title={schema?.gallery?.title || 'Ons werk'}
         primaryColor={primaryColor}
+        templateId={templateId}
       />
 
       {/* Instagram Feed */}
@@ -195,6 +197,7 @@ export default function Preview() {
       <TestimonialsSection
         testimonials={schema?.testimonials || []}
         primaryColor={primaryColor}
+        templateId={templateId}
       />
 
       <ContactSection
@@ -203,8 +206,8 @@ export default function Preview() {
         address={schema?.contact?.address}
         instagram={schema?.contact?.instagram}
         facebook={schema?.contact?.facebook}
-        isModern={isModern}
         primaryColor={primaryColor}
+        templateId={templateId}
       />
 
       <FeedbackButton previewId={preview.id} primaryColor={primaryColor} />

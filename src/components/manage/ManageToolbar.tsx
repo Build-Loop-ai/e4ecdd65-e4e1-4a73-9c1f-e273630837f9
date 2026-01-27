@@ -189,13 +189,16 @@ export default function ManageToolbar({
             value={preview.template_id}
             onValueChange={onTemplateChange}
           >
-            <SelectTrigger className="w-[160px] h-9">
+            <SelectTrigger className="w-[140px] h-9">
               <LayoutTemplate className="h-4 w-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="modern-professional">Modern</SelectItem>
               <SelectItem value="corporate-classic">Classic</SelectItem>
+              <SelectItem value="modern-professional">Modern</SelectItem>
+              <SelectItem value="bold-starter">Bold</SelectItem>
+              <SelectItem value="elegant-minimal">Elegant</SelectItem>
+              <SelectItem value="warm-friendly">Warm</SelectItem>
             </SelectContent>
           </Select>
 
