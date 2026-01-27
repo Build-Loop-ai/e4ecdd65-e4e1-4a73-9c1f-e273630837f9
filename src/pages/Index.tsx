@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Play } from 'lucide-react';
+import { ArrowRight, Check, Play, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,11 +14,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background overflow-hidden">
-      {/* Subtle background */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-gradient-to-b from-primary/[0.07] to-transparent rounded-full blur-3xl" />
-      </div>
-
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
@@ -44,29 +39,40 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="pt-32 md:pt-40 pb-20 md:pb-32 px-6">
-        <div className="container mx-auto max-w-4xl">
+      {/* Hero - with gradient background */}
+      <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 px-6 overflow-hidden">
+        {/* Grainy gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/5" />
+        <div 
+          className="absolute inset-0 opacity-50"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+        />
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+        
+        <div className="container mx-auto max-w-4xl relative">
           <motion.div 
             className="text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            {/* Eyebrow */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-primary font-medium text-sm tracking-wide uppercase mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-8"
             >
-              The outreach tool for web designers
-            </motion.p>
+              <Zap className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-primary">The outreach tool for web designers</span>
+            </motion.div>
 
             {/* Main headline */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground tracking-tight leading-[1.1] mb-6">
               Turn any website into a
-              <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
                 winning proposal
               </span>
             </h1>
@@ -79,13 +85,13 @@ const Index = () => {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-8">
-              <Button size="lg" asChild className="h-12 px-6 text-base shadow-lg shadow-primary/20 group">
+              <Button size="lg" asChild className="h-12 px-6 text-base shadow-lg shadow-primary/25 group">
                 <Link to={user ? "/dashboard" : "/auth"}>
                   Start for free
                   <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="h-12 px-6 text-base" asChild>
+              <Button size="lg" variant="outline" className="h-12 px-6 text-base bg-background/50 backdrop-blur-sm" asChild>
                 <Link to="/auth">
                   <Play className="h-4 w-4 mr-2" />
                   See how it works
@@ -101,15 +107,15 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Trusted by */}
-      <section className="py-12 border-y border-border/40">
+      {/* Trusted by - subtle gradient */}
+      <section className="py-12 border-y border-border/40 bg-gradient-to-r from-muted/50 via-background to-muted/50">
         <div className="container mx-auto px-6">
           <p className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-8">
             Trusted by leading design studios
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
             {trustedBy.map((name) => (
-              <span key={name} className="text-muted-foreground/60 font-medium text-lg">
+              <span key={name} className="text-foreground/40 font-semibold text-lg hover:text-primary transition-colors">
                 {name}
               </span>
             ))}
@@ -117,10 +123,36 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Value Props */}
-      <section className="py-24 md:py-32 px-6">
-        <div className="container mx-auto max-w-5xl">
-          <div className="grid md:grid-cols-3 gap-12 md:gap-8">
+      {/* How it works - PRIMARY BACKGROUND */}
+      <section className="relative py-24 md:py-32 px-6 bg-primary overflow-hidden">
+        {/* Grainy overlay */}
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+        />
+        {/* Gradient orbs */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-accent/20 rounded-full blur-3xl" />
+        
+        <div className="container mx-auto max-w-5xl relative">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
+              How it works
+            </h2>
+            <p className="text-lg text-white/70">
+              Three steps to your next closed deal
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
             {[
               {
                 step: '01',
@@ -144,15 +176,15 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="text-center md:text-left"
+                className="relative p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-colors"
               >
-                <span className="text-6xl font-bold text-primary/10 block mb-4">
+                <span className="text-6xl font-bold text-white/20 block mb-4">
                   {item.step}
                 </span>
-                <h3 className="text-xl font-semibold text-foreground mb-2">
+                <h3 className="text-xl font-semibold text-white mb-2">
                   {item.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-white/70 leading-relaxed">
                   {item.description}
                 </p>
               </motion.div>
@@ -161,9 +193,13 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-24 md:py-32 px-6 bg-muted/30">
-        <div className="container mx-auto max-w-4xl">
+      {/* Features - light with accent touches */}
+      <section className="relative py-24 md:py-32 px-6 overflow-hidden">
+        {/* Subtle gradient */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-primary/10 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-accent/10 to-transparent rounded-full blur-3xl" />
+        
+        <div className="container mx-auto max-w-4xl relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -172,7 +208,8 @@ const Index = () => {
             className="text-center mb-16"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Everything you need to close more deals
+              Everything you need to{' '}
+              <span className="text-primary">close more deals</span>
             </h2>
             <p className="text-lg text-muted-foreground">
               Built specifically for web designers and agencies
@@ -196,10 +233,10 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
                 viewport={{ once: true }}
-                className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50"
+                className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all group"
               >
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Check className="h-4 w-4 text-primary" />
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:scale-110 transition-all">
+                  <Check className="h-4 w-4 text-primary group-hover:text-white transition-colors" />
                 </div>
                 <span className="font-medium text-foreground">{feature}</span>
               </motion.div>
@@ -208,9 +245,23 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Testimonial */}
-      <section className="py-24 md:py-32 px-6">
-        <div className="container mx-auto max-w-3xl">
+      {/* Testimonial - ACCENT GRADIENT BACKGROUND */}
+      <section className="relative py-24 md:py-32 px-6 overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent" />
+        {/* Grainy overlay */}
+        <div 
+          className="absolute inset-0 opacity-25"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+        />
+        {/* Decorative elements */}
+        <div className="absolute top-10 left-10 w-32 h-32 border border-white/10 rounded-full" />
+        <div className="absolute bottom-10 right-10 w-48 h-48 border border-white/10 rounded-full" />
+        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-white/5 rounded-full blur-2xl" />
+        
+        <div className="container mx-auto max-w-3xl relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -220,32 +271,41 @@ const Index = () => {
           >
             <div className="flex justify-center gap-1 mb-8">
               {[...Array(5)].map((_, i) => (
-                <svg key={i} className="w-5 h-5 text-chart-4 fill-current" viewBox="0 0 20 20">
+                <svg key={i} className="w-6 h-6 text-white fill-current" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               ))}
             </div>
             
-            <blockquote className="text-2xl md:text-3xl font-medium text-foreground mb-8 leading-relaxed">
+            <blockquote className="text-2xl md:text-4xl font-medium text-white mb-10 leading-relaxed">
               "Pitch cut my proposal time from 3 hours to 5 minutes. I've closed 4 new clients this month alone."
             </blockquote>
             
-            <div className="flex items-center justify-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-semibold">
+            <div className="flex items-center justify-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-semibold text-lg border border-white/20">
                 MR
               </div>
               <div className="text-left">
-                <p className="font-medium text-foreground">Maria Rodriguez</p>
-                <p className="text-sm text-muted-foreground">Founder, Studio Pixel</p>
+                <p className="font-semibold text-white text-lg">Maria Rodriguez</p>
+                <p className="text-white/70">Founder, Studio Pixel</p>
               </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 md:py-32 px-6">
-        <div className="container mx-auto max-w-2xl">
+      {/* CTA - with gradient accent */}
+      <section className="py-24 md:py-32 px-6 relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent" />
+        <div 
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+        />
+        
+        <div className="container mx-auto max-w-2xl relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -253,32 +313,35 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
               Ready to win more clients?
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
+            <p className="text-lg text-muted-foreground mb-10">
               Join 500+ designers who close deals faster with Pitch
             </p>
-            <Button size="lg" asChild className="h-12 px-8 text-base shadow-lg shadow-primary/20 group">
+            <Button size="lg" asChild className="h-14 px-8 text-lg shadow-xl shadow-primary/25 group">
               <Link to="/auth">
                 Get started for free
-                <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
+            <p className="text-sm text-muted-foreground mt-6">
+              No credit card required
+            </p>
           </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-6 border-t border-border/40">
+      <footer className="py-8 px-6 border-t border-border/40 bg-muted/30">
         <div className="container mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <PitchLogo size="sm" />
           <p className="text-sm text-muted-foreground">
             © 2026 Pitch
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/auth" className="hover:text-foreground transition-colors">Log in</Link>
-            <Link to="/auth" className="hover:text-foreground transition-colors">Sign up</Link>
+            <Link to="/auth" className="hover:text-primary transition-colors">Log in</Link>
+            <Link to="/auth" className="hover:text-primary transition-colors">Sign up</Link>
           </div>
         </div>
       </footer>
