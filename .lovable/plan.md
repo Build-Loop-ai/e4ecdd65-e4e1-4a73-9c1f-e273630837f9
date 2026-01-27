@@ -1,92 +1,200 @@
-# Intelligent Business-Aware Website Configuration
 
-## ✅ IMPLEMENTATION COMPLETE
+# Dashboard Enhancement and Analytics Implementation Plan
 
-This plan has been fully implemented. The system now:
+## Overview
 
-1. ✅ **Detects business type** from scraped content (industry, business type, target audience, brand personality)
-2. ✅ **Recommends the best template** automatically with "AI Pick" badges
-3. ✅ **Adapts content tone** with industry-appropriate section titles
-4. ✅ **Customizes section ordering** based on what matters most for that business type
-5. ✅ **Generates industry-specific CTAs** and headlines
+This plan transforms the basic dashboard into a comprehensive management hub with powerful analytics to help users understand who is viewing their preview websites. The core idea is to track every visit to the `/preview/:slug` pages and provide actionable insights.
+
+## What You Will Get
+
+### 1. Enhanced Dashboard Layout
+The dashboard will be restructured with a sidebar navigation and multiple sections:
+- **Overview** - Quick stats cards showing total previews, total views, feedback count, and active previews
+- **Previews** - The existing preview cards (improved)
+- **Analytics** - Dedicated analytics page with charts and insights
+
+### 2. Visit Tracking System
+Every time someone visits a preview website (`/preview/:slug`), the system will log:
+- Which preview was viewed
+- When they visited
+- How long they stayed (session duration)
+- Their general location (country/city via IP geolocation)
+- Device type (desktop/tablet/mobile)
+- Referrer source (where they came from)
+
+### 3. Analytics Dashboard Features
+- **Total Views Chart** - Line/bar chart showing views over time (last 7, 14, 30 days)
+- **Per-Preview Breakdown** - See which previews are getting the most attention
+- **Device Distribution** - Pie chart showing desktop vs mobile vs tablet
+- **Geographic Insights** - Where your viewers are located
+- **Recent Visitors Table** - Live feed of recent visits with details
+- **Engagement Metrics** - Average time on page, bounce indicators
+
+### 4. Dashboard Quick Stats
+At the top of the dashboard, you will see:
+- Total views across all previews (with trend indicator)
+- Active previews count
+- Unread feedback count
+- Views this week vs last week comparison
 
 ---
 
-## Files Modified
+## Technical Implementation
 
-1. **`supabase/functions/process-content/index.ts`** - Enhanced with business intelligence extraction
-2. **`src/lib/templateStyles.ts`** - Added industry mapping, color hints, section order preferences
-3. **`src/lib/businessIntelligence.ts`** - New utility file for BI types and helpers
-4. **`src/pages/Preview.tsx`** - Dynamic section ordering based on contentPriority
-5. **`src/pages/NewPreview.tsx`** - Auto-selects recommended template, shows "AI Pick" badges
-6. **`src/components/preview/ServicesSection.tsx`** - Accepts dynamic title prop
-7. **`src/components/preview/GallerySection.tsx`** - Already had title prop
-8. **`src/components/preview/TestimonialsSection.tsx`** - Accepts dynamic title prop
-9. **`src/components/preview/ContactSection.tsx`** - Accepts dynamic title prop
-10. **`src/components/preview/AboutSection.tsx`** - Already had title via description
+### Database Changes
 
----
-
-## How It Works
-
-### AI Schema Output
-
-The `process-content` edge function now returns:
-
-```json
-{
-  "businessIntelligence": {
-    "industry": "beauty_wellness",
-    "businessType": "barber",
-    "targetAudience": "local_consumers",
-    "brandPersonality": "friendly",
-    "primaryAction": "book_appointment",
-    "contentPriority": ["services", "gallery", "testimonials", "about", "contact"],
-    "recommendedTemplate": "warm-friendly",
-    "confidence": 0.9
-  },
-  "adaptedContent": {
-    "servicesTitle": "Behandelingen",
-    "galleryTitle": "Ons Werk",
-    "aboutTitle": "Over Ons",
-    "testimonialsTitle": "Wat Klanten Zeggen",
-    "contactTitle": "Contact"
-  },
-  "hero": {
-    "ctaText": "Maak een afspraak"
-  }
-  // ... rest of schema
-}
+**New Table: `preview_visits`**
+```
+- id (UUID, primary key)
+- preview_id (UUID, foreign key to client_previews)
+- visited_at (timestamp)
+- session_duration (integer, seconds - nullable)
+- device_type (text: desktop/tablet/mobile)
+- country (text, nullable)
+- city (text, nullable)
+- referrer (text, nullable)
+- user_agent (text, nullable)
+- ip_hash (text - hashed for privacy)
 ```
 
-### Template Auto-Selection
+**RLS Policies:**
+- Anyone can INSERT (for public preview tracking)
+- Preview owners can SELECT their own visits
 
-The NewPreview page:
-- Auto-selects the AI-recommended template when processing completes
-- Shows "AI Pick" badge on the recommended template
-- Displays detected industry and business type
+### New Edge Function: `track-visit`
+A lightweight edge function that:
+1. Receives visit data from the Preview page
+2. Performs IP geolocation (using a free API)
+3. Inserts the visit record
+4. Returns success
 
-### Dynamic Section Ordering
+### Frontend Changes
 
-The Preview page renders sections in the AI-recommended order from `contentPriority`, ensuring:
-- Barbers show: Services → Gallery → Testimonials → About → Contact
-- Law firms show: About → Services → Testimonials → Gallery → Contact
-- Restaurants show: Gallery → Services → About → Testimonials → Contact
+**New Files:**
+- `src/pages/Analytics.tsx` - Dedicated analytics page
+- `src/components/dashboard/DashboardLayout.tsx` - Sidebar layout wrapper
+- `src/components/dashboard/StatsCards.tsx` - Overview stat cards
+- `src/components/dashboard/ViewsChart.tsx` - Line/bar chart for views over time
+- `src/components/dashboard/DeviceBreakdown.tsx` - Pie chart for devices
+- `src/components/dashboard/RecentVisitors.tsx` - Table of recent visits
+- `src/components/dashboard/PreviewAnalytics.tsx` - Per-preview analytics card
+- `src/hooks/useAnalytics.ts` - Custom hook for fetching analytics data
+
+**Modified Files:**
+- `src/pages/Dashboard.tsx` - Add sidebar, quick stats, integrate new layout
+- `src/pages/Preview.tsx` - Add visit tracking on page load
+- `src/App.tsx` - Add `/analytics` route
+
+### Key UI Components
+
+**Dashboard Sidebar:**
+```
++------------------+
+| PreviewPro       |
++------------------+
+| Overview         | <- Stats cards
+| Previews         | <- Existing cards  
+| Analytics        | <- New page
++------------------+
+| Settings         |
+| Sign Out         |
++------------------+
+```
+
+**Analytics Page Layout:**
+```
++------------------------------------------+
+| Analytics                                 |
++------------------------------------------+
+| [Total Views] [Unique Visitors] [Avg Time]|
++------------------------------------------+
+| Views Over Time Chart                     |
+| [7 days] [14 days] [30 days]             |
++------------------------------------------+
+| [Device Breakdown]  | [Top Previews]     |
++------------------------------------------+
+| Recent Visitors                          |
+| Preview | Location | Device | Time       |
++------------------------------------------+
+```
 
 ---
 
-## Industry-Template Mapping
+## Implementation Steps
 
-| Industry | Recommended Template |
-|----------|---------------------|
-| beauty_wellness | warm-friendly |
-| food_hospitality | warm-friendly |
-| professional_services | corporate-classic |
-| creative_agency | bold-starter |
-| retail_ecommerce | elegant-minimal |
-| healthcare | corporate-classic |
-| construction_trades | corporate-classic |
-| technology | modern-professional |
-| education | modern-professional |
-| fitness_sports | warm-friendly |
-| automotive | corporate-classic |
+### Step 1: Database Setup
+1. Create `preview_visits` table with appropriate columns
+2. Add RLS policies for secure access
+3. Enable the table for realtime (optional, for live visitor feed)
+
+### Step 2: Visit Tracking Edge Function
+1. Create `track-visit` edge function
+2. Handle CORS for browser requests
+3. Implement IP geolocation using free API
+4. Parse user agent for device detection
+5. Hash IP for privacy
+
+### Step 3: Preview Page Integration
+1. Modify `Preview.tsx` to call the tracking edge function on mount
+2. Implement session duration tracking (track when user leaves)
+3. Detect device type from window/navigator
+
+### Step 4: Dashboard Restructure
+1. Create `DashboardLayout` with sidebar navigation
+2. Implement `StatsCards` component with animated counters
+3. Add quick stats row at top of dashboard
+4. Integrate existing preview cards into new layout
+
+### Step 5: Analytics Page
+1. Create main Analytics page with date range selector
+2. Build `ViewsChart` using Recharts (already installed)
+3. Build `DeviceBreakdown` pie chart
+4. Build `RecentVisitors` table with sorting
+5. Add per-preview filtering
+
+### Step 6: Analytics Hook
+1. Create `useAnalytics` hook for data fetching
+2. Implement date range filtering
+3. Add loading and error states
+4. Cache data for performance
+
+---
+
+## Privacy Considerations
+
+- IP addresses are hashed (SHA-256) before storage - original IPs are never stored
+- No cookies or persistent identifiers are used
+- Only aggregate location data (city/country) is stored
+- Compliant with GDPR principles
+- Users can see who viewed their previews but viewers remain semi-anonymous
+
+---
+
+## Existing Patterns Used
+
+- Follows the existing Supabase client patterns from `client.ts`
+- Uses existing UI components (Card, Badge, Button, Skeleton)
+- Matches the existing dashboard styling
+- Leverages already-installed Recharts for visualizations
+- Uses the existing toast system for notifications
+- Follows the established RLS policy patterns
+
+---
+
+## Summary of Deliverables
+
+| Component | Type | Purpose |
+|-----------|------|---------|
+| `preview_visits` table | Database | Store visit data |
+| `track-visit` function | Edge Function | Process and log visits |
+| `DashboardLayout.tsx` | Component | Sidebar navigation wrapper |
+| `StatsCards.tsx` | Component | Quick overview stats |
+| `Analytics.tsx` | Page | Full analytics dashboard |
+| `ViewsChart.tsx` | Component | Views over time visualization |
+| `DeviceBreakdown.tsx` | Component | Device type pie chart |
+| `RecentVisitors.tsx` | Component | Live visitor table |
+| `useAnalytics.ts` | Hook | Data fetching logic |
+| Updated `Dashboard.tsx` | Modified | Integrated with new layout |
+| Updated `Preview.tsx` | Modified | Visit tracking on load |
+| Updated `App.tsx` | Modified | New route for analytics |
+
