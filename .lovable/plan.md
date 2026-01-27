@@ -1,195 +1,260 @@
 
-# Intelligent Image Classification & Smart Fallback System
+# Smart Brand Color Extraction & Contrast Safety System
 
 ## Problem Summary
-The screenshot shows critical issues with the generated websites:
-1. **Wrong image placement** - A portrait photo (clearly an "about us" image) is placed as the hero background
-2. **Text over text** - The original site's logo/branding text ("EVERYMAN'S AI") shows behind the new headline
-3. **No smart fallbacks** - When no suitable hero image exists, we default to plain gradients
+
+Based on my investigation, there are two critical issues:
+
+1. **Brand colors not being properly extracted/identified** - The system relies on Firecrawl's `branding` format to extract colors, but this extraction is inconsistent. The AI doesn't actively analyze and identify the primary brand color from the scraped content.
+
+2. **Dark text on dark backgrounds** - There's no systematic contrast validation. When a template uses a dark background (like `bold-starter` or `modern-professional`), and text colors aren't properly managed, you get unreadable text.
+
+## Current Flow Analysis
+
+```text
+User enters URL
+     ↓
+Firecrawl scrapes with 'branding' format
+     ↓
+Returns: { branding: { colors: { primary, secondary, ... }, logo } }
+     ↓
+Passed to process-content edge function
+     ↓
+AI processes content BUT doesn't analyze/validate colors
+     ↓
+Colors stored in brand_colors column (often incomplete)
+     ↓
+Preview.tsx reads colors, passes to components
+     ↓
+Components use primaryColor directly without contrast checks
+```
+
+**Issues in this flow:**
+- Firecrawl's branding extraction can fail or return null colors
+- AI doesn't actively identify the brand's primary color from visual analysis
+- No fallback color detection from logo, images, or meta tags
+- Components use `primaryColor` for text without checking if it's readable against the background
+
+---
 
 ## Solution Overview
 
-This plan introduces an **AI-powered image classification system** that analyzes each scraped image to understand its content and purpose, then routes images to the correct sections. For cases where no suitable hero image exists, we'll provide beautiful **business-type-specific pattern backgrounds**.
+### Part 1: Enhanced AI Color Intelligence
 
----
-
-## Technical Implementation
-
-### Part 1: Enhanced Image Classification in AI Processing
+Update `process-content` to actively analyze and identify brand colors:
 
 **File: `supabase/functions/process-content/index.ts`**
 
-Update the AI prompt to classify every extracted image with semantic analysis:
+Add to the AI prompt:
 
 ```text
-For EVERY image URL found, analyze and classify:
+## BRAND COLOR ANALYSIS (CRITICAL)
 
-IMAGE CLASSIFICATION (CRITICAL):
+Analyze the brand colors provided. If colors are missing or unclear:
+1. Look for color mentions in CSS, metadata, or content
+2. Identify the dominant brand color from descriptions
+3. Ensure we have at least a PRIMARY color
+
+Return validated brand colors:
 {
-  "url": "image_url_here",
-  "classification": "hero" | "about" | "team" | "gallery" | "product" | "service" | "logo" | "unusable",
-  "confidence": 0.0-1.0,
-  "reasoning": "brief description of why",
-  "hasText": true/false,  // Does the image contain embedded text/logos?
-  "subjectType": "portrait" | "group" | "interior" | "exterior" | "product" | "abstract" | "food" | "action"
-}
-
-CLASSIFICATION RULES:
-- "hero": Wide/landscape images of interiors, exteriors, or abstract visuals WITHOUT embedded text. Must be suitable as a full-width background.
-- "about": Portraits of individuals, team headshots, founder photos
-- "team": Group photos of multiple people
-- "gallery": Work samples, portfolio pieces, finished products
-- "product": Product photography, items for sale
-- "service": Images showing services being performed
-- "logo": Company logos, badges, icons
-- "unusable": Images with heavy text overlays, poor quality, or icons
-
-CRITICAL: Images with visible text/logos should NEVER be used as hero backgrounds (set "hasText": true)
-```
-
-The output schema will be updated to:
-```json
-{
-  "hero": {
-    "backgroundImages": ["only hero-classified images"],
-    "fallbackPattern": "tech" | "beauty" | "food" | "legal" | "creative" | "medical" | "construction" | "retail" | "default"
-  },
-  "classifiedImages": [
-    { "url": "...", "classification": "hero", "confidence": 0.9, "hasText": false },
-    { "url": "...", "classification": "about", "confidence": 0.85, "hasText": false },
-    ...
-  ],
-  "about": {
-    "image": "first about-classified image (for split layouts)"
+  "brandColors": {
+    "primary": "#hexcolor - the main brand color (REQUIRED)",
+    "secondary": "#hexcolor or null",
+    "accent": "#hexcolor or null", 
+    "background": "#hexcolor - light or dark bg preference",
+    "textPrimary": "#hexcolor - main text color",
+    "colorScheme": "light" | "dark" - overall brand preference
   }
 }
+
+COLOR DETECTION RULES:
+1. If Firecrawl extracted colors, validate they look like real brand colors
+2. If primary is missing, infer from:
+   - Logo colors mentioned
+   - Common industry colors (tech=blue, food=red/orange, legal=navy)
+   - Any hex colors found in content
+3. Default to industry-appropriate colors if nothing found
+```
+
+### Part 2: Contrast Safety Utility
+
+Create a utility for ensuring text is always readable.
+
+**New File: `src/lib/colorContrast.ts`**
+
+```typescript
+// Calculate relative luminance
+function getLuminance(hex: string): number;
+
+// Calculate contrast ratio (WCAG formula)
+function getContrastRatio(color1: string, color2: string): number;
+
+// Ensure readable text color against background
+export function getReadableTextColor(
+  backgroundColor: string,
+  preferredColor?: string
+): string;
+
+// Ensure CTA button text is readable
+export function getButtonTextColor(buttonBgColor: string): string;
+
+// Check if color combo passes WCAG AA (4.5:1 for text)
+export function passesContrastCheck(
+  textColor: string, 
+  bgColor: string
+): boolean;
+```
+
+### Part 3: Update Template Components with Contrast Safety
+
+**Files to update:**
+- `src/components/preview/HeroSection.tsx`
+- `src/components/preview/ServicesSection.tsx`
+- `src/components/preview/AboutSection.tsx`
+- `src/components/preview/ContactSection.tsx`
+- `src/components/preview/TestimonialsSection.tsx`
+- `src/components/preview/GallerySection.tsx`
+
+For each component, wrap text color decisions with contrast checks:
+
+```typescript
+import { getReadableTextColor, getButtonTextColor } from '@/lib/colorContrast';
+
+// Before (dangerous - could be dark on dark):
+<h1 className="text-foreground">{headline}</h1>
+
+// After (safe - always readable):
+<h1 style={{ color: getReadableTextColor(backgroundColor, primaryColor) }}>
+  {headline}
+</h1>
+
+// CTA buttons:
+<Button style={{ 
+  backgroundColor: primaryColor,
+  color: getButtonTextColor(primaryColor) 
+}}>
+```
+
+### Part 4: Smart Color Fallbacks by Industry
+
+**File: `src/lib/industryColors.ts`**
+
+Define sensible default colors per industry when extraction fails:
+
+| Industry | Primary | Secondary |
+|----------|---------|-----------|
+| Technology | #3B82F6 (blue) | #06B6D4 (cyan) |
+| Beauty/Wellness | #EC4899 (pink) | #F472B6 |
+| Food/Hospitality | #F97316 (orange) | #EF4444 (red) |
+| Legal/Professional | #1E3A5F (navy) | #64748B |
+| Healthcare | #14B8A6 (teal) | #22C55E |
+| Construction | #D97706 (amber) | #78716C |
+| Creative Agency | #8B5CF6 (purple) | #EC4899 |
+| Retail | #6366F1 (indigo) | #F43F5E |
+| Default | #6366F1 (indigo) | #64748B |
+
+### Part 5: Preview Page Color Integration
+
+**File: `src/pages/Preview.tsx`**
+
+Update to use validated colors with fallbacks:
+
+```typescript
+import { getIndustryColors } from '@/lib/industryColors';
+
+// Get colors with intelligent fallback
+const getValidatedColors = () => {
+  const brandColors = preview.brand_colors as any;
+  const industry = businessIntelligence.industry;
+  const fallbackColors = getIndustryColors(industry);
+  
+  return {
+    primary: brandColors?.colors?.primary || 
+             processedSchema?.brandColors?.primary || 
+             fallbackColors.primary,
+    secondary: brandColors?.colors?.secondary || 
+               fallbackColors.secondary,
+    // ... etc
+  };
+};
 ```
 
 ---
 
-### Part 2: Dynamic Pattern Generation System
+## Files to Create
 
-**New File: `src/lib/heroPatterns.ts`**
+| File | Purpose |
+|------|---------|
+| `src/lib/colorContrast.ts` | WCAG contrast utilities |
+| `src/lib/industryColors.ts` | Industry-specific fallback colors |
 
-Create a library of SVG-based, business-type-specific patterns that can be used as fallbacks:
+## Files to Modify
 
-| Business Type | Pattern Style |
-|--------------|---------------|
-| Technology | Circuit board / node network with gradient mesh |
-| Beauty/Wellness | Soft organic curves, flowing lines |
-| Food/Hospitality | Abstract culinary shapes, warm gradients |
-| Legal/Professional | Clean geometric grid, subtle lines |
-| Creative/Agency | Dynamic shapes, bold color blocks |
-| Healthcare | Clean waves, calming gradients |
-| Construction | Angular geometric patterns |
-| Retail | Modern abstract shapes |
-
-Each pattern will be dynamically colored using the extracted brand primary color.
-
-```typescript
-export type PatternType = 
-  | 'tech-circuit' 
-  | 'beauty-waves' 
-  | 'food-organic' 
-  | 'legal-grid' 
-  | 'creative-blocks' 
-  | 'medical-clean' 
-  | 'construction-angular' 
-  | 'retail-modern'
-  | 'default-gradient';
-
-export function getHeroPattern(
-  patternType: PatternType, 
-  primaryColor: string,
-  templateId: TemplateId
-): React.ReactNode;
-```
+| File | Changes |
+|------|---------|
+| `supabase/functions/process-content/index.ts` | Add brand color analysis to AI prompt |
+| `src/pages/Preview.tsx` | Use validated colors with fallbacks |
+| `src/components/preview/HeroSection.tsx` | Add contrast safety for all text |
+| `src/components/preview/ServicesSection.tsx` | Ensure text readability |
+| `src/components/preview/AboutSection.tsx` | Ensure text readability |
+| `src/components/preview/ContactSection.tsx` | Ensure text readability |
+| `src/components/preview/TestimonialsSection.tsx` | Ensure text readability |
+| `src/components/preview/GallerySection.tsx` | Ensure text readability |
+| `src/components/preview/PatternBackground.tsx` | Use validated colors |
 
 ---
 
-### Part 3: Smart Hero Section Updates
+## Technical Details
 
-**File: `src/components/preview/HeroSection.tsx`**
-
-Update all template hero renderers to:
-
-1. **Check image suitability** before using as background
-2. **Apply pattern fallback** when no suitable image exists
-3. **Never display text-over-text** scenarios
+### Contrast Calculation Algorithm
 
 ```typescript
-// New logic flow
-const suitableHeroImage = backgroundImages?.find(img => {
-  // Only use images marked as hero-suitable
-  const classification = classifiedImages?.find(c => c.url === img);
-  return classification?.classification === 'hero' && !classification?.hasText;
-});
+// WCAG 2.1 relative luminance formula
+function getLuminance(hex: string): number {
+  const rgb = hexToRgb(hex);
+  const [r, g, b] = [rgb.r, rgb.g, rgb.b].map(c => {
+    c = c / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
 
-// If no suitable image, use business-type pattern
-if (!suitableHeroImage) {
-  return <PatternHeroBackground 
-    patternType={getPatternForIndustry(businessIntelligence.industry)}
-    primaryColor={primaryColor}
-    templateId={templateId}
-  />;
+// Contrast ratio (should be >= 4.5 for normal text)
+function getContrastRatio(color1: string, color2: string): number {
+  const l1 = getLuminance(color1);
+  const l2 = getLuminance(color2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
 }
 ```
 
----
-
-### Part 4: About Section Image Support
-
-**File: `src/components/preview/AboutSection.tsx`**
-
-Add optional image support to About sections to use "about"-classified images:
-
-- For templates with split layouts, display the portrait/team photo
-- Ensure proper cropping and aspect ratio handling
-- Add subtle animation on scroll
-
----
-
-### Part 5: Fallback Pattern Component
-
-**New File: `src/components/preview/PatternBackground.tsx`**
-
-A reusable component that renders SVG-based patterns:
+### How Text Color Selection Works
 
 ```typescript
-interface PatternBackgroundProps {
-  industry: IndustryType;
-  primaryColor: string;
-  templateId: TemplateId;
-  className?: string;
+export function getReadableTextColor(
+  backgroundColor: string,
+  preferredColor?: string
+): string {
+  // If preferred color has good contrast, use it
+  if (preferredColor && getContrastRatio(preferredColor, backgroundColor) >= 4.5) {
+    return preferredColor;
+  }
+  
+  // Otherwise, pick white or black based on background luminance
+  const bgLuminance = getLuminance(backgroundColor);
+  return bgLuminance > 0.5 ? '#000000' : '#FFFFFF';
 }
 ```
-
-Pattern examples:
-- **Tech**: Animated node connections with subtle glow
-- **Beauty**: Soft flowing curves that animate
-- **Food**: Warm organic shapes
-- **Legal**: Clean minimal grid lines
-- **Default**: Sophisticated gradient mesh (similar to landing page hero)
-
----
-
-## Files to Create/Modify
-
-| File | Action | Description |
-|------|--------|-------------|
-| `supabase/functions/process-content/index.ts` | Modify | Add image classification prompts and structured output |
-| `src/lib/heroPatterns.ts` | Create | Pattern type definitions and generation utilities |
-| `src/lib/businessIntelligence.ts` | Modify | Add image classification types and helpers |
-| `src/components/preview/PatternBackground.tsx` | Create | SVG pattern background component |
-| `src/components/preview/HeroSection.tsx` | Modify | Integrate pattern fallbacks and image validation |
-| `src/components/preview/AboutSection.tsx` | Modify | Add optional image support for portrait placement |
 
 ---
 
 ## Summary of Benefits
 
-1. **Intelligent Image Placement**: AI classifies each image by content type, ensuring portraits go to About sections, not heroes
-2. **No Text-Over-Text**: Images with embedded text/logos are flagged and excluded from background use
-3. **Beautiful Fallbacks**: When no suitable hero image exists, business-appropriate animated patterns fill the space
-4. **Brand Consistency**: Patterns use extracted brand colors for cohesive design
-5. **Industry-Aware**: Different industries get different pattern styles that match their aesthetic
+1. **Reliable Brand Color Extraction** - AI actively identifies and validates brand colors, with industry-specific fallbacks when extraction fails
+
+2. **Guaranteed Readable Text** - WCAG-compliant contrast checking ensures text is always visible regardless of template or brand colors
+
+3. **Industry-Aware Defaults** - When brand colors can't be detected, sensible industry-appropriate colors are used
+
+4. **No More Dark-on-Dark** - Every text element will be checked against its background before rendering
