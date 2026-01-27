@@ -1,75 +1,88 @@
 
-## What’s actually happening (root cause)
-The “Failed to send a request to the Edge Function” on **Analyze Website** is coming from the **process-content** backend function call (not the scrape call).
+# Dynamic Content Display - Intelligent Section Rendering
 
-Your frontend calls:
-- `firecrawl-scrape` via custom `fetch` (works; network shows 200)
-- then calls `process-content` via `supabase.functions.invoke(...)` (fails with “Failed to fetch”)
+## Overview
+Make the preview generation smarter by only showing sections when there's meaningful content. This creates a cleaner, more professional result by hiding empty or insufficient data sections.
 
-When `supabase.functions.invoke` runs in the browser, it automatically sends extra headers like:
-- `x-client-info`
-- `x-supabase-client-platform`
+## Current Situation
+- **TestimonialsSection**: Shows if there are any testimonials (even just 1)
+- **InstagramFeed**: Already filters for valid posts but shows with just 1 post
+- **HorizontalGallery**: Shows if there are valid images (minimum 1)
+- **Services**: Always shows (no minimum check)
 
-But your backend function CORS currently allows only:
-`authorization, x-client-info, apikey, content-type`
+## What Changes
 
-So the browser’s CORS preflight fails (because `x-supabase-client-platform` isn’t allowed), and the browser reports it as a generic network error (“Failed to fetch”), which Supabase surfaces as “Failed to send a request to the Edge Function”.
+### 1. Update AI Prompt for Smarter Extraction
+Modify `supabase/functions/process-content/index.ts`:
+- Add explicit instructions to the AI: "Only include testimonials if 2 or more genuine customer reviews are found"
+- Add instruction: "Only include Instagram posts if a real Instagram feed embed is detected"
+- Instruct AI to return empty arrays (not fabricated content) when data isn't found
 
-This also explains why:
-- backend logs show only “booted” and nothing else (the function never actually runs)
-- calling the function server-to-server (my curl test) works fine
+### 2. Frontend Conditional Logic
+Update `src/components/preview/TestimonialsSection.tsx`:
+- Change minimum threshold from 1 to 2 testimonials
+- Add validation that testimonials have actual content (not placeholder text)
 
----
+Update `src/components/preview/InstagramFeed.tsx`:
+- Require minimum 3 valid Instagram posts to display the section
+- Add better image URL validation
 
-## Implementation plan (what I will change)
+Update `src/components/preview/HorizontalGallery.tsx`:
+- Require minimum 3 images to show the gallery section (1-2 images looks sparse)
 
-### 1) Fix CORS headers for `process-content`
-Update `supabase/functions/process-content/index.ts`:
+Update `src/components/preview/ServicesSection.tsx`:
+- Require minimum 2 services to show the section
 
-- Expand `corsHeaders['Access-Control-Allow-Headers']` to include:
-  - `x-supabase-client-platform`
-  - (optionally) `x-supabase-client-version` if present in some clients
-- Keep OPTIONS preflight handling as-is.
+### 3. Add Content Quality Validation
+In `src/pages/Preview.tsx`:
+- Pre-filter testimonials to remove any with suspiciously short quotes or generic content
+- Pre-filter Instagram posts to ensure they have valid image URLs
+- Log what sections are being shown/hidden for debugging
 
-Target header string:
-- `authorization, x-client-info, apikey, content-type, x-supabase-client-platform`
+## Technical Implementation
 
-### 2) (Optional but recommended) Align CORS headers across all backend functions
-Update `firecrawl-scrape` too to use the same broader allow-list, so future calls (or future usage of `supabase.functions.invoke` there) won’t hit the same issue.
+### TestimonialsSection.tsx Changes
+```text
+Current: if (!testimonials || testimonials.length === 0) return null;
+New:     if (!testimonials || testimonials.length < 2) return null;
+         + Filter out testimonials with quotes shorter than 20 characters
+```
 
-### 3) Add minimal request logging to `process-content`
-Add a couple of safe logs:
-- “process-content started”
-- payload sizes (e.g., length of markdown) — not the full content
-This makes future debugging much faster without leaking user data.
+### InstagramFeed.tsx Changes
+```text
+Current: Shows with any valid posts
+New:     Require minimum 3 valid posts with working image URLs
+```
 
-### 4) Verify end-to-end from the UI
-After changes land, I’ll validate the full flow:
-1. Open `/new-preview`
-2. Run Analyze on a known URL
-3. Confirm:
-   - scrape step succeeds
-   - processing step succeeds
-   - template selection appears
+### HorizontalGallery.tsx Changes
+```text
+Current: Shows with any valid images
+New:     Require minimum 3 valid images
+```
 
-### 5) Improve error messaging (small UX tweak)
-If the backend call fails again for any other reason, update the toast to include:
-- which step failed (Scrape vs AI Processing)
-- the actionable hint if it’s a CORS/network issue
+### ServicesSection.tsx Changes
+```text
+Current: Shows all services
+New:     Require minimum 2 services to display section
+```
 
----
+### process-content AI Prompt Updates
+Add these instructions to system prompt:
+- "CRITICAL: Only include testimonials if you find 2+ genuine, distinct customer reviews with real names. If fewer reviews exist, return an empty testimonials array."
+- "CRITICAL: Only include Instagram data if the website has a visible Instagram feed embed. Do not fabricate Instagram posts."
+- "Do not invent or fabricate any content. Only extract what actually exists on the page."
 
-## Files that will be modified
-- `supabase/functions/process-content/index.ts` (required)
-- `supabase/functions/firecrawl-scrape/index.ts` (optional but recommended)
-- `src/pages/NewPreview.tsx` (optional UX improvement only)
+## Files to Modify
+1. `supabase/functions/process-content/index.ts` - Stricter AI extraction rules
+2. `src/components/preview/TestimonialsSection.tsx` - Minimum 2 testimonials
+3. `src/components/preview/InstagramFeed.tsx` - Minimum 3 posts
+4. `src/components/preview/HorizontalGallery.tsx` - Minimum 3 images
+5. `src/components/preview/ServicesSection.tsx` - Minimum 2 services
 
----
+## Expected Result
+- Websites with only 1 review: No testimonials section shown
+- Websites without Instagram: No Instagram section shown
+- Sparse galleries: Hidden if fewer than 3 images
+- Single service businesses: Integrate service info into About section instead
 
-## Expected result after fix
-Clicking **Analyze Website** should reliably proceed past “Processing Content with AI…” and reach **Choose a Template** without the red error toast.
-
----
-
-## Risks / edge cases
-- If the scraped HTML is extremely large, processing might still be slow; but that would produce a *different* error pattern (timeouts or 500s) and the function logs would show it. The current issue is almost certainly CORS/preflight because the request never reaches the function handler.
+This creates a polished, professional preview that only shows sections with meaningful content!
