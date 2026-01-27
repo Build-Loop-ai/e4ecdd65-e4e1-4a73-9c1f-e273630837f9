@@ -151,26 +151,26 @@ export function ContactSection({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-3xl p-6 md:p-8 lg:p-12 shadow-xl shadow-orange-100/50 border border-orange-100"
+            className="bg-white rounded-3xl p-5 sm:p-6 md:p-8 lg:p-12 shadow-xl shadow-orange-100/50 border border-orange-100"
           >
-            <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="flex flex-col gap-8">
               {/* Contact info */}
-              <div className="space-y-5">
+              <div className="space-y-3 sm:space-y-5">
                 {email && (
                   <motion.a
                     href={`mailto:${email}`}
                     whileHover={{ x: 5 }}
-                    className="flex items-center gap-4 p-4 rounded-2xl hover:bg-orange-50 transition-colors"
+                    className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl hover:bg-orange-50 transition-colors"
                   >
                     <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: `${primaryColor || '#f97316'}15` }}
                     >
-                      <Mail className="w-5 h-5" style={{ color: primaryColor || '#f97316' }} />
+                      <Mail className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: primaryColor || '#f97316' }} />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">E-mail</p>
-                      <p className="font-medium">{email}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">E-mail</p>
+                      <p className="font-medium text-sm sm:text-base truncate">{email}</p>
                     </div>
                   </motion.a>
                 )}
@@ -179,32 +179,32 @@ export function ContactSection({
                   <motion.a
                     href={`tel:${phone.replace(/\s/g, '')}`}
                     whileHover={{ x: 5 }}
-                    className="flex items-center gap-4 p-4 rounded-2xl hover:bg-orange-50 transition-colors"
+                    className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl hover:bg-orange-50 transition-colors"
                   >
                     <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: `${primaryColor || '#f97316'}15` }}
                     >
-                      <Phone className="w-5 h-5" style={{ color: primaryColor || '#f97316' }} />
+                      <Phone className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: primaryColor || '#f97316' }} />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Telefoon</p>
-                      <p className="font-medium">{phone}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">Telefoon</p>
+                      <p className="font-medium text-sm sm:text-base">{phone}</p>
                     </div>
                   </motion.a>
                 )}
 
                 {address && (
-                  <div className="flex items-center gap-4 p-4 rounded-2xl">
+                  <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl">
                     <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: `${primaryColor || '#f97316'}15` }}
                     >
-                      <MapPin className="w-5 h-5" style={{ color: primaryColor || '#f97316' }} />
+                      <MapPin className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: primaryColor || '#f97316' }} />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Adres</p>
-                      <p className="font-medium">{address}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">Adres</p>
+                      <p className="font-medium text-sm sm:text-base break-words">{address}</p>
                     </div>
                   </div>
                 )}
@@ -212,13 +212,13 @@ export function ContactSection({
 
               {/* CTA */}
               <div 
-                className="flex flex-col justify-center items-center text-center p-8 rounded-2xl"
+                className="flex flex-col justify-center items-center text-center p-5 sm:p-8 rounded-2xl"
                 style={{ backgroundColor: `${primaryColor || '#f97316'}10` }}
               >
-                <p className="text-lg mb-6 font-medium">Klaar om te beginnen?</p>
+                <p className="text-base sm:text-lg mb-4 sm:mb-6 font-medium">Klaar om te beginnen?</p>
                 <Button 
                   size="lg"
-                  className="rounded-full px-8 py-6 font-semibold shadow-lg transition-all hover:scale-105"
+                  className="rounded-full px-6 sm:px-8 py-5 sm:py-6 font-semibold shadow-lg transition-all hover:scale-105 text-sm sm:text-base"
                   style={{ 
                     backgroundColor: primaryColor || '#f97316',
                     color: 'white'
