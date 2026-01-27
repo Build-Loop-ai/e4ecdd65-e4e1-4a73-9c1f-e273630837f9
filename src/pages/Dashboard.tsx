@@ -188,7 +188,8 @@ export default function Dashboard() {
               return (
                 <Card 
                   key={preview.id} 
-                  className="overflow-hidden group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30"
+                  className="overflow-hidden group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/30 cursor-pointer"
+                  onClick={() => navigate(`/manage/${preview.id}`)}
                 >
                   {/* Visual Preview Header */}
                   <div 
@@ -304,7 +305,7 @@ export default function Dashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(`/preview/${preview.slug}`, '_blank')}
+                        onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}
                         title="Open preview in new tab"
                       >
                         <ExternalLink className="h-4 w-4" />
@@ -312,7 +313,7 @@ export default function Dashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => copyPreviewLink(preview.slug)}
+                        onClick={(e) => { e.stopPropagation(); copyPreviewLink(preview.slug); }}
                         title="Copy link"
                       >
                         <Copy className="h-4 w-4" />
@@ -321,7 +322,7 @@ export default function Dashboard() {
                         variant="ghost" 
                         size="sm"
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => deletePreview(preview.id)}
+                        onClick={(e) => { e.stopPropagation(); deletePreview(preview.id); }}
                         title="Delete preview"
                       >
                         <Trash2 className="h-4 w-4" />
