@@ -334,137 +334,149 @@ export function HeroSection({
   }
 
   // ========== MODERN PROFESSIONAL - "Tech Forward" ==========
-  // 3D floating cards that tilt on mouse move, gradient mesh background
+  // Clean centered layout with animated gradient orbs - no ugly cards
   if (effectiveTemplateId === 'modern-professional') {
     return (
-      <section ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden bg-[#0a0a0a]">
-        {/* Gradient mesh background */}
+      <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
+        {/* Gradient mesh background with animated orbs */}
         <div className="absolute inset-0">
           <motion.div 
             animate={{ 
-              rotate: [0, 360],
+              x: [0, 50, 0],
+              y: [0, -30, 0],
+              scale: [1, 1.1, 1],
             }}
-            transition={{ duration: 80, repeat: Infinity, ease: 'linear' }}
-            className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] opacity-30"
+            transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute top-1/4 left-1/3 w-[600px] h-[600px] rounded-full blur-[150px] opacity-25"
             style={{ backgroundColor: primaryColor || '#3b82f6' }}
           />
           <motion.div 
             animate={{ 
-              rotate: [360, 0],
+              x: [0, -40, 0],
+              y: [0, 40, 0],
+              scale: [1, 1.15, 1],
             }}
-            transition={{ duration: 100, repeat: Infinity, ease: 'linear' }}
-            className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full blur-[100px] opacity-25"
+            transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+            className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] rounded-full blur-[130px] opacity-20"
             style={{ backgroundColor: '#06b6d4' }}
+          />
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.2, 1],
+              opacity: [0.15, 0.25, 0.15],
+            }}
+            transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[200px]"
+            style={{ backgroundColor: primaryColor || '#3b82f6' }}
           />
         </div>
 
-        {/* Background image with overlay */}
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)`,
+          backgroundSize: '80px 80px',
+        }} />
+
+        {/* Background image with overlay if available */}
         {bgImage && (
           <motion.div style={{ scale }} className="absolute inset-0">
-            <img src={bgImage} alt="" className="w-full h-full object-cover opacity-15" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/90 via-[#0a0a0a]/70 to-[#0a0a0a]" />
+            <img src={bgImage} alt="" className="w-full h-full object-cover opacity-20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/80 via-[#0a0a0a]/60 to-[#0a0a0a]/90" />
           </motion.div>
         )}
 
-        <div className="container mx-auto max-w-7xl px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left - Content */}
-            <motion.div 
-              style={{ y, opacity }}
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
+        <motion.div 
+          style={{ y, opacity }}
+          className="container mx-auto max-w-5xl text-center relative z-10 px-6"
+        >
+          {/* Logo */}
+          {logo && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
+              className="mb-12 flex justify-center"
             >
-              {logo && (
-                <motion.div className="mb-10">
-                  <SmartLogo 
-                    src={logo} 
-                    alt={companyName || 'Logo'} 
-                    className="h-10 w-auto object-contain"
-                    onDark={true}
-                    fallbackText={companyName}
-                  />
-                </motion.div>
-              )}
-
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6">
-                {headline}
-              </h1>
-
-              <p className="text-lg md:text-xl text-white/60 max-w-xl leading-relaxed mb-10">
-                {subheadline}
-              </p>
-
-              <div className="flex flex-wrap gap-4">
-                <Button
-                  size="lg"
-                  className="group text-base px-8 py-6 rounded-xl font-semibold transition-all hover:scale-105"
-                  style={{
-                    backgroundColor: primaryColor || '#3b82f6',
-                    color: 'white',
-                  }}
-                >
-                  {ctaText}
-                  <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="text-base px-8 py-6 rounded-xl font-semibold border-white/20 text-white hover:bg-white/10"
-                >
-                  Meer info
-                </Button>
+              <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-4">
+                <SmartLogo 
+                  src={logo} 
+                  alt={companyName || 'Logo'} 
+                  className="h-10 w-auto object-contain"
+                  onDark={true}
+                  fallbackText={companyName}
+                />
               </div>
             </motion.div>
+          )}
 
-            {/* Right - 3D Tilt Cards */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="hidden lg:block relative h-[500px]"
+          {/* Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-4xl md:text-5xl lg:text-7xl font-bold text-white leading-[1.05] tracking-tight mb-8"
+          >
+            {headline}
+          </motion.h1>
+
+          {/* Subheadline */}
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-lg md:text-xl lg:text-2xl text-white/50 max-w-2xl mx-auto leading-relaxed mb-12"
+          >
+            {subheadline}
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex flex-wrap justify-center gap-4"
+          >
+            <Button
+              size="lg"
+              className="group text-base px-10 py-7 rounded-xl font-semibold transition-all hover:scale-105"
+              style={{
+                backgroundColor: primaryColor || '#3b82f6',
+                color: 'white',
+                boxShadow: `0 0 80px -20px ${primaryColor || '#3b82f6'}`,
+              }}
             >
-              <TiltCard 
-                className="absolute top-0 right-0 w-64 h-80 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6"
-                maxTilt={15}
-              >
-                <div className="w-full h-full flex flex-col justify-between">
-                  <div className="w-10 h-10 rounded-xl" style={{ backgroundColor: primaryColor || '#3b82f6' }} />
-                  <div>
-                    <div className="h-3 bg-white/20 rounded mb-2 w-3/4" />
-                    <div className="h-3 bg-white/10 rounded w-1/2" />
-                  </div>
-                </div>
-              </TiltCard>
-              
-              <TiltCard 
-                className="absolute top-20 left-0 w-56 h-72 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6"
-                maxTilt={12}
-              >
-                <div className="w-full h-full flex flex-col justify-between">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/50" />
-                  <div>
-                    <div className="h-2.5 bg-white/20 rounded mb-2 w-full" />
-                    <div className="h-2.5 bg-white/10 rounded w-2/3" />
-                  </div>
-                </div>
-              </TiltCard>
-              
-              <TiltCard 
-                className="absolute bottom-0 right-16 w-48 h-56 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-5"
-                maxTilt={18}
-              >
-                <div className="w-full h-full flex flex-col justify-between">
-                  <div className="w-7 h-7 rounded-md bg-purple-500/50" />
-                  <div>
-                    <div className="h-2 bg-white/20 rounded mb-1.5 w-full" />
-                    <div className="h-2 bg-white/10 rounded w-1/2" />
-                  </div>
-                </div>
-              </TiltCard>
-            </motion.div>
-          </div>
-        </div>
+              {ctaText}
+              <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-base px-10 py-7 rounded-xl font-semibold border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
+            >
+              Meer info
+            </Button>
+          </motion.div>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        >
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="w-6 h-10 border-2 border-white/20 rounded-full flex justify-center pt-2"
+          >
+            <motion.div 
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="w-1 h-2 bg-white/50 rounded-full" 
+            />
+          </motion.div>
+        </motion.div>
       </section>
     );
   }
