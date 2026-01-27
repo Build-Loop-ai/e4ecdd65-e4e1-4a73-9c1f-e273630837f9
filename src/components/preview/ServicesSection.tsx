@@ -371,77 +371,78 @@ export function ServicesSection({
     );
   }
 
-  // ========== CORPORATE CLASSIC - Accordion with expand animation ==========
+  // ========== CORPORATE CLASSIC - Clean professional cards ==========
   return (
-    <section ref={containerRef} className="py-32 bg-background relative overflow-hidden">
-      <div className="container mx-auto max-w-5xl px-6">
+    <section ref={containerRef} className="py-28 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden">
+      {/* Subtle pattern */}
+      <div className="absolute inset-0 opacity-[0.02]" style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, #000 1px, transparent 0)`,
+        backgroundSize: '32px 32px',
+      }} />
+
+      <div className="container mx-auto max-w-6xl px-6 relative z-10">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-4">
             Onze Diensten
           </h2>
-          <div 
-            className="w-20 h-1 mx-auto"
-            style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
-          />
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+            Professionele services op maat gemaakt voor uw behoeften
+          </p>
         </motion.div>
 
-        {/* Accordion */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <Accordion type="single" collapsible className="space-y-4">
-            {services.map((service, index) => (
-              <AccordionItem 
-                key={index} 
-                value={`service-${index}`}
-                className="border border-border/50 rounded-xl px-6 data-[state=open]:shadow-lg transition-all duration-300"
-              >
-                <AccordionTrigger className="py-6 hover:no-underline group">
-                  <div className="flex items-center gap-6 text-left">
-                    <span 
-                      className="text-sm font-medium px-3 py-1 rounded-lg"
-                      style={{ 
-                        backgroundColor: `${primaryColor || 'hsl(var(--primary))'}15`,
-                        color: primaryColor || 'hsl(var(--primary))'
-                      }}
-                    >
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="text-lg md:text-xl font-semibold group-hover:text-primary transition-colors">
-                      {service.title}
-                    </span>
+        {/* Cards grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.map((service, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="group"
+            >
+              <div className="h-full bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-slate-200 transition-all duration-300 hover:-translate-y-1">
+                {/* Service image or accent bar */}
+                {service.image ? (
+                  <div className="aspect-video rounded-xl overflow-hidden mb-6">
+                    <img 
+                      src={service.image} 
+                      alt={service.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
                   </div>
-                </AccordionTrigger>
-                <AccordionContent className="pb-6">
-                  <div className="pl-16">
-                    <p className="text-muted-foreground leading-relaxed max-w-2xl">
-                      {service.description}
-                    </p>
-                    {service.image && (
-                      <div className="mt-6 aspect-video max-w-md rounded-xl overflow-hidden">
-                        <img 
-                          src={service.image} 
-                          alt={service.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </motion.div>
+                ) : (
+                  <div 
+                    className="w-12 h-1 rounded-full mb-6"
+                    style={{ backgroundColor: primaryColor || '#1e40af' }}
+                  />
+                )}
+                
+                <h3 className="text-xl font-semibold text-slate-900 mb-3 group-hover:text-primary transition-colors">
+                  {service.title}
+                </h3>
+                <p className="text-slate-600 leading-relaxed text-sm">
+                  {service.description}
+                </p>
+
+                {/* Hover arrow */}
+                <div className="mt-6 flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ color: primaryColor || '#1e40af' }}
+                >
+                  Meer informatie
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
