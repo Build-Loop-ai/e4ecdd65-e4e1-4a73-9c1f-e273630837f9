@@ -31,25 +31,29 @@ export function ContactSection({
   const template = getTemplateStyle(templateId);
   const effectiveTemplateId = templateId || (isModern ? 'modern-professional' : 'corporate-classic');
 
-  // Elegant Minimal variant
+  // ========== ELEGANT MINIMAL - Centered text only, no cards ==========
   if (effectiveTemplateId === 'elegant-minimal') {
     return (
       <section className="py-40 px-6 bg-background">
-        <div className="container mx-auto max-w-2xl text-center">
+        <div className="container mx-auto max-w-xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 1 }}
           >
             <h2 
-              className="text-3xl md:text-4xl font-light mb-6"
+              className="text-3xl md:text-4xl font-light mb-8"
               style={{ fontFamily: 'Georgia, serif' }}
             >
-              Laten we praten
+              Contact
             </h2>
-            <div 
-              className="w-16 h-px mx-auto mb-10"
+            <motion.div 
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.3 }}
+              className="w-16 h-px mx-auto mb-12 origin-center"
               style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
             />
           </motion.div>
@@ -58,13 +62,14 @@ export function ContactSection({
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="space-y-6"
+            transition={{ duration: 1, delay: 0.5 }}
+            className="space-y-4"
+            style={{ fontFamily: 'Georgia, serif' }}
           >
             {email && (
               <a 
                 href={`mailto:${email}`}
-                className="block text-lg text-muted-foreground hover:text-foreground transition-colors"
+                className="block text-lg text-muted-foreground hover:text-foreground transition-colors duration-500"
               >
                 {email}
               </a>
@@ -72,7 +77,7 @@ export function ContactSection({
             {phone && (
               <a 
                 href={`tel:${phone.replace(/\s/g, '')}`}
-                className="block text-lg text-muted-foreground hover:text-foreground transition-colors"
+                className="block text-lg text-muted-foreground hover:text-foreground transition-colors duration-500"
               >
                 {phone}
               </a>
@@ -89,15 +94,15 @@ export function ContactSection({
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex justify-center gap-6 mt-12"
+              transition={{ duration: 1, delay: 0.8 }}
+              className="flex justify-center gap-8 mt-16"
             >
               {instagram && (
                 <a
                   href={instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-500"
                 >
                   <Instagram className="w-5 h-5" />
                 </a>
@@ -107,7 +112,7 @@ export function ContactSection({
                   href={facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-500"
                 >
                   <Facebook className="w-5 h-5" />
                 </a>
@@ -119,7 +124,7 @@ export function ContactSection({
     );
   }
 
-  // Warm Friendly variant
+  // ========== WARM FRIENDLY - Rounded card with warm shadows ==========
   if (effectiveTemplateId === 'warm-friendly') {
     return (
       <section className="py-24 px-6 bg-gradient-to-b from-background to-orange-50/50">
@@ -128,34 +133,38 @@ export function ContactSection({
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6, type: 'spring' }}
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Kom langs of neem contact op!
+              Kom langs! 👋
             </h2>
             <p className="text-muted-foreground text-lg">
-              We staan altijd klaar om je te helpen
+              We helpen je graag verder
             </p>
           </motion.div>
 
-          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl shadow-orange-100/30 border border-orange-100">
-            <div className="grid md:grid-cols-2 gap-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-white rounded-3xl p-8 md:p-12 shadow-xl shadow-orange-100/50 border border-orange-100"
+          >
+            <div className="grid md:grid-cols-2 gap-8 items-center">
               {/* Contact info */}
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {email && (
                   <motion.a
                     href={`mailto:${email}`}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="flex items-center gap-4 p-4 rounded-2xl hover:bg-orange-50 transition-colors group"
+                    whileHover={{ x: 5 }}
+                    className="flex items-center gap-4 p-4 rounded-2xl hover:bg-orange-50 transition-colors"
                   >
                     <div 
                       className="w-12 h-12 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: `${primaryColor || 'hsl(var(--primary))'}15` }}
+                      style={{ backgroundColor: `${primaryColor || '#f97316'}15` }}
                     >
-                      <Mail className="w-5 h-5" style={{ color: primaryColor || 'hsl(var(--primary))' }} />
+                      <Mail className="w-5 h-5" style={{ color: primaryColor || '#f97316' }} />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">E-mail</p>
@@ -167,17 +176,14 @@ export function ContactSection({
                 {phone && (
                   <motion.a
                     href={`tel:${phone.replace(/\s/g, '')}`}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.1 }}
-                    className="flex items-center gap-4 p-4 rounded-2xl hover:bg-orange-50 transition-colors group"
+                    whileHover={{ x: 5 }}
+                    className="flex items-center gap-4 p-4 rounded-2xl hover:bg-orange-50 transition-colors"
                   >
                     <div 
                       className="w-12 h-12 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: `${primaryColor || 'hsl(var(--primary))'}15` }}
+                      style={{ backgroundColor: `${primaryColor || '#f97316'}15` }}
                     >
-                      <Phone className="w-5 h-5" style={{ color: primaryColor || 'hsl(var(--primary))' }} />
+                      <Phone className="w-5 h-5" style={{ color: primaryColor || '#f97316' }} />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Telefoon</p>
@@ -187,41 +193,32 @@ export function ContactSection({
                 )}
 
                 {address && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 }}
-                    className="flex items-center gap-4 p-4 rounded-2xl"
-                  >
+                  <div className="flex items-center gap-4 p-4 rounded-2xl">
                     <div 
                       className="w-12 h-12 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: `${primaryColor || 'hsl(var(--primary))'}15` }}
+                      style={{ backgroundColor: `${primaryColor || '#f97316'}15` }}
                     >
-                      <MapPin className="w-5 h-5" style={{ color: primaryColor || 'hsl(var(--primary))' }} />
+                      <MapPin className="w-5 h-5" style={{ color: primaryColor || '#f97316' }} />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Adres</p>
                       <p className="font-medium">{address}</p>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
               </div>
 
               {/* CTA */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
+              <div 
                 className="flex flex-col justify-center items-center text-center p-8 rounded-2xl"
-                style={{ backgroundColor: `${primaryColor || 'hsl(var(--primary))'}10` }}
+                style={{ backgroundColor: `${primaryColor || '#f97316'}10` }}
               >
-                <p className="text-lg mb-6">Klaar om te beginnen?</p>
+                <p className="text-lg mb-6 font-medium">Klaar om te beginnen?</p>
                 <Button 
                   size="lg"
-                  className="rounded-full px-8 py-6 font-semibold shadow-lg"
+                  className="rounded-full px-8 py-6 font-semibold shadow-lg transition-all hover:scale-105"
                   style={{ 
-                    backgroundColor: primaryColor || 'hsl(var(--primary))',
+                    backgroundColor: primaryColor || '#f97316',
                     color: 'white'
                   }}
                 >
@@ -253,157 +250,243 @@ export function ContactSection({
                     )}
                   </div>
                 )}
-              </motion.div>
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     );
   }
 
-  // Bold Starter variant
+  // ========== BOLD STARTER - Minimal with neon glow CTA ==========
   if (effectiveTemplateId === 'bold-starter') {
     return (
-      <section className="py-32 px-6 bg-black relative overflow-hidden">
-        {/* Animated gradient background */}
+      <section className="py-32 px-6 bg-[#0a0a0a] relative overflow-hidden">
+        {/* Subtle glow */}
         <motion.div 
-          animate={{ 
-            background: [
-              `radial-gradient(circle at 0% 0%, ${primaryColor || '#3b82f6'}40 0%, transparent 50%)`,
-              `radial-gradient(circle at 100% 100%, ${primaryColor || '#3b82f6'}40 0%, transparent 50%)`,
-              `radial-gradient(circle at 0% 0%, ${primaryColor || '#3b82f6'}40 0%, transparent 50%)`,
-            ]
-          }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className="absolute inset-0"
+          animate={{ opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 4, repeat: Infinity }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[200px]"
+          style={{ backgroundColor: primaryColor || '#3b82f6' }}
         />
 
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="container mx-auto max-w-4xl text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6">
+              Let's Talk
+            </h2>
+            <p className="text-xl text-white/50 max-w-lg mx-auto mb-12">
+              Ready to start your project? Get in touch.
+            </p>
+          </motion.div>
+
+          {/* Neon glow CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <Button 
+              size="lg"
+              className="group text-lg px-14 py-8 rounded-xl font-bold transition-all hover:scale-105"
+              style={{
+                backgroundColor: primaryColor || '#3b82f6',
+                color: 'white',
+                boxShadow: `0 0 80px -20px ${primaryColor || '#3b82f6'}, 0 0 40px -10px ${primaryColor || '#3b82f6'}`,
+              }}
+            >
+              Start Conversation
+              <ArrowRight className="ml-2 h-6 w-6 transition-transform group-hover:translate-x-2" />
+            </Button>
+          </motion.div>
+
+          {/* Contact links */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="flex flex-wrap justify-center gap-8 mt-16"
+          >
+            {email && (
+              <a href={`mailto:${email}`} className="text-white/50 hover:text-white transition-colors">
+                {email}
+              </a>
+            )}
+            {phone && (
+              <a href={`tel:${phone.replace(/\s/g, '')}`} className="text-white/50 hover:text-white transition-colors">
+                {phone}
+              </a>
+            )}
+          </motion.div>
+
+          {hasSocial && (
+            <div className="flex justify-center gap-4 mt-8">
+              {instagram && (
+                <a
+                  href={instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                >
+                  <Instagram className="w-5 h-5 text-white" />
+                </a>
+              )}
+              {facebook && (
+                <a
+                  href={facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                >
+                  <Facebook className="w-5 h-5 text-white" />
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  // ========== MODERN PROFESSIONAL - Glassmorphism floating card ==========
+  if (effectiveTemplateId === 'modern-professional') {
+    return (
+      <section className="py-32 px-6 bg-[#0a0a0a] relative overflow-hidden">
+        {/* Background gradients */}
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
+          className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[150px] opacity-20"
+          style={{ backgroundColor: primaryColor || '#3b82f6' }}
+        />
+
+        <div className="container mx-auto max-w-5xl relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left - CTA */}
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
             >
-              <h2 
-                className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6"
-                style={{ 
-                  background: `linear-gradient(135deg, white 0%, ${primaryColor || '#3b82f6'} 100%)`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                Let's Build Something Amazing
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                Laten we{' '}
+                <span style={{ color: primaryColor || '#3b82f6' }}>samenwerken</span>
               </h2>
-              <p className="text-xl text-white/60 mb-10">
-                Ready to take your business to the next level? Get in touch.
+              <p className="text-lg text-white/60 mb-8 max-w-md">
+                Klaar om uw project naar het volgende niveau te tillen? Neem vandaag nog contact op.
               </p>
-
               <Button 
                 size="lg"
-                className="group text-lg px-10 py-8 rounded-2xl font-bold"
+                className="text-base px-8 py-6 rounded-xl font-semibold transition-all hover:scale-105"
                 style={{
                   backgroundColor: primaryColor || '#3b82f6',
                   color: 'white',
-                  boxShadow: `0 20px 60px -15px ${primaryColor || '#3b82f6'}80`,
                 }}
               >
-                Start a Conversation
-                <ArrowRight className="ml-2 h-6 w-6 transition-transform duration-300 group-hover:translate-x-2" />
+                Start een gesprek
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </motion.div>
 
-            {/* Right - Contact details */}
+            {/* Right - Glass card */}
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="space-y-4"
+              transition={{ delay: 0.2 }}
+              className="relative"
             >
-              {email && (
-                <a
-                  href={`mailto:${email}`}
-                  className="block p-6 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
+              {/* Animated border */}
+              <div 
+                className="absolute -inset-px rounded-3xl opacity-50"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}, transparent, ${primaryColor || '#3b82f6'})`,
+                }}
+              />
+              
+              <div className="relative p-8 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 space-y-4">
+                {email && (
+                  <a
+                    href={`mailto:${email}`}
+                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors"
+                  >
                     <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: primaryColor || '#3b82f6' }}
                     >
-                      <Mail className="w-5 h-5 text-white" />
+                      <Mail className="w-4 h-4 text-white" />
                     </div>
                     <div>
                       <p className="text-white/50 text-sm">Email</p>
                       <p className="text-white font-medium">{email}</p>
                     </div>
-                  </div>
-                </a>
-              )}
+                  </a>
+                )}
 
-              {phone && (
-                <a
-                  href={`tel:${phone.replace(/\s/g, '')}`}
-                  className="block p-6 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
+                {phone && (
+                  <a
+                    href={`tel:${phone.replace(/\s/g, '')}`}
+                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors"
+                  >
                     <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: primaryColor || '#3b82f6' }}
                     >
-                      <Phone className="w-5 h-5 text-white" />
+                      <Phone className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <p className="text-white/50 text-sm">Phone</p>
+                      <p className="text-white/50 text-sm">Telefoon</p>
                       <p className="text-white font-medium">{phone}</p>
                     </div>
-                  </div>
-                </a>
-              )}
+                  </a>
+                )}
 
-              {address && (
-                <div className="p-6 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10">
-                  <div className="flex items-center gap-4">
+                {address && (
+                  <div className="flex items-center gap-4 p-4 rounded-xl">
                     <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: primaryColor || '#3b82f6' }}
                     >
-                      <MapPin className="w-5 h-5 text-white" />
+                      <MapPin className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <p className="text-white/50 text-sm">Location</p>
+                      <p className="text-white/50 text-sm">Locatie</p>
                       <p className="text-white font-medium">{address}</p>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {hasSocial && (
-                <div className="flex gap-3 pt-4">
-                  {instagram && (
-                    <a
-                      href={instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-                    >
-                      <Instagram className="w-5 h-5 text-white" />
-                    </a>
-                  )}
-                  {facebook && (
-                    <a
-                      href={facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-                    >
-                      <Facebook className="w-5 h-5 text-white" />
-                    </a>
-                  )}
-                </div>
-              )}
+                {hasSocial && (
+                  <div className="flex gap-3 pt-4 pl-4">
+                    {instagram && (
+                      <a
+                        href={instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                      >
+                        <Instagram className="w-4 h-4 text-white" />
+                      </a>
+                    )}
+                    {facebook && (
+                      <a
+                        href={facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                      >
+                        <Facebook className="w-4 h-4 text-white" />
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
             </motion.div>
           </div>
         </div>
@@ -411,149 +494,116 @@ export function ContactSection({
     );
   }
 
-  // Default: Modern Professional / Corporate Classic
+  // ========== CORPORATE CLASSIC - Two-column layout ==========
   return (
-    <section className="relative py-32 px-6 bg-foreground text-background overflow-hidden">
-      {/* Background decoration */}
-      <div 
-        className="absolute top-0 left-0 w-full h-px opacity-20"
-        style={{ backgroundColor: primaryColor || 'white' }}
-      />
-      <motion.div 
-        className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] rounded-full blur-[150px] opacity-10"
-        style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
-        animate={{ 
-          scale: [1, 1.2, 1],
-          opacity: [0.1, 0.15, 0.1]
-        }}
-        transition={{ duration: 8, repeat: Infinity }}
-      />
-
-      <div className="container mx-auto max-w-6xl relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left column - CTA */}
+    <section className="py-32 px-6 bg-foreground text-background">
+      <div className="container mx-auto max-w-6xl">
+        <div className="grid lg:grid-cols-2 gap-16 items-start">
+          {/* Left - CTA */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6">
-              Laten we 
-              <span 
-                className="block"
-                style={{ color: primaryColor || 'hsl(var(--primary))' }}
-              >
-                samenwerken
-              </span>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Neem contact op
             </h2>
-            <p className="text-xl text-background/60 mb-10 max-w-md">
-              Klaar om uw visie werkelijkheid te maken? Neem vandaag nog contact met ons op.
+            <p className="text-lg text-background/60 mb-10 max-w-md">
+              Klaar om samen te werken? We horen graag van u.
             </p>
-
             <Button 
               size="lg"
-              className="group text-lg px-8 py-7 rounded-full font-semibold shadow-2xl transition-all duration-300"
+              className="text-base px-8 py-6 rounded-lg font-semibold"
               style={{
-                backgroundColor: primaryColor || 'hsl(var(--background))',
-                color: primaryColor ? 'white' : 'hsl(var(--foreground))',
+                backgroundColor: primaryColor || 'hsl(var(--primary))',
+                color: 'white',
               }}
             >
-              Start een gesprek
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+              Stuur een bericht
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </motion.div>
 
-          {/* Right column - Contact details */}
+          {/* Right - Contact details */}
           <motion.div
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ delay: 0.2 }}
             className="space-y-6"
           >
             {email && (
-              <motion.a
+              <a
                 href={`mailto:${email}`}
-                whileHover={{ x: 10 }}
-                className="flex items-center gap-5 p-6 rounded-2xl bg-background/5 border border-background/10 hover:bg-background/10 transition-colors duration-300 group"
+                className="flex items-center gap-4 p-5 rounded-xl bg-background/5 hover:bg-background/10 transition-colors group"
               >
                 <div 
-                  className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
                 >
-                  <Mail className="w-6 h-6 text-white" />
+                  <Mail className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-background/50 mb-1">E-mail</p>
-                  <p className="text-lg font-medium text-background">{email}</p>
+                  <p className="text-background/50 text-sm">Email</p>
+                  <p className="text-background font-medium">{email}</p>
                 </div>
-              </motion.a>
+              </a>
             )}
 
             {phone && (
-              <motion.a
+              <a
                 href={`tel:${phone.replace(/\s/g, '')}`}
-                whileHover={{ x: 10 }}
-                className="flex items-center gap-5 p-6 rounded-2xl bg-background/5 border border-background/10 hover:bg-background/10 transition-colors duration-300 group"
+                className="flex items-center gap-4 p-5 rounded-xl bg-background/5 hover:bg-background/10 transition-colors group"
               >
                 <div 
-                  className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
                 >
-                  <Phone className="w-6 h-6 text-white" />
+                  <Phone className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-background/50 mb-1">Telefoon</p>
-                  <p className="text-lg font-medium text-background">{phone}</p>
+                  <p className="text-background/50 text-sm">Telefoon</p>
+                  <p className="text-background font-medium">{phone}</p>
                 </div>
-              </motion.a>
+              </a>
             )}
 
             {address && (
-              <motion.div
-                whileHover={{ x: 10 }}
-                className="flex items-center gap-5 p-6 rounded-2xl bg-background/5 border border-background/10"
-              >
+              <div className="flex items-center gap-4 p-5 rounded-xl bg-background/5">
                 <div 
-                  className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+                  className="w-12 h-12 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: primaryColor || 'hsl(var(--primary))' }}
                 >
-                  <MapPin className="w-6 h-6 text-white" />
+                  <MapPin className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-background/50 mb-1">Adres</p>
-                  <p className="text-lg font-medium text-background">{address}</p>
+                  <p className="text-background/50 text-sm">Adres</p>
+                  <p className="text-background font-medium">{address}</p>
                 </div>
-              </motion.div>
+              </div>
             )}
 
-            {/* Social links */}
             {hasSocial && (
               <div className="flex gap-4 pt-4">
                 {instagram && (
-                  <motion.a
+                  <a
                     href={instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-14 h-14 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
+                    className="w-12 h-12 rounded-lg bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
                   >
-                    <Instagram className="w-6 h-6 text-background" />
-                  </motion.a>
+                    <Instagram className="w-5 h-5 text-background" />
+                  </a>
                 )}
                 {facebook && (
-                  <motion.a
+                  <a
                     href={facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-14 h-14 rounded-xl bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
+                    className="w-12 h-12 rounded-lg bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors"
                   >
-                    <Facebook className="w-6 h-6 text-background" />
-                  </motion.a>
+                    <Facebook className="w-5 h-5 text-background" />
+                  </a>
                 )}
               </div>
             )}

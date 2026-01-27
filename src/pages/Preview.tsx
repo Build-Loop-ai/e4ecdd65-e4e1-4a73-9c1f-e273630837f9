@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { HeroSection } from '@/components/preview/HeroSection';
 import { AboutSection } from '@/components/preview/AboutSection';
 import { ServicesSection } from '@/components/preview/ServicesSection';
-import { HorizontalGallery } from '@/components/preview/HorizontalGallery';
+import { GallerySection } from '@/components/preview/GallerySection';
 import { InstagramFeed } from '@/components/preview/InstagramFeed';
 import { TestimonialsSection } from '@/components/preview/TestimonialsSection';
 import { ContactSection } from '@/components/preview/ContactSection';
@@ -178,10 +178,10 @@ export default function Preview() {
         templateId={templateId}
       />
 
-      {/* Gallery with horizontal scroll */}
-      <HorizontalGallery
+      {/* Gallery - template-specific layouts */}
+      <GallerySection
         images={schema?.gallery?.images || []}
-        title={schema?.gallery?.title || 'Ons werk'}
+        title={schema?.gallery?.title || 'Ons Werk'}
         primaryColor={primaryColor}
         templateId={templateId}
       />
