@@ -93,6 +93,9 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            {/* New URL structure: /:userPrefix/:clientSlug */}
+            <Route path="/:userPrefix/:clientSlug" element={<Preview />} />
+            {/* Legacy support for old slugs */}
             <Route path="/preview/:slug" element={<Preview />} />
           </Routes>
         </AuthProvider>
