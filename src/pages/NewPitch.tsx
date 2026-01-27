@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { generatePitchSlug } from '@/lib/slugUtils';
 import { 
   Globe, 
   Loader2, 
@@ -47,6 +48,19 @@ export default function NewPitch() {
   const [processedSchema, setProcessedSchema] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [scanPhase, setScanPhase] = useState<'connecting' | 'extracting' | 'processing'>('connecting');
+  const [userProfile, setUserProfile] = useState<{ full_name: string | null } | null>(null);
+
+  // Fetch user profile for slug generation
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => setUserProfile(data));
+    }
+  }, [user]);
 
   // Auto-select recommended template
   useEffect(() => {
@@ -54,13 +68,6 @@ export default function NewPitch() {
       setTemplate(processedSchema.businessIntelligence.recommendedTemplate);
     }
   }, [processedSchema]);
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
-  };
 
   const handleScrape = async () => {
     if (!url || !clientName) {
@@ -122,7 +129,8 @@ export default function NewPitch() {
     setIsLoading(true);
 
     try {
-      const slug = generateSlug(clientName);
+      // Generate slug with user prefix and client name
+      const slug = generatePitchSlug(clientName, userProfile?.full_name, user.email);
 
       const { error } = await supabase.from('client_previews').insert({
         user_id: user.id,

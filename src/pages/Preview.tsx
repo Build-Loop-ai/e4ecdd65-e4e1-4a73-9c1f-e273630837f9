@@ -51,15 +51,22 @@ const trackVisit = async (previewId: string) => {
 };
 
 export default function Preview() {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, userPrefix, clientSlug } = useParams<{ 
+    slug?: string; 
+    userPrefix?: string; 
+    clientSlug?: string; 
+  }>();
   const { toast } = useToast();
   const [preview, setPreview] = useState<ClientPreview | null>(null);
   const [loading, setLoading] = useState(true);
   const hasTracked = useRef(false);
 
+  // Determine the full slug to search for
+  const fullSlug = slug || (userPrefix && clientSlug ? `${userPrefix}/${clientSlug}` : null);
+
   useEffect(() => {
     fetchPreview();
-  }, [slug]);
+  }, [fullSlug]);
 
   // Track visit when preview loads
   useEffect(() => {
@@ -70,12 +77,12 @@ export default function Preview() {
   }, [preview]);
 
   const fetchPreview = async () => {
-    if (!slug) return;
+    if (!fullSlug) return;
 
     const { data, error } = await supabase
       .from('client_previews')
       .select('*')
-      .eq('slug', slug)
+      .eq('slug', fullSlug)
       .maybeSingle();
 
     if (error) {

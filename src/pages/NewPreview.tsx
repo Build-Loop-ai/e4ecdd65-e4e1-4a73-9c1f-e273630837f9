@@ -15,6 +15,7 @@ import { ArrowLeft, Globe, Loader2, CheckCircle2, Sparkles, Star } from 'lucide-
 import { Link } from 'react-router-dom';
 import { ScanningProgress } from '@/components/preview/ScanningProgress';
 import { INDUSTRY_DISPLAY_NAMES, type IndustryType } from '@/lib/templateStyles';
+import { generatePitchSlug } from '@/lib/slugUtils';
 
 type Step = 'url' | 'connecting' | 'extracting' | 'processing' | 'template' | 'complete';
 
@@ -37,6 +38,19 @@ export default function NewPreview() {
   const [scrapedData, setScrapedData] = useState<any>(null);
   const [processedSchema, setProcessedSchema] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<{ full_name: string | null } | null>(null);
+
+  // Fetch user profile for slug generation
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => setUserProfile(data));
+    }
+  }, [user]);
 
   // Auto-select recommended template when processing completes
   useEffect(() => {
@@ -44,13 +58,6 @@ export default function NewPreview() {
       setTemplate(processedSchema.businessIntelligence.recommendedTemplate);
     }
   }, [processedSchema]);
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
-  };
 
   const handleScrape = async () => {
     if (!url || !clientName) {
@@ -129,7 +136,8 @@ export default function NewPreview() {
     setIsLoading(true);
 
     try {
-      const slug = generateSlug(clientName);
+      // Generate slug with user prefix and client name
+      const slug = generatePitchSlug(clientName, userProfile?.full_name, user.email);
 
       const { error } = await supabase.from('client_previews').insert({
         user_id: user.id,
