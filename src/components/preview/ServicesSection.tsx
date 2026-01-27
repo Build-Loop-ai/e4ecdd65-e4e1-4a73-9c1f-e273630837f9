@@ -150,7 +150,7 @@ export function ServicesSection({
     const displayServices = services.slice(0, layout.limit);
 
     return (
-      <section ref={containerRef} className="py-24 bg-gradient-to-b from-orange-50/50 to-background">
+      <section ref={containerRef} className="py-24 bg-white">
         <div className="container mx-auto max-w-6xl px-6">
           {/* Header */}
           <motion.div
@@ -418,7 +418,7 @@ export function ServicesSection({
   const corporateServices = services.slice(0, corporateLayout.limit);
 
   return (
-    <section ref={containerRef} className="py-28 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden">
+    <section ref={containerRef} className="py-28 bg-slate-50 relative overflow-hidden">
       {/* Subtle pattern */}
       <div className="absolute inset-0 opacity-[0.02]" style={{
         backgroundImage: `radial-gradient(circle at 1px 1px, #000 1px, transparent 0)`,
