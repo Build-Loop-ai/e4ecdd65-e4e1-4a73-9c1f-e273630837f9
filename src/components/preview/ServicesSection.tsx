@@ -204,7 +204,7 @@ export function ServicesSection({
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight"
+              className="text-3xl md:text-4xl lg:text-6xl font-black text-white tracking-tight"
             >
               {title}
             </motion.h2>
@@ -220,7 +220,7 @@ export function ServicesSection({
               whileInView={{ opacity: 1 }}
               viewport={{ once: true, amount: 0.5 }}
               transition={{ duration: 0.8 }}
-              className="sticky top-32 min-h-[70vh] flex items-center"
+              className="lg:sticky lg:top-32 min-h-[50vh] lg:min-h-[70vh] flex items-center"
               style={{ 
                 zIndex: index + 1,
                 backgroundColor: '#0a0a0a',
@@ -230,12 +230,12 @@ export function ServicesSection({
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                   <div>
                     <motion.span 
-                      className="text-8xl md:text-9xl font-black opacity-10 block mb-4"
+                      className="text-6xl md:text-7xl lg:text-9xl font-black opacity-10 block mb-4"
                       style={{ color: primaryColor || '#3b82f6' }}
                     >
                       {String(index + 1).padStart(2, '0')}
                     </motion.span>
-                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+                    <h3 className="text-2xl md:text-3xl lg:text-5xl font-bold text-white mb-6">
                       {service.title}
                     </h3>
                     <p className="text-lg md:text-xl text-white/50 leading-relaxed max-w-lg">

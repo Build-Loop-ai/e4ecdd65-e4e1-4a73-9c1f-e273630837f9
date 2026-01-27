@@ -151,7 +151,7 @@ export function ContactSection({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-3xl p-8 md:p-12 shadow-xl shadow-orange-100/50 border border-orange-100"
+            className="bg-white rounded-3xl p-6 md:p-8 lg:p-12 shadow-xl shadow-orange-100/50 border border-orange-100"
           >
             <div className="grid md:grid-cols-2 gap-8 items-center">
               {/* Contact info */}
@@ -278,7 +278,7 @@ export function ContactSection({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white mb-6">
               Let's Talk
             </h2>
             <p className="text-xl text-white/50 max-w-lg mx-auto mb-12">

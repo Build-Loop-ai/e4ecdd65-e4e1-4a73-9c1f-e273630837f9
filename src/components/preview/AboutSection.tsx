@@ -84,13 +84,13 @@ export function AboutSection({
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="flex justify-center gap-20 mb-20 flex-wrap"
+              className="flex justify-center gap-8 md:gap-16 lg:gap-20 mb-20 flex-wrap"
             >
               {stats.map((stat, index) => (
                 <div key={index} className="text-center">
                   <AnimatedCounter 
                     value={stat.value}
-                    className="text-5xl md:text-6xl font-light text-stone-900 block mb-3"
+                    className="text-4xl md:text-5xl lg:text-6xl font-light text-stone-900 block mb-3"
                   />
                   <div className="text-sm text-stone-400 tracking-[0.2em] uppercase">
                     {stat.label}
@@ -171,7 +171,7 @@ export function AboutSection({
                     >
                       <AnimatedCounter 
                         value={stat.value}
-                        className="text-4xl font-bold block mb-1"
+                        className="text-3xl md:text-4xl font-bold block mb-1"
                         duration={1.5}
                       />
                       <div className="text-sm text-stone-500">
@@ -240,7 +240,7 @@ export function AboutSection({
               initial={{ opacity: 0, y: 60 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8 }}
-              className="flex flex-wrap justify-center gap-20 mb-24"
+              className="flex flex-wrap justify-center gap-8 md:gap-12 lg:gap-20 mb-24"
             >
               {stats.map((stat, index) => (
                 <motion.div 
@@ -252,7 +252,7 @@ export function AboutSection({
                 >
                   <AnimatedCounter 
                     value={stat.value}
-                    className="text-7xl md:text-8xl lg:text-9xl font-black block mb-4"
+                    className="text-5xl md:text-7xl lg:text-8xl font-black block mb-4"
                     duration={2}
                   />
                   <div 
@@ -343,7 +343,7 @@ export function AboutSection({
               initial={{ opacity: 0, y: 40 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8 }}
-              className="flex gap-16 mb-24 overflow-x-auto pb-4"
+              className="flex flex-wrap justify-center gap-6 md:gap-12 lg:gap-16 mb-24"
             >
               {stats.map((stat, index) => (
                 <motion.div 
@@ -351,11 +351,11 @@ export function AboutSection({
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={isInView ? { opacity: 1, scale: 1 } : {}}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="flex-shrink-0 text-center min-w-[180px]"
+                  className="text-center min-w-0"
                 >
                   <AnimatedCounter 
                     value={stat.value}
-                    className="text-5xl md:text-6xl font-black block mb-3"
+                    className="text-4xl md:text-5xl lg:text-6xl font-black block mb-3"
                     duration={2}
                   />
                   <div className="text-sm text-white/40 uppercase tracking-widest">
