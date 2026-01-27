@@ -8,6 +8,20 @@
    All colors MUST be HSL.
 */
 
+/* Marquee animation for stats */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
 @layer base {
   :root {
     /* Light theme - Warm off-white with indigo accents */
