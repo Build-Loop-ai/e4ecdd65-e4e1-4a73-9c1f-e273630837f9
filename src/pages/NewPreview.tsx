@@ -148,8 +148,8 @@ export default function NewPreview() {
       setStep('complete');
       
       toast({
-        title: 'Preview created!',
-        description: 'Your client preview is ready to share.',
+        title: 'Ready to send!',
+        description: 'Your pitch is ready to share with the prospect.',
       });
 
       setTimeout(() => {
@@ -204,9 +204,9 @@ export default function NewPreview() {
 
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Create New Preview</h1>
+          <h1 className="text-3xl font-bold mb-2">New Pitch</h1>
           <p className="text-muted-foreground">
-            Enter a website URL to generate a professional preview for your client
+            Enter a prospect's website URL to generate a stunning preview
           </p>
         </div>
 
@@ -239,14 +239,14 @@ export default function NewPreview() {
         {step === 'url' && (
           <Card>
             <CardHeader>
-              <CardTitle>Client Information</CardTitle>
+              <CardTitle>Prospect Information</CardTitle>
               <CardDescription>
-                Enter your client's current website to scrape their content
+                Enter your prospect's current website to analyze their content
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="clientName">Client Name</Label>
+                <Label htmlFor="clientName">Company Name</Label>
                 <Input
                   id="clientName"
                   placeholder="Acme Corporation"
