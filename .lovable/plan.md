@@ -1,138 +1,202 @@
 
-# Complete Template Overhaul - Truly Distinct Professional Designs
+# Intelligent Business-Aware Website Configuration
 
-## The Core Problems I Found
+## The Problem
+Currently, the system treats every business the same:
+- A barber shop and a law firm get the same content schema
+- Template selection is manual with no smart recommendations
+- Section ordering is identical regardless of business type
+- CTA text, headlines, and tone don't adapt to industry
 
-1. **Bold Starter** - Shows the headline TWICE with gradient text layered (looks messy)
-2. **All 5 templates use horizontal scroll** for Gallery and Testimonials
-3. **All Services sections are grid-based** with only minor styling differences
-4. Same animation patterns everywhere (fade-in, scale, slide)
-5. Sections have the same vertical rhythm and spacing across templates
+## The Solution: AI-Powered Business Intelligence Layer
 
-## The Solution: Radically Different Section Types Per Template
+We'll add an **intelligent configuration system** that:
+1. **Detects business type** from scraped content
+2. **Recommends the best template** automatically
+3. **Adapts content tone** to match the industry
+4. **Customizes section ordering** based on what matters most for that business
+5. **Generates industry-specific CTAs** and headlines
 
-Each template will have a COMPLETELY DIFFERENT layout approach - not just different colors/fonts:
-
-### Template Layout Matrix
-
-| Section | Corporate | Modern | Bold | Elegant | Warm |
-|---------|-----------|--------|------|---------|------|
-| **Hero** | Split-screen image+text | Floating 3D cards | Full-screen video/image + massive type | Centered minimal serif | Organic shapes + bouncy |
-| **Services** | Accordion expand | Bento grid (mixed sizes) | Sticky scroll reveal | Numbered list + line extends | Icon cards with wobble |
-| **Gallery** | Fade-in grid | Infinite auto-scroll | Masonry + lightbox | Single large image + parallax | Polaroid stack (draggable) |
-| **Testimonials** | Single quote typewriter | 3D card carousel | Marquee ticker | Fade between quotes | Speech bubbles with avatars |
-| **Contact** | Two-column classic | Glassmorphism floating | Minimal + neon glow | Centered elegant text | Friendly rounded card |
-
-## Detailed Section Redesigns
-
-### 1. BOLD STARTER - Complete Overhaul
-
-**Problems to Fix:**
-- Remove the duplicate headline with gradient overlay
-- Remove horizontal scroll galleries
-- Make it feel like a high-end creative agency
-
-**New Design:**
-- **Hero**: Clean massive white headline on black, NO gradient text effects. Simple. Powerful. Maybe a subtle grid pattern.
-- **Services**: Full-width stacked sections that reveal as you scroll (sticky scroll effect) - each service takes the full viewport
-- **Gallery**: CSS Grid masonry layout with hover zoom + lightbox overlay
-- **Testimonials**: Continuous marquee ticker strip (like Awwwards sites)
-- **Contact**: Minimal dark with single neon-glow CTA button
-
-### 2. CORPORATE CLASSIC - "Executive Authority"
-
-**New Design:**
-- **Hero**: Classic split-screen (text left, image right) with subtle Ken Burns zoom on image
-- **Services**: Accordion cards - click to expand details with smooth height animation
-- **Gallery**: Static grid that fades in staggered, with subtle lift on hover
-- **Testimonials**: Single large quote display with typewriter effect, navigation dots
-- **Contact**: Traditional two-column (info left, form placeholder right)
-
-### 3. MODERN PROFESSIONAL - "Tech Forward"
-
-**New Design:**
-- **Hero**: 3D floating cards that tilt on mouse move, gradient mesh background
-- **Services**: Bento grid with mixed card sizes (some 2x1, some 1x2, some 1x1)
-- **Gallery**: Infinite horizontal auto-scroll (no scroll-linked parallax, just continuous motion)
-- **Testimonials**: 3D carousel with perspective (cards rotate in/out)
-- **Contact**: Floating glassmorphism card with animated gradient border
-
-### 4. ELEGANT MINIMAL - "Atelier"
-
-**New Design:**
-- **Hero**: Maximum whitespace, centered serif text, thin animated line, scroll indicator only
-- **Services**: Numbered list (01, 02, 03...) with animated underline on hover
-- **Gallery**: Single large image at a time with parallax scroll within frame, generous padding
-- **Testimonials**: One quote visible, subtle fade transition between quotes on scroll
-- **Contact**: Centered elegant text only, no cards or boxes
-
-### 5. WARM FRIENDLY - "Neighborhood"
-
-**New Design:**
-- **Hero**: Warm gradient with bouncy animations, wave divider at bottom
-- **Services**: Rounded icon cards with wobble/jiggle hover effect
-- **Gallery**: Polaroid-style images with slight random rotations, draggable/swipeable
-- **Testimonials**: Speech bubble cards with large avatar photos
-- **Contact**: Friendly rounded card with warm shadows, map placeholder
+---
 
 ## Technical Implementation
 
-### Files to Completely Rewrite
+### 1. Enhanced AI Processing - New Schema Fields
 
-1. **`src/components/preview/HeroSection.tsx`**
-   - Fix Bold template (remove duplicate headline)
-   - Refine each template's unique character
+Update `supabase/functions/process-content/index.ts` to extract business intelligence:
 
-2. **`src/components/preview/ServicesSection.tsx`**
-   - Corporate: Accordion with expand animation
-   - Modern: Bento grid with varied sizes
-   - Bold: Sticky scroll full-width sections
-   - Elegant: Numbered list with line animation
-   - Warm: Wobble icon cards
+**New fields to add to the processed schema:**
 
-3. **`src/components/preview/HorizontalGallery.tsx`** (rename to `GallerySection.tsx`)
-   - Corporate: Static grid with fade-in
-   - Modern: Infinite auto-scroll strip
-   - Bold: Masonry grid with lightbox
-   - Elegant: Single image parallax
-   - Warm: Polaroid stack
+```json
+{
+  "businessIntelligence": {
+    "industry": "beauty_wellness | food_hospitality | professional_services | creative_agency | retail_ecommerce | healthcare | construction_trades | technology | education | other",
+    "businessType": "barber | salon | restaurant | cafe | law_firm | accounting | dentist | contractor | saas | agency | gym | spa | etc",
+    "targetAudience": "local_consumers | businesses | luxury_clients | young_professionals | families | etc",
+    "brandPersonality": "professional | friendly | luxury | edgy | traditional | modern | playful",
+    "primaryAction": "book_appointment | call_now | get_quote | shop_now | learn_more | contact_us",
+    "contentPriority": ["services", "portfolio", "testimonials", "about", "contact"],
+    "recommendedTemplate": "corporate-classic | modern-professional | bold-starter | elegant-minimal | warm-friendly",
+    "confidence": 0.85
+  },
+  "adaptedContent": {
+    "hero": {
+      "headline": "Industry-appropriate headline",
+      "subheadline": "Tailored value proposition",
+      "ctaText": "Book Your Appointment" // vs "Get Started" vs "Request Quote"
+    },
+    "sectionOrder": ["hero", "services", "gallery", "testimonials", "about", "contact"],
+    "galleryTitle": "Our Work" | "Portfolio" | "Menu" | "Projects" | "Before & After",
+    "servicesTitle": "Our Services" | "What We Offer" | "Menu" | "Treatments"
+  }
+}
+```
 
-4. **`src/components/preview/TestimonialsSection.tsx`**
-   - Corporate: Single quote with typewriter
-   - Modern: 3D perspective carousel
-   - Bold: Marquee ticker
-   - Elegant: Fade between quotes
-   - Warm: Speech bubbles
+### 2. Enhanced System Prompt
 
-5. **`src/components/preview/ContactSection.tsx`**
-   - Each template gets a completely different layout
+The AI will analyze the business and make intelligent decisions:
 
-### New Animation Utilities Needed
+```text
+BUSINESS INTELLIGENCE ANALYSIS:
+1. Identify the INDUSTRY (beauty, food, professional services, creative, etc.)
+2. Identify the specific BUSINESS TYPE (barber, restaurant, law firm, etc.)
+3. Analyze the BRAND PERSONALITY from imagery, colors, and language
+4. Determine the PRIMARY ACTION customers should take
+5. Recommend which TEMPLATE best fits this business
+6. Prioritize SECTIONS based on what matters most for this business type
 
-1. **Accordion component** - for Corporate services
-2. **Masonry grid** - for Bold gallery
-3. **Marquee ticker** - for Bold testimonials (already have MarqueeText)
-4. **Typewriter effect** - for Corporate testimonials
-5. **Wobble hover** - for Warm cards
-6. **Sticky scroll reveal** - for Bold services
+INDUSTRY-SPECIFIC RULES:
+- Barbers/Salons: Prioritize gallery (before/after), services with pricing hints, booking CTA
+- Restaurants/Cafes: Prioritize menu/food gallery, ambiance photos, location/hours
+- Law Firms/Accountants: Prioritize credentials, testimonials, about (trust), contact
+- Creative Agencies: Prioritize portfolio, bold visuals, case studies
+- Local Services (plumbers, etc.): Prioritize reviews, services, quick contact
+- Luxury Brands: Prioritize whitespace, elegant imagery, exclusivity
 
-## Priority Implementation Order
+TEMPLATE MATCHING:
+- corporate-classic: Law firms, accountants, consultants, B2B services
+- modern-professional: Tech companies, SaaS, digital agencies, startups
+- bold-starter: Creative agencies, portfolios, design studios, artists
+- elegant-minimal: Luxury brands, architects, high-end fashion, spas
+- warm-friendly: Cafes, restaurants, local shops, family businesses, barbers
+```
 
-1. **Fix Bold Hero** - Remove duplicate gradient headline, make it clean and impactful
-2. **Rewrite ServicesSection** - 5 completely different layouts
-3. **Rewrite GallerySection** - 5 completely different display modes
-4. **Rewrite TestimonialsSection** - 5 completely different presentations
-5. **Refine ContactSection** - Ensure 5 distinct layouts
-6. **Add section transitions/dividers** - Template-specific separators
+### 3. Dynamic Section Ordering
 
-## Expected Visual Outcome
+Update `src/pages/Preview.tsx` to respect `contentPriority`:
 
-When switching templates, users will see DRAMATICALLY different websites:
+```typescript
+// Instead of fixed order, use AI-recommended order
+const sectionOrder = schema?.businessIntelligence?.contentPriority || 
+  ['services', 'gallery', 'testimonials', 'about', 'contact'];
 
-- **Corporate** → Traditional, trustworthy, accordion-based, single testimonial spotlight
-- **Modern** → Cutting-edge, bento boxes, infinite scrolling gallery, 3D carousel
-- **Bold** → Creative agency feel, sticky reveals, masonry grid, marquee ticker
-- **Elegant** → Luxury minimalism, numbered list, single image focus, fading quotes
-- **Warm** → Friendly local business, bouncy wobble effects, polaroids, speech bubbles
+// Render sections in recommended order
+{sectionOrder.map(section => renderSection(section))}
+```
 
-Each template will feel like it was designed by a completely different agency for a completely different type of client.
+### 4. Industry-Specific Section Titles
+
+Instead of hardcoded "Our Services", use adaptive titles:
+
+| Business Type | Services Title | Gallery Title | CTA Text |
+|--------------|----------------|---------------|----------|
+| Barber/Salon | Treatments | Our Work | Book Now |
+| Restaurant | Menu | Our Dishes | Reserve a Table |
+| Law Firm | Practice Areas | Case Results | Schedule Consultation |
+| Agency | What We Do | Portfolio | Start a Project |
+| Contractor | Our Services | Recent Projects | Get a Quote |
+
+### 5. Smart Template Auto-Selection
+
+In `src/pages/NewPreview.tsx`, show the AI-recommended template as pre-selected with a "Recommended for [business type]" badge:
+
+```tsx
+{template === schema?.businessIntelligence?.recommendedTemplate && (
+  <Badge className="absolute top-2 right-2 bg-green-500">
+    Recommended for {schema?.businessIntelligence?.businessType}
+  </Badge>
+)}
+```
+
+### 6. Adaptive Color Treatment
+
+Enhance `src/lib/templateStyles.ts` with industry-aware color adjustments:
+
+```typescript
+export interface IndustryColorHints {
+  preferDark: boolean; // Tech/agencies prefer dark
+  warmTones: boolean;  // Restaurants/cafes prefer warm
+  highContrast: boolean; // Professional services need readability
+  accentUsage: 'bold' | 'subtle' | 'accent-only';
+}
+```
+
+---
+
+## Files to Modify
+
+1. **`supabase/functions/process-content/index.ts`**
+   - Expand system prompt with business intelligence extraction
+   - Add new schema fields for industry, business type, recommendations
+   - Generate industry-appropriate content adaptations
+
+2. **`src/lib/templateStyles.ts`**
+   - Add industry mapping to templates
+   - Add `industryFit` scores per template
+   - Add section ordering preferences per template
+
+3. **`src/pages/Preview.tsx`**
+   - Implement dynamic section ordering from `contentPriority`
+   - Use adapted section titles from schema
+   - Pass industry context to section components
+
+4. **`src/pages/NewPreview.tsx`**
+   - Auto-select recommended template
+   - Show "Recommended" badge on AI-suggested template
+   - Display detected business type during template selection
+
+5. **`src/components/preview/ServicesSection.tsx`**
+   - Accept dynamic section title
+   - Adjust layout based on industry (e.g., menu-style for restaurants)
+
+6. **`src/components/preview/GallerySection.tsx`**
+   - Accept dynamic section title
+   - Adjust display style (before/after for salons, grid for portfolios)
+
+7. **`src/components/preview/HeroSection.tsx`**
+   - Use industry-appropriate CTA text
+   - Adjust tone based on brand personality
+
+---
+
+## Expected Outcome
+
+When you scrape ANY business website:
+
+**Barber Shop** will automatically:
+- Recommend "Warm Friendly" template
+- Show "Our Work" gallery with before/after style
+- Use "Book Your Appointment" CTA
+- Prioritize: Services > Gallery > Testimonials > Contact
+
+**Law Firm** will automatically:
+- Recommend "Corporate Classic" template
+- Show "Practice Areas" instead of "Services"
+- Use "Schedule a Consultation" CTA
+- Prioritize: About (trust) > Testimonials > Services > Contact
+
+**Creative Agency** will automatically:
+- Recommend "Bold Starter" template
+- Show "Portfolio" with masonry layout
+- Use "Start a Project" CTA
+- Prioritize: Portfolio > Services > About > Contact
+
+---
+
+## Implementation Priority
+
+1. **Phase 1**: Update `process-content` edge function with business intelligence extraction
+2. **Phase 2**: Implement dynamic section ordering in Preview page
+3. **Phase 3**: Add template auto-recommendation in NewPreview
+4. **Phase 4**: Make section titles and CTAs adaptive
+5. **Phase 5**: Fine-tune industry-specific layouts in section components
