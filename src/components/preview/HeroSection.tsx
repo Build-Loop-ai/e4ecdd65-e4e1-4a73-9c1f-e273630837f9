@@ -156,11 +156,11 @@ export function HeroSection({
   }
 
   // ========== WARM FRIENDLY - "Neighborhood" ==========
-  // Warm gradient with bouncy animations, wave divider at bottom - WITH BACKGROUND IMAGE
+  // Clean, inviting design with subtle warmth - lets the image breathe
   if (effectiveTemplateId === 'warm-friendly') {
     return (
-      <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background image - always present */}
+      <section ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden">
+        {/* Background image with clean dark gradient overlay */}
         <div className="absolute inset-0">
           {bgImage ? (
             <motion.img
@@ -170,84 +170,85 @@ export function HeroSection({
               style={{ scale }}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-orange-100 via-amber-50 to-rose-100" />
+            <div className="w-full h-full bg-gradient-to-br from-stone-800 via-stone-700 to-stone-900" />
           )}
-          {/* Warm overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-orange-50/90 via-amber-50/85 to-orange-100/90" />
+          {/* Clean gradient overlay - dark at bottom for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
         </div>
         
-        {/* Floating organic blobs */}
-        <FloatingShape color={primaryColor || '#f97316'} size={400} blur={100} className="top-10 right-10 opacity-40" duration={20} />
-        <FloatingShape color="#fb923c" size={300} blur={80} className="bottom-20 left-10 opacity-30" duration={25} delay={3} />
+        {/* Subtle accent glow in corner */}
+        <motion.div 
+          animate={{ opacity: [0.3, 0.5, 0.3] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full blur-[120px]"
+          style={{ backgroundColor: primaryColor || '#f97316' }}
+        />
 
-        <motion.div style={{ y, opacity }} className="container mx-auto max-w-4xl text-center relative z-10 px-6">
-          {/* Logo with playful shadow */}
-          {logo && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.6, type: 'spring', bounce: 0.5 }}
-              className="mb-10 flex justify-center"
-            >
-              <div className="bg-white rounded-3xl p-5 shadow-xl shadow-orange-200/50 border border-orange-100">
-                <SmartLogo 
-                  src={logo} 
-                  alt={companyName || 'Logo'} 
-                  className="h-14 w-auto object-contain"
-                  onDark={false}
-                  fallbackText={companyName}
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {/* Bouncy headline */}
-          <motion.h1 
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, type: 'spring', bounce: 0.4 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-stone-800 leading-[1.15] tracking-tight mb-6"
-          >
-            {headline}
-          </motion.h1>
-
-          {/* Subheadline */}
-          <motion.p 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15, type: 'spring' }}
-            className="text-xl md:text-2xl text-stone-600 max-w-2xl mx-auto leading-relaxed mb-10"
-          >
-            {subheadline}
-          </motion.p>
-
-          {/* Bouncy CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3, type: 'spring', bounce: 0.5 }}
-          >
-            <Button
-              size="lg"
-              className="group text-lg px-10 py-7 rounded-full font-bold shadow-xl shadow-orange-200/50 transition-all hover:shadow-2xl hover:scale-105"
-              style={{ 
-                backgroundColor: primaryColor || '#f97316', 
-                color: 'white' 
-              }}
-            >
-              {ctaText}
-              <motion.span
-                animate={{ x: [0, 4, 0] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-                className="ml-2"
+        <motion.div style={{ y, opacity }} className="container mx-auto max-w-5xl relative z-10 px-6 py-32">
+          <div className="max-w-3xl">
+            {/* Logo - clean floating card */}
+            {logo && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="mb-8 inline-block"
               >
-                <ArrowRight className="w-5 h-5" />
-              </motion.span>
-            </Button>
-          </motion.div>
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-2xl">
+                  <SmartLogo 
+                    src={logo} 
+                    alt={companyName || 'Logo'} 
+                    className="h-12 w-auto object-contain"
+                    onDark={false}
+                    fallbackText={companyName}
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {/* Clean headline */}
+            <motion.h1 
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6"
+            >
+              {headline}
+            </motion.h1>
+
+            {/* Subheadline */}
+            <motion.p 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg md:text-xl text-white/80 max-w-xl leading-relaxed mb-10"
+            >
+              {subheadline}
+            </motion.p>
+
+            {/* CTA with brand color */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="flex flex-wrap gap-4"
+            >
+              <Button
+                size="lg"
+                className="group text-base px-8 py-6 rounded-full font-semibold transition-all hover:scale-105"
+                style={{ 
+                  backgroundColor: primaryColor || '#f97316', 
+                  color: getContrastColor(primaryColor),
+                }}
+              >
+                {ctaText}
+                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </motion.div>
+          </div>
         </motion.div>
 
-        {/* Wave divider at bottom */}
+        {/* Subtle wave divider */}
         <WaveDivider color="hsl(var(--background))" variant="wave" animated />
       </section>
     );
