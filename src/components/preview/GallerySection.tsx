@@ -111,14 +111,14 @@ export function GallerySection({
       // Force symmetrical counts: 1, 2, 3, 4, 6, 8, 9, 12
       if (count === 1) return { cols: 'grid-cols-1 max-w-md', limit: 1 };
       if (count === 2) return { cols: 'grid-cols-2 max-w-2xl', limit: 2 };
-      if (count === 3) return { cols: 'grid-cols-3 max-w-4xl', limit: 3 };
-      if (count === 4) return { cols: 'grid-cols-2 sm:grid-cols-4 max-w-5xl', limit: 4 };
-      if (count === 5) return { cols: 'grid-cols-2 sm:grid-cols-4 max-w-5xl', limit: 4 }; // Drop 1 for symmetry
+      if (count === 3) return { cols: 'grid-cols-1 sm:grid-cols-3 max-w-4xl', limit: 3 };
+      if (count === 4) return { cols: 'grid-cols-2 max-w-4xl', limit: 4 };
+      if (count === 5) return { cols: 'grid-cols-2 max-w-4xl', limit: 4 }; // Drop 1 for symmetry
       if (count === 6) return { cols: 'grid-cols-2 sm:grid-cols-3 max-w-5xl', limit: 6 };
       if (count === 7) return { cols: 'grid-cols-2 sm:grid-cols-3 max-w-5xl', limit: 6 }; // Drop 1 for symmetry
       if (count === 8) return { cols: 'grid-cols-2 sm:grid-cols-4 max-w-6xl', limit: 8 };
-      if (count >= 9) return { cols: 'grid-cols-3 sm:grid-cols-3 max-w-5xl', limit: 9 }; // 3x3 grid
-      return { cols: 'grid-cols-2 sm:grid-cols-4 max-w-6xl', limit: 8 };
+      if (count >= 9) return { cols: 'grid-cols-2 sm:grid-cols-3 max-w-5xl', limit: 9 }; // 3x3 grid on desktop
+      return { cols: 'grid-cols-2 max-w-4xl', limit: 8 };
     };
 
     const layout = getSymmetricalLayout();
