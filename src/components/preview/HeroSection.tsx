@@ -470,10 +470,17 @@ export function HeroSection({
   }
 
   // ========== CORPORATE CLASSIC - Split-screen image+text, Ken Burns ==========
+  // Clean, professional light design with authority
   return (
-    <section ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden bg-foreground">
+    <section ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      {/* Subtle professional pattern */}
+      <div className="absolute inset-0 opacity-[0.015]" style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, #000 1px, transparent 0)`,
+        backgroundSize: '40px 40px',
+      }} />
+
       <div className="container mx-auto max-w-7xl px-6 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center min-h-screen py-20">
+        <div className="grid lg:grid-cols-2 gap-16 items-center min-h-screen py-24">
           {/* Left - Text content */}
           <motion.div 
             initial={{ opacity: 0, x: -40 }}
@@ -481,20 +488,40 @@ export function HeroSection({
             transition={{ duration: 0.8 }}
             className="order-2 lg:order-1"
           >
+            {/* Only show logo if it's a real image, not fallback */}
             {logo && (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="mb-8"
+                className="mb-10"
               >
                 <SmartLogo 
                   src={logo} 
                   alt={companyName || 'Logo'} 
-                  className="h-10 w-auto object-contain"
-                  onDark={true}
-                  fallbackText={companyName}
+                  className="h-12 w-auto object-contain"
+                  onDark={false}
                 />
+              </motion.div>
+            )}
+
+            {/* Company name badge if no logo */}
+            {!logo && companyName && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="mb-8"
+              >
+                <span 
+                  className="inline-block text-sm font-semibold tracking-widest uppercase px-4 py-2 rounded-full"
+                  style={{
+                    backgroundColor: `${primaryColor || '#3b82f6'}15`,
+                    color: primaryColor || '#3b82f6',
+                  }}
+                >
+                  {companyName}
+                </span>
               </motion.div>
             )}
 
@@ -502,7 +529,7 @@ export function HeroSection({
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-background leading-[1.1] tracking-tight mb-6"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] tracking-tight mb-6"
             >
               {headline}
             </motion.h1>
@@ -511,7 +538,7 @@ export function HeroSection({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-lg md:text-xl text-background/60 max-w-lg leading-relaxed mb-10"
+              className="text-lg md:text-xl text-slate-600 max-w-lg leading-relaxed mb-10"
             >
               {subheadline}
             </motion.p>
@@ -524,14 +551,21 @@ export function HeroSection({
             >
               <Button
                 size="lg"
-                className="text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105"
+                className="text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
                 style={{
-                  backgroundColor: primaryColor || 'hsl(var(--primary))',
-                  color: getContrastColor(primaryColor),
+                  backgroundColor: primaryColor || '#1e40af',
+                  color: 'white',
                 }}
               >
                 {ctaText}
                 <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-base px-8 py-6 rounded-lg font-semibold border-slate-300 text-slate-700 hover:bg-slate-100"
+              >
+                Meer info
               </Button>
             </motion.div>
           </motion.div>
@@ -544,24 +578,30 @@ export function HeroSection({
             className="order-1 lg:order-2 relative"
           >
             {bgImage ? (
-              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200">
                 <motion.img
                   src={bgImage}
                   alt=""
                   className="w-full h-full object-cover"
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+                  animate={{ scale: [1, 1.08, 1] }}
+                  transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent" />
               </div>
             ) : (
               <div 
-                className="aspect-[4/5] rounded-2xl"
+                className="aspect-[4/5] rounded-2xl ring-1 ring-slate-200"
                 style={{
-                  background: `linear-gradient(135deg, ${primaryColor || 'hsl(var(--primary))'}30 0%, ${primaryColor || 'hsl(var(--primary))'}10 100%)`
+                  background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}15 0%, ${primaryColor || '#3b82f6'}05 100%)`
                 }}
               />
             )}
+            
+            {/* Decorative element */}
+            <div 
+              className="absolute -bottom-6 -left-6 w-32 h-32 rounded-2xl -z-10 opacity-20"
+              style={{ backgroundColor: primaryColor || '#3b82f6' }}
+            />
           </motion.div>
         </div>
       </div>
