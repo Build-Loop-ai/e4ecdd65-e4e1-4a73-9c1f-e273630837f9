@@ -249,7 +249,7 @@ export default function NewPreview() {
 
         {/* Template Selection Step */}
         {step === 'template' && (
-          <Card>
+          <Card className="max-w-4xl mx-auto">
             <CardHeader>
               <CardTitle>Choose a Template</CardTitle>
               <CardDescription>
@@ -258,39 +258,106 @@ export default function NewPreview() {
             </CardHeader>
             <CardContent className="space-y-6">
               <RadioGroup value={template} onValueChange={setTemplate}>
-                <div className="grid gap-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Corporate Classic Template Preview */}
                   <label
                     htmlFor="corporate-classic"
-                    className={`flex items-start gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
-                      template === 'corporate-classic' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                    className={`group cursor-pointer transition-all duration-300 ${
+                      template === 'corporate-classic' ? 'scale-[1.02]' : 'hover:scale-[1.01]'
                     }`}
                   >
-                    <RadioGroupItem value="corporate-classic" id="corporate-classic" />
-                    <div>
-                      <div className="font-semibold">Corporate Classic</div>
-                      <div className="text-sm text-muted-foreground">
-                        Clean, professional layout perfect for business services and consultants
+                    <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
+                      template === 'corporate-classic' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
+                    }`}>
+                      {/* Mini Template Preview */}
+                      <div className="aspect-[4/3] bg-gradient-to-b from-slate-900 to-slate-800 p-4 relative overflow-hidden">
+                        {/* Mini Hero */}
+                        <div className="bg-gradient-to-br from-slate-800 to-slate-700 rounded-lg p-3 mb-2">
+                          <div className="w-8 h-2 bg-white/20 rounded mb-2" />
+                          <div className="w-16 h-3 bg-white/40 rounded mb-1" />
+                          <div className="w-12 h-2 bg-white/20 rounded" />
+                        </div>
+                        {/* Mini About Section */}
+                        <div className="bg-white/5 rounded-lg p-2 mb-2">
+                          <div className="w-10 h-2 bg-white/30 rounded mb-1" />
+                          <div className="flex gap-1">
+                            <div className="w-6 h-6 bg-white/10 rounded" />
+                            <div className="w-6 h-6 bg-white/10 rounded" />
+                            <div className="w-6 h-6 bg-white/10 rounded" />
+                          </div>
+                        </div>
+                        {/* Mini Services Grid */}
+                        <div className="grid grid-cols-3 gap-1">
+                          <div className="aspect-square bg-white/10 rounded" />
+                          <div className="aspect-square bg-white/10 rounded" />
+                          <div className="aspect-square bg-white/10 rounded" />
+                        </div>
+                        {/* Decorative gradient */}
+                        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-slate-900/80 to-transparent" />
+                      </div>
+                      {/* Template Info */}
+                      <div className="p-4 bg-background flex items-start gap-3">
+                        <RadioGroupItem value="corporate-classic" id="corporate-classic" className="mt-1" />
+                        <div>
+                          <div className="font-semibold">Corporate Classic</div>
+                          <div className="text-sm text-muted-foreground">
+                            Clean, professional layout with subtle gradients
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </label>
+
+                  {/* Modern Professional Template Preview */}
                   <label
                     htmlFor="modern-professional"
-                    className={`flex items-start gap-4 p-4 border rounded-lg cursor-pointer transition-colors ${
-                      template === 'modern-professional' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
+                    className={`group cursor-pointer transition-all duration-300 ${
+                      template === 'modern-professional' ? 'scale-[1.02]' : 'hover:scale-[1.01]'
                     }`}
                   >
-                    <RadioGroupItem value="modern-professional" id="modern-professional" />
-                    <div>
-                      <div className="font-semibold">Modern Professional</div>
-                      <div className="text-sm text-muted-foreground">
-                        Bold typography and modern design for agencies and creative professionals
+                    <div className={`relative rounded-xl overflow-hidden border-2 transition-colors ${
+                      template === 'modern-professional' ? 'border-primary shadow-lg shadow-primary/20' : 'border-border hover:border-primary/50'
+                    }`}>
+                      {/* Mini Template Preview */}
+                      <div className="aspect-[4/3] bg-black p-4 relative overflow-hidden">
+                        {/* Animated shapes */}
+                        <div className="absolute top-2 right-2 w-16 h-16 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-full blur-lg" />
+                        <div className="absolute bottom-4 left-2 w-12 h-12 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-full blur-lg" />
+                        {/* Mini Hero with bold typography */}
+                        <div className="relative z-10 mb-3">
+                          <div className="w-6 h-6 bg-white/20 rounded-full mb-2" />
+                          <div className="w-20 h-4 bg-white rounded mb-1" />
+                          <div className="w-14 h-2 bg-white/40 rounded" />
+                        </div>
+                        {/* Horizontal scroll preview */}
+                        <div className="flex gap-2 mb-2 overflow-hidden">
+                          <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
+                          <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
+                          <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
+                          <div className="w-10 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded flex-shrink-0" />
+                        </div>
+                        {/* Mini cards */}
+                        <div className="flex gap-1">
+                          <div className="flex-1 h-8 bg-white/10 rounded border border-white/20" />
+                          <div className="flex-1 h-8 bg-white/10 rounded border border-white/20" />
+                        </div>
+                      </div>
+                      {/* Template Info */}
+                      <div className="p-4 bg-background flex items-start gap-3">
+                        <RadioGroupItem value="modern-professional" id="modern-professional" className="mt-1" />
+                        <div>
+                          <div className="font-semibold">Modern Professional</div>
+                          <div className="text-sm text-muted-foreground">
+                            Bold design with animations & horizontal scrolls
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </label>
                 </div>
               </RadioGroup>
 
-              <Button onClick={handleSave} disabled={isLoading} className="w-full">
+              <Button onClick={handleSave} disabled={isLoading} className="w-full" size="lg">
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Create Preview
               </Button>
