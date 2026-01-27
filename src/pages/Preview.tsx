@@ -12,6 +12,7 @@ import { InstagramFeed } from '@/components/preview/InstagramFeed';
 import { TestimonialsSection } from '@/components/preview/TestimonialsSection';
 import { ContactSection } from '@/components/preview/ContactSection';
 import { FeedbackButton } from '@/components/preview/FeedbackButton';
+import { CreatorFooter } from '@/components/preview/CreatorFooter';
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
 import { 
   getSectionOrder, 
@@ -241,21 +242,13 @@ export default function Preview() {
 
       <FeedbackButton previewId={preview.id} primaryColor={primaryColor} />
 
-      {/* Footer */}
-      <footer className="py-12 px-6 border-t border-border/50 bg-background">
-        <div className="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
-            Preview gegenereerd door PreviewPro
-          </p>
-          {logo && (
-            <img 
-              src={logo} 
-              alt={schema?.companyName || 'Logo'} 
-              className="h-8 w-auto object-contain opacity-50"
-            />
-          )}
-        </div>
-      </footer>
+      {/* Creator Footer */}
+      <CreatorFooter 
+        userId={preview.user_id}
+        primaryColor={primaryColor}
+        clientLogo={logo}
+        clientName={schema?.companyName}
+      />
     </div>
   );
 }

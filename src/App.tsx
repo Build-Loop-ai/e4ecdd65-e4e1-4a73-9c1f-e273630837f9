@@ -15,6 +15,7 @@ import NewPitch from "./pages/NewPitch";
 import Preview from "./pages/Preview";
 import Feedback from "./pages/Feedback";
 import ManagePreview from "./pages/ManagePreview";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ManagePreview />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
                 </ProtectedRoute>
               }
             />
