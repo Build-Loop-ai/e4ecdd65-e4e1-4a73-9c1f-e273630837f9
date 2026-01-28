@@ -27,7 +27,7 @@ Analyze the brand colors provided from Firecrawl. This is ESSENTIAL for maintain
 If Firecrawl extracted colors, validate and use them. If colors are missing or incomplete:
 1. Look for color mentions in CSS, metadata, or content
 2. Analyze the brand personality to infer appropriate colors
-3. Use industry-appropriate defaults if nothing found
+3. Use the COMPREHENSIVE INDUSTRY COLOR PALETTE below
 
 You MUST return validated brand colors in this format:
 {
@@ -46,7 +46,7 @@ COLOR DETECTION RULES:
 2. If primary is missing, look for:
    - Colors in the logo description
    - Dominant colors mentioned in CSS snippets
-   - Common industry colors (tech=blue, food=red/orange, legal=navy, beauty=pink/purple)
+   - Use the 60+ industry color palette below
 3. NEVER return null for primary - always provide a valid hex color
 4. If the brand uses dark colors predominantly, set colorScheme to "dark"
 
@@ -57,22 +57,116 @@ LOGO COLOR ANALYSIS (when brand colors not found):
 4. Bright colored logos → use that hue as primary
 5. Black/white logos → fall back to industry defaults
 
-BARBER-SPECIFIC GUIDANCE:
-- Barbershops are traditionally masculine businesses
-- Prefer charcoal (#1F2937), navy (#1E3A5F), or gold (#D4AF37)
-- NEVER use pink or pastel colors for barbershops
-- Dutch terms: "kapper", "herenkapper", "barbershop" = barber
+## COMPREHENSIVE INDUSTRY COLOR PALETTE (60+ business types)
 
-5. Industry color defaults:
-   - Barbershop: #1F2937 (charcoal) with #D4AF37 (gold) accent
-   - Technology: #3B82F6 (blue)
-   - Beauty/Wellness (salons, spas): #7C3AED (purple)
-   - Food/Hospitality: #F97316 (orange)
-   - Legal/Professional: #1E3A5F (navy)
-   - Healthcare: #14B8A6 (teal)
-   - Creative Agency: #8B5CF6 (purple)
-   - Construction: #D97706 (amber)
-   - Retail: #6366F1 (indigo)
+MULTILINGUAL KEYWORD DETECTION - Recognize these terms in ANY language:
+
+### PERSONAL SERVICES
+| Business Type | Keywords (EN/NL/DE/FR/ES) | Primary | Secondary |
+|--------------|---------------------------|---------|-----------|
+| Barber | barber, barbershop, kapper, herenkapper, friseur, barbier, barberia | #1F2937 (charcoal) | #D4AF37 (gold) |
+| Hair Salon | salon, hairdresser, kapsalon, dameskapper, coiffure, peluqueria | #7C3AED (purple) | #EC4899 (pink) |
+| Nail Studio | nail, nails, nagel, nagelsalon, manucure, manicura | #F472B6 (pink) | #A855F7 (violet) |
+| Tattoo | tattoo, tatoeage, tätowierer, tatouage, tatuaje | #0F172A (black) | #EF4444 (red) |
+| Spa/Wellness | spa, wellness, sauna, wellnesscentrum, therme | #14B8A6 (teal) | #22C55E (green) |
+| Massage | massage, masseur, massagesalon | #0D9488 (teal) | #6EE7B7 (mint) |
+| Photography | photography, fotografie, fotograaf, photographe | #18181B (zinc) | #F59E0B (amber) |
+| Wedding | wedding, bruiloft, hochzeit, mariage, boda | #F9A8D4 (pink) | #D4AF37 (gold) |
+| Florist | florist, flowers, bloemen, bloemist, fleuriste, florista | #22C55E (green) | #EC4899 (pink) |
+| Pet Groomer | grooming, trimsalon, hundesalon, toilettage | #3B82F6 (blue) | #F97316 (orange) |
+| Dry Cleaner | dry cleaning, stomerij, reinigung, pressing, tintorería | #0EA5E9 (sky) | #64748B (slate) |
+| Tailor | tailor, kleermaker, schneider, tailleur, sastre | #1E3A5F (navy) | #D4AF37 (gold) |
+
+### FOOD & HOSPITALITY
+| Business Type | Keywords | Primary | Secondary |
+|--------------|----------|---------|-----------|
+| Restaurant | restaurant, eetcafé, gaststätte, brasserie | #DC2626 (red) | #F97316 (orange) |
+| Cafe | cafe, coffee, koffie, koffiehuis, café | #92400E (brown) | #D97706 (amber) |
+| Bakery | bakery, bakkerij, bäckerei, boulangerie, panadería | #F59E0B (amber) | #92400E (brown) |
+| Bar/Nightclub | bar, pub, kroeg, nightclub, discotheek | #7C3AED (violet) | #EC4899 (pink) |
+| Fast Food | fast food, snackbar, imbiss, restauration rapide | #EF4444 (red) | #FBBF24 (yellow) |
+| Fine Dining | fine dining, gourmet, sterrenrestaurant, michelin | #1F2937 (charcoal) | #D4AF37 (gold) |
+| Food Truck | food truck, foodtruck, streetfood | #F97316 (orange) | #22C55E (green) |
+| Catering | catering, traiteur, partyservice | #6366F1 (indigo) | #F97316 (orange) |
+| Ice Cream | ice cream, ijs, ijssalon, eiscafé, heladería | #EC4899 (pink) | #06B6D4 (cyan) |
+| Butcher | butcher, slager, metzger, boucher, carnicero | #991B1B (dark red) | #78716C (stone) |
+
+### HEALTHCARE
+| Business Type | Keywords | Primary | Secondary |
+|--------------|----------|---------|-----------|
+| Dentist | dentist, dental, tandarts, zahnarzt, dentiste | #0D9488 (teal) | #3B82F6 (blue) |
+| Optician | optician, opticien, optiker, lunettes, óptico | #3B82F6 (blue) | #6366F1 (indigo) |
+| Pharmacy | pharmacy, apotheek, apotheke, pharmacie, farmacia | #22C55E (green) | #3B82F6 (blue) |
+| Physiotherapy | physio, fysiotherapie, physiotherapie, kinésithérapie | #14B8A6 (teal) | #F97316 (orange) |
+| Veterinary | vet, dierenarts, tierarzt, vétérinaire, veterinario | #22C55E (green) | #3B82F6 (blue) |
+| Psychologist | psychologist, psycholoog, psychologe, thérapeute | #7C3AED (purple) | #14B8A6 (teal) |
+| Chiropractor | chiropractor, chiropractie, chiropraktiker | #0D9488 (teal) | #64748B (slate) |
+
+### HOME SERVICES
+| Business Type | Keywords | Primary | Secondary |
+|--------------|----------|---------|-----------|
+| Plumber | plumber, loodgieter, klempner, plombier, fontanero | #3B82F6 (blue) | #64748B (slate) |
+| Electrician | electrician, elektricien, elektriker, électricien | #F59E0B (amber) | #64748B (slate) |
+| HVAC | hvac, airco, klimaat, heating, climatisation | #06B6D4 (cyan) | #64748B (slate) |
+| Roofer | roofer, dakdekker, dachdecker, couvreur, techador | #78716C (stone) | #D97706 (amber) |
+| Landscaper | landscaper, hovenier, tuinman, gärtner, jardinero | #22C55E (green) | #92400E (brown) |
+| Painter | painter, schilder, maler, peintre, pintor | #6366F1 (indigo) | #EC4899 (pink) |
+| Locksmith | locksmith, slotenmaker, schlüsseldienst, serrurier | #1F2937 (charcoal) | #F59E0B (amber) |
+| Cleaning | cleaning, schoonmaak, reinigung, nettoyage, limpieza | #0EA5E9 (sky) | #22C55E (green) |
+| Moving | moving, verhuizen, umzug, déménagement, mudanza | #F97316 (orange) | #3B82F6 (blue) |
+| Interior Design | interior, interieur, innenarchitekt, décorateur | #8B5CF6 (purple) | #D4AF37 (gold) |
+| Pest Control | pest control, ongediertebestrijding, schädlingsbekämpfung | #22C55E (green) | #78716C (stone) |
+
+### PROFESSIONAL SERVICES
+| Business Type | Keywords | Primary | Secondary |
+|--------------|----------|---------|-----------|
+| Lawyer | lawyer, attorney, advocaat, rechtsanwalt, avocat, abogado | #1E3A5F (navy) | #64748B (slate) |
+| Accountant | accountant, boekhouder, buchhalter, comptable, contador | #1E3A5F (navy) | #059669 (emerald) |
+| Insurance | insurance, verzekering, versicherung, assurance, seguros | #3B82F6 (blue) | #22C55E (green) |
+| Real Estate | real estate, makelaar, immobilien, immobilier, inmobiliaria | #1F2937 (charcoal) | #D4AF37 (gold) |
+| Notary | notary, notaris, notar, notaire, notario | #1E3A5F (navy) | #78716C (stone) |
+| Architect | architect, architectuur, architektur, architecte, arquitecto | #18181B (zinc) | #F59E0B (amber) |
+| Consultant | consultant, adviseur, berater, conseil, consultor | #6366F1 (indigo) | #64748B (slate) |
+
+### AUTOMOTIVE
+| Business Type | Keywords | Primary | Secondary |
+|--------------|----------|---------|-----------|
+| Car Dealer | car dealer, autodealer, autohaus, concessionnaire | #1F2937 (charcoal) | #DC2626 (red) |
+| Mechanic | mechanic, garage, autowerkplaats, werkstatt, taller | #4B5563 (gray) | #D97706 (amber) |
+| Car Wash | car wash, wasstraat, waschanlage, lavage auto | #0EA5E9 (sky) | #3B82F6 (blue) |
+| Tire Shop | tire, banden, reifen, pneus, neumáticos | #1F2937 (charcoal) | #F97316 (orange) |
+| Auto Detailing | detailing, autopoetsen, autopflege | #18181B (zinc) | #D4AF37 (gold) |
+| Motorcycle | motorcycle, motor, motorrad, moto | #0F172A (black) | #EF4444 (red) |
+
+### RETAIL
+| Business Type | Keywords | Primary | Secondary |
+|--------------|----------|---------|-----------|
+| Fashion | fashion, mode, kleding, bekleidung, vêtements, moda | #18181B (zinc) | #EC4899 (pink) |
+| Jewelry | jewelry, juwelier, schmuck, bijouterie, joyería | #D4AF37 (gold) | #18181B (zinc) |
+| Electronics | electronics, elektronica, elektronik, électronique | #3B82F6 (blue) | #06B6D4 (cyan) |
+| Furniture | furniture, meubels, möbel, meubles, muebles | #78716C (stone) | #D97706 (amber) |
+| Pet Store | pet store, dierenwinkel, tierhandlung, animalerie | #22C55E (green) | #F97316 (orange) |
+
+### TECHNOLOGY
+| Business Type | Keywords | Primary | Secondary |
+|--------------|----------|---------|-----------|
+| Technology | tech, software, it, digital, ict | #3B82F6 (blue) | #06B6D4 (cyan) |
+| SaaS | saas, cloud, platform | #6366F1 (indigo) | #3B82F6 (blue) |
+
+### FITNESS & EDUCATION
+| Business Type | Keywords | Primary | Secondary |
+|--------------|----------|---------|-----------|
+| Fitness/Gym | fitness, gym, sportschool, fitnessstudio | #DC2626 (red) | #F97316 (orange) |
+| Yoga | yoga, pilates, yogastudio | #14B8A6 (teal) | #F472B6 (pink) |
+| Education | education, school, onderwijs, bildung, éducation | #2563EB (blue) | #16A34A (green) |
+| Driving School | driving school, rijschool, fahrschule, auto-école | #22C55E (green) | #3B82F6 (blue) |
+
+CRITICAL RULES FOR COLOR SELECTION:
+1. ALWAYS detect the exact business type first using keywords in ANY language
+2. Use the EXACT colors from the palette above - do not improvise
+3. NEVER use pink (#EC4899, #F472B6) for masculine businesses (barbers, mechanics, gyms)
+4. NEVER use charcoal/black (#1F2937, #0F172A) for feminine businesses (nail studios, spas)
+5. When in doubt, use the industry's standard professional color
 
 ## BUSINESS INTELLIGENCE ANALYSIS (CRITICAL - DO THIS FIRST)
 
