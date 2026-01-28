@@ -1,222 +1,216 @@
 
-# Lead Generation & Email Outreach Implementation Plan
+
+# Enhanced Lead Management - Save & Organize Leads
 
 ## Overview
 
-This plan adds two major features to your pitch platform:
-1. **Lead Finder** - Search for local businesses via Apify Google Maps and store them as leads
-2. **Email Outreach** - Send pitch emails directly from the platform using Resend
+Transform the current Lead Finder into a full lead management system where all fetched leads are automatically saved for later use, with intuitive organization and tracking.
 
----
+## Current State
 
-## Phase 1: Lead Finder with Apify Google Maps
+- Leads are only saved when "Create Pitch" is clicked
+- No way to view previously discovered leads
+- Search results are lost when navigating away
 
-### What You'll Get
-- A new "Find Leads" page at `/dashboard/leads`
-- Search for businesses like "barbers in zaandam" 
-- Get back: business name, website URL, phone, address, email (when available)
-- One-click "Create Pitch" button per lead
+## Proposed UX Design
 
-### Data Retrieved from Apify
-
-| Field | Example |
-|-------|---------|
-| Business Name | "Kapsalon Amsterdam" |
-| Website | "https://kapsalonamsterdam.nl" |
-| Phone | "+31 20 123 4567" |
-| Email | "info@kapsalon.nl" (when found) |
-| Address | "Hoofdstraat 1, 1000 AB Zaandam" |
-| Category | "Barber shop" |
-| Rating | 4.5 |
-
-### Database Schema
+### Two-Tab Interface
 
 ```text
-+-------------------+
-|      leads        |
-+-------------------+
-| id (uuid, PK)     |
-| user_id (uuid)    |  --> owner of the lead
-| business_name     |
-| website_url       |
-| email             |  --> extracted from Google Maps
-| phone             |
-| address           |
-| city              |
-| category          |
-| rating            |  --> Google Maps rating
-| source_query      |  --> "barbers in zaandam"
-| status            |  --> 'new', 'pitched', 'converted'
-| preview_id (uuid) |  --> links to created pitch
-| created_at        |
-+-------------------+
++--------------------------------------------------+
+|  Find Leads                                       |
++--------------------------------------------------+
+|  [🔍 Search]    [📋 My Leads (47)]              |
++--------------------------------------------------+
 ```
 
-### New Files to Create
+**Tab 1: Search** - Find new businesses
+**Tab 2: My Leads** - View/manage saved leads
 
-1. **Database Migration** - Create `leads` table with RLS policies
-2. **Edge Function** (`apify-google-maps`) - Calls Apify API to search businesses
-3. **Lead Finder Page** (`src/pages/Leads.tsx`) - UI for searching and viewing leads
-4. **API Client** (`src/lib/api/apify.ts`) - Frontend helper to call the edge function
-5. **Update Navigation** - Add "Find Leads" to sidebar
+### Search Tab Behavior
 
-### User Flow
+1. User enters query (e.g., "barbers in zaandam")
+2. Results displayed in cards (current design)
+3. **NEW**: "Save All" button appears above results
+4. **NEW**: Individual "Save" button per card (if not already saved)
+5. **NEW**: Visual indicator for already-saved leads (checkmark badge)
+
+### My Leads Tab Features
 
 ```text
-1. User navigates to /dashboard/leads
-2. Enters search: "barbers in zaandam"
-3. Clicks "Search"
-4. Edge function calls Apify Google Maps scraper
-5. Results displayed in a table/grid
-6. User clicks "Create Pitch" on a lead
-7. Redirects to /dashboard/new with website pre-filled
-8. After pitch created, lead status updates to "pitched"
++--------------------------------------------------+
+|  [Filter by Status ▼] [Filter by City ▼] [Sort ▼]|
++--------------------------------------------------+
+|  □  Select All                         47 leads  |
++--------------------------------------------------+
+|  □  Kapsalon Amsterdam    ★ 4.8   [new]    [...] |
+|     barbers in zaandam    amsterdam              |
+|     🌐 website  📧 email  📱 phone               |
++--------------------------------------------------+
+|  □  The Barber Shop       ★ 4.5   [pitched] [...] |
+|     barbers in zaandam    zaandam                |
+|     🌐 website  📱 phone                         |
++--------------------------------------------------+
+
+Selected: 2 leads    [Create Pitches] [Delete]
 ```
 
-### API Key Requirement
+**Features:**
+- **Filtering**: By status (new, pitched, converted), city, category
+- **Sorting**: By date added, rating, name
+- **Bulk selection**: Checkboxes for multi-select
+- **Bulk actions**: Create pitches, delete
+- **Status badges**: Color-coded (new=blue, pitched=yellow, converted=green)
+- **Source query**: Shows which search found this lead
 
-You'll need an **Apify API token** from https://console.apify.com/account#/integrations
-
-This will be stored as a secret (`APIFY_API_KEY`) and used by the edge function.
-
----
-
-## Phase 2: Email Outreach with Resend
-
-### What You'll Get
-- "Send Pitch" button in the manage pitch view
-- Compose email dialog with recipient details
-- Professional HTML email template with pitch preview
-- Track sent emails and status
-
-### Database Schema
+### Status Flow
 
 ```text
-+-----------------------+
-|   outreach_emails     |
-+-----------------------+
-| id (uuid, PK)         |
-| user_id (uuid)        |
-| preview_id (uuid)     |  --> which pitch
-| recipient_email       |
-| recipient_name        |
-| subject               |
-| status                |  --> 'sent', 'opened', 'clicked'
-| sent_at               |
-| created_at            |
-+-----------------------+
+[new] → User creates pitch → [pitched] → Client converts → [converted]
 ```
 
-### New Files to Create
+## Technical Implementation
 
-1. **Database Migration** - Create `outreach_emails` table
-2. **Edge Function** (`send-pitch-email`) - Sends email via Resend API
-3. **Send Pitch Dialog** (`src/components/manage/SendPitchDialog.tsx`)
-4. **Email Template** - Professional HTML template with pitch preview
-5. **Outreach History** - View sent emails per pitch
+### 1. Duplicate Detection
 
-### Email Template Preview
+Before saving, check if lead already exists by matching:
+- `website_url` (primary identifier)
+- OR `business_name + city` combination
+
+```typescript
+// Check for existing lead
+const { data: existing } = await supabase
+  .from('leads')
+  .select('id')
+  .eq('user_id', user.id)
+  .eq('website_url', lead.website_url)
+  .maybeSingle();
+```
+
+### 2. New Components
+
+| Component | Purpose |
+|-----------|---------|
+| `LeadsTabs.tsx` | Tab navigation between Search and My Leads |
+| `SavedLeadsList.tsx` | Table/grid of saved leads with filters |
+| `LeadFilters.tsx` | Filter dropdowns for status, city, category |
+| `BulkActionsBar.tsx` | Actions bar when leads are selected |
+
+### 3. State Management
+
+```typescript
+// Track which fetched leads are already saved
+const [savedLeadUrls, setSavedLeadUrls] = useState<Set<string>>(new Set());
+
+// On search, check which results are already in DB
+const checkExistingLeads = async (results: ApifyLead[]) => {
+  const urls = results.map(r => r.website_url).filter(Boolean);
+  const { data } = await supabase
+    .from('leads')
+    .select('website_url')
+    .eq('user_id', user.id)
+    .in('website_url', urls);
+  setSavedLeadUrls(new Set(data?.map(d => d.website_url)));
+};
+```
+
+### 4. Save All Function
+
+```typescript
+const handleSaveAll = async () => {
+  const newLeads = results.filter(
+    lead => lead.website_url && !savedLeadUrls.has(lead.website_url)
+  );
+  
+  const { data, error } = await supabase
+    .from('leads')
+    .insert(newLeads.map(lead => ({
+      user_id: user.id,
+      business_name: lead.business_name,
+      website_url: lead.website_url,
+      // ... other fields
+      source_query: searchQuery,
+      status: 'new',
+    })))
+    .select();
+    
+  // Update UI to show saved state
+  if (data) {
+    setSavedLeadUrls(prev => new Set([...prev, ...data.map(d => d.website_url)]));
+    toast({ title: `Saved ${data.length} new leads` });
+  }
+};
+```
+
+### 5. Fetching Saved Leads
+
+```typescript
+const { data: savedLeads, isLoading } = useQuery({
+  queryKey: ['leads', user?.id, filters],
+  queryFn: async () => {
+    let query = supabase
+      .from('leads')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    
+    if (filters.status) query = query.eq('status', filters.status);
+    if (filters.city) query = query.eq('city', filters.city);
+    
+    return query;
+  },
+});
+```
+
+## UI Components Summary
+
+### Search Results Card (Updated)
 
 ```text
-┌─────────────────────────────────────────────┐
-│  [Your Logo]                                │
-├─────────────────────────────────────────────┤
-│                                             │
-│  Hi {RecipientName},                        │
-│                                             │
-│  I've created a preview of what your        │
-│  updated website could look like!           │
-│                                             │
-│  ┌───────────────────────────────┐         │
-│  │ [Pitch Preview Thumbnail]     │         │
-│  │                               │         │
-│  │    {BusinessName}             │         │
-│  └───────────────────────────────┘         │
-│                                             │
-│      [View Your Preview]                    │
-│                                             │
-│  Best regards,                              │
-│  {YourName}                                 │
-│                                             │
-└─────────────────────────────────────────────┘
+┌────────────────────────────────────────┐
+│  Kapsalon Amsterdam           ✓ Saved  │  ← Badge if already saved
+│  [Barber shop]                         │
+│                                        │
+│  🌐 kapsalonamsterdam.nl              │
+│  📧 info@kapsalon.nl                  │
+│  📱 +31 20 123 4567                   │
+│  📍 Amsterdam                          │
+│  ★ 4.5                                │
+│                                        │
+│  [Save] [Create Pitch] [↗]            │  ← Save button OR disabled if saved
+└────────────────────────────────────────┘
 ```
 
-### API Key Requirement
+### Saved Leads Table Row
 
-You'll need a **Resend API key** from https://resend.com/api-keys
+```text
+┌──┬────────────────────┬─────────┬────────────┬─────────┬──────────┐
+│☐ │ Business           │ Contact │ Query      │ Status  │ Actions  │
+├──┼────────────────────┼─────────┼────────────┼─────────┼──────────┤
+│☐ │ Kapsalon Amsterdam │ 🌐📧📱  │ barbers... │ [new]   │ [•••]    │
+│  │ ★ 4.8 · Amsterdam  │         │ 2 days ago │         │          │
+└──┴────────────────────┴─────────┴────────────┴─────────┴──────────┘
+```
 
-Plus a **verified domain** for sending emails: https://resend.com/domains
+## Files to Create/Modify
 
----
+| File | Action | Purpose |
+|------|--------|---------|
+| `src/pages/Leads.tsx` | Modify | Add tabs, save functionality |
+| `src/components/leads/LeadsTabs.tsx` | Create | Tab navigation component |
+| `src/components/leads/SavedLeadsList.tsx` | Create | Saved leads table with filters |
+| `src/components/leads/LeadCard.tsx` | Create | Reusable lead card component |
+| `src/components/leads/LeadFilters.tsx` | Create | Filter dropdowns |
+| `src/components/leads/BulkActionsBar.tsx` | Create | Bulk action buttons |
+| `src/hooks/useLeads.ts` | Create | Custom hook for lead operations |
 
 ## Implementation Order
 
-### Step 1: Setup Apify Integration
-- Add `APIFY_API_KEY` secret
-- Create edge function for Google Maps search
-- Create leads database table
+1. Create `useLeads` hook for CRUD operations
+2. Extract `LeadCard` component from current code
+3. Add "Save" and "Save All" functionality to search
+4. Build `SavedLeadsList` with table view
+5. Add `LeadFilters` component
+6. Implement bulk selection and actions
+7. Add tab navigation wrapper
 
-### Step 2: Build Lead Finder UI
-- Create Leads page with search form
-- Display results in a table
-- Add "Create Pitch" action
-
-### Step 3: Setup Resend Integration
-- Add `RESEND_API_KEY` secret
-- Create edge function for sending emails
-- Create outreach_emails database table
-
-### Step 4: Build Email Outreach UI
-- Add "Send Pitch" button to manage view
-- Create email compose dialog
-- Show outreach history
-
----
-
-## Technical Details
-
-### Apify Edge Function
-
-```typescript
-// supabase/functions/apify-google-maps/index.ts
-// Calls: https://api.apify.com/v2/acts/compass~crawler-google-places/run-sync-get-dataset-items
-// Input: { searchStringsArray: ["barbers in zaandam"], maxCrawledPlacesPerSearch: 20 }
-// Returns: Array of businesses with name, website, phone, address, etc.
-```
-
-### Resend Edge Function
-
-```typescript
-// supabase/functions/send-pitch-email/index.ts  
-// Uses RESEND_API_KEY
-// Sends HTML email with pitch thumbnail and CTA button
-// From: noreply@yourdomain.com (must be verified in Resend)
-```
-
-### Navigation Update
-
-```typescript
-// Add to DashboardLayout navItems:
-{ to: '/dashboard/leads', icon: Search, label: 'Find Leads' },
-```
-
----
-
-## Prerequisites Before Starting
-
-1. **Apify Account** - Sign up at https://apify.com (free tier: 5 USD/month)
-2. **Apify API Token** - Get from https://console.apify.com/account#/integrations
-3. **Resend Account** - Sign up at https://resend.com (free tier: 100 emails/day)
-4. **Resend API Key** - Get from https://resend.com/api-keys
-5. **Verified Domain** - Add domain at https://resend.com/domains
-
----
-
-## Estimated Work
-
-| Phase | Components | Estimate |
-|-------|------------|----------|
-| Phase 1: Lead Finder | DB + Edge + UI | ~45 min |
-| Phase 2: Email Outreach | DB + Edge + UI + Template | ~45 min |
-
-**Total: ~90 minutes**
