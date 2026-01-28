@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,48 @@ import {
   Bookmark,
   Users
 } from 'lucide-react';
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { 
+    opacity: 0, 
+    y: 20,
+    scale: 0.95,
+  },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring" as const,
+      stiffness: 260,
+      damping: 20,
+    },
+  },
+};
+
+const skeletonVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: (i: number) => ({
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delay: i * 0.05,
+      duration: 0.3,
+    },
+  }),
+};
 
 export default function Leads() {
   const { user } = useAuth();
@@ -271,20 +314,35 @@ export default function Leads() {
             </Card>
 
             {/* Loading State */}
-            {isSearching && (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i}>
-                    <CardContent className="p-4 space-y-3">
-                      <Skeleton className="h-5 w-3/4" />
-                      <Skeleton className="h-4 w-1/2" />
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-9 w-full" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {isSearching && (
+                <motion.div 
+                  className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+                  initial="hidden"
+                  animate="visible"
+                  exit={{ opacity: 0 }}
+                >
+                  {[...Array(6)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      custom={i}
+                      variants={skeletonVariants}
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      <Card className="overflow-hidden">
+                        <CardContent className="p-4 space-y-3">
+                          <Skeleton className="h-5 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                          <Skeleton className="h-4 w-full" />
+                          <Skeleton className="h-9 w-full" />
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* No Results */}
             {!isSearching && hasSearched && results.length === 0 && (
@@ -300,45 +358,67 @@ export default function Leads() {
             )}
 
             {/* Results */}
-            {!isSearching && results.length > 0 && (
-              <>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    Found {results.length} businesses
-                  </p>
-                  {unsavedCount > 0 && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleSaveAll}
-                      disabled={isSaving}
-                    >
-                      {isSaving ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Bookmark className="h-4 w-4 mr-2" />
-                      )}
-                      Save All ({unsavedCount})
-                    </Button>
-                  )}
-                </div>
+            <AnimatePresence mode="wait">
+              {!isSearching && results.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-4"
+                >
+                  <motion.div 
+                    className="flex items-center justify-between"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <p className="text-sm text-muted-foreground">
+                      Found <span className="font-medium text-foreground">{results.length}</span> businesses
+                    </p>
+                    {unsavedCount > 0 && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleSaveAll}
+                        disabled={isSaving}
+                      >
+                        {isSaving ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Bookmark className="h-4 w-4 mr-2" />
+                        )}
+                        Save All ({unsavedCount})
+                      </Button>
+                    )}
+                  </motion.div>
 
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {results.map((lead, index) => (
-                    <LeadCard
-                      key={index}
-                      lead={lead}
-                      index={index}
-                      isSaved={lead.website_url ? savedUrls.has(lead.website_url) : false}
-                      onSave={() => handleSaveLead(lead, index)}
-                      onCreatePitch={() => handleCreatePitch(lead, index)}
-                      isSaving={savingIndex === index}
-                      isCreatingPitch={creatingPitchIndex === index}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+                  <motion.div 
+                    className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                  >
+                    {results.map((lead, index) => (
+                      <motion.div
+                        key={`${lead.business_name}-${index}`}
+                        variants={cardVariants}
+                        layout
+                      >
+                        <LeadCard
+                          lead={lead}
+                          index={index}
+                          isSaved={lead.website_url ? savedUrls.has(lead.website_url) : false}
+                          onSave={() => handleSaveLead(lead, index)}
+                          onCreatePitch={() => handleCreatePitch(lead, index)}
+                          isSaving={savingIndex === index}
+                          isCreatingPitch={creatingPitchIndex === index}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Empty state before search */}
             {!hasSearched && (
