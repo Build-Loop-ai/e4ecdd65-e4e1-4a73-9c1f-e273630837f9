@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, User, Globe, Linkedin, Twitter, Instagram, Mail, Save, Upload, X, Camera } from 'lucide-react';
+import { EmailConnectionsSection } from '@/components/email/EmailConnectionCard';
+import { useEmailConnections } from '@/hooks/useEmailConnections';
 
 interface CreatorProfile {
   full_name: string | null;
@@ -28,6 +31,8 @@ interface CreatorProfile {
 
 export default function Settings() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { handleOAuthCallback } = useEmailConnections();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -44,6 +49,19 @@ export default function Settings() {
     public_email: '',
     show_branding: true,
   });
+
+  // Handle OAuth callback
+  useEffect(() => {
+    const oauthProvider = searchParams.get('oauth');
+    const code = searchParams.get('code');
+    
+    if (oauthProvider && code && (oauthProvider === 'gmail' || oauthProvider === 'outlook')) {
+      // Clear the URL params
+      setSearchParams({});
+      // Process the callback
+      handleOAuthCallback(oauthProvider, code);
+    }
+  }, [searchParams, setSearchParams, handleOAuthCallback]);
 
   useEffect(() => {
     if (user) {
@@ -420,6 +438,9 @@ export default function Settings() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Email Integrations Section */}
+        <EmailConnectionsSection />
 
         {/* Preview Card */}
         <Card>
