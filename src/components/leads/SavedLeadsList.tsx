@@ -14,7 +14,8 @@ import {
   MoreHorizontal,
   Trash2,
   Loader2,
-  Users
+  Users,
+  Send
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LeadFilters } from './LeadFilters';
 import { BulkActionsBar } from './BulkActionsBar';
+import { SendEmailDialog } from '@/components/email/SendEmailDialog';
 import { useLeads, type SavedLead } from '@/hooks/useLeads';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,6 +57,7 @@ export function SavedLeadsList() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [creatingPitchId, setCreatingPitchId] = useState<string | null>(null);
+  const [emailDialogLead, setEmailDialogLead] = useState<SavedLead | null>(null);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
@@ -318,6 +321,15 @@ export function SavedLeadsList() {
                               </a>
                             </DropdownMenuItem>
                           )}
+                          {lead.email && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => setEmailDialogLead(lead)}>
+                                <Send className="h-4 w-4 mr-2" />
+                                Send Pitch Email
+                              </DropdownMenuItem>
+                            </>
+                          )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
                             className="text-destructive"
@@ -336,6 +348,19 @@ export function SavedLeadsList() {
           </Card>
         ))}
       </div>
+
+      {/* Send Email Dialog */}
+      {emailDialogLead && (
+        <SendEmailDialog
+          open={!!emailDialogLead}
+          onOpenChange={(open) => !open && setEmailDialogLead(null)}
+          recipientEmail={emailDialogLead.email || ''}
+          recipientName={emailDialogLead.business_name}
+          previewId={emailDialogLead.preview_id || '00000000-0000-0000-0000-000000000000'}
+          previewUrl={emailDialogLead.preview_id ? `${window.location.origin}/preview/${emailDialogLead.preview_id}` : ''}
+          leadId={emailDialogLead.id}
+        />
+      )}
     </div>
   );
 }

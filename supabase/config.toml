@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.generate-images]
 verify_jwt = false
+
+[functions.oauth-callback]
+verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,8 +39,10 @@ import {
   Pencil,
   Trash2,
   LayoutTemplate,
+  Send,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { SendEmailDialog } from '@/components/email/SendEmailDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
 type ClientPreview = Tables<'client_previews'>;
@@ -49,6 +52,7 @@ interface ManageToolbarProps {
   preview: ClientPreview;
   viewport: Viewport;
   onViewportChange: (viewport: Viewport) => void;
+  clientEmail?: string;
   onStatusChange: (status: 'draft' | 'sent' | 'feedback_received') => void;
   onTemplateChange: (templateId: string) => void;
   onOpenFeedback: () => void;
@@ -67,8 +71,10 @@ export default function ManageToolbar({
   onEdit,
   onDelete,
   feedbackCount,
+  clientEmail,
 }: ManageToolbarProps) {
   const navigate = useNavigate();
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
   const { toast } = useToast();
 
   const previewUrl = `${window.location.origin}/preview/${preview.slug}`;
@@ -202,6 +208,12 @@ export default function ManageToolbar({
             </SelectContent>
           </Select>
 
+          {/* Send Email Button */}
+          <Button variant="outline" size="sm" onClick={() => setShowEmailDialog(true)}>
+            <Send className="h-4 w-4 mr-2" />
+            Send
+          </Button>
+
           {/* Edit Button */}
           <Button variant="outline" size="sm" onClick={onEdit}>
             <Pencil className="h-4 w-4 mr-2" />
@@ -259,6 +271,17 @@ export default function ManageToolbar({
           </AlertDialog>
         </div>
       </div>
+
+      {/* Send Email Dialog */}
+      <SendEmailDialog
+        open={showEmailDialog}
+        onOpenChange={setShowEmailDialog}
+        recipientEmail={clientEmail || ''}
+        recipientName={companyName}
+        previewId={preview.id}
+        previewUrl={previewUrl}
+        primaryColor={(schema?.brandColors?.primary as string) || '#3b82f6'}
+      />
     </div>
   );
 }
