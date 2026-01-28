@@ -16,6 +16,7 @@ import Preview from "./pages/Preview";
 import Feedback from "./pages/Feedback";
 import ManagePreview from "./pages/ManagePreview";
 import Settings from "./pages/Settings";
+import Leads from "./pages/Leads";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/leads"
+              element={
+                <ProtectedRoute>
+                  <Leads />
                 </ProtectedRoute>
               }
             />
