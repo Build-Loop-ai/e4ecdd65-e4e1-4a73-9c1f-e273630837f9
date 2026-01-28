@@ -16,8 +16,9 @@ import { Link } from 'react-router-dom';
 import { ScanningProgress } from '@/components/preview/ScanningProgress';
 import { INDUSTRY_DISPLAY_NAMES, type IndustryType } from '@/lib/templateStyles';
 import { generatePitchSlug } from '@/lib/slugUtils';
+import { detectImageGaps, needsImageGeneration, generateImages, mergeGeneratedImages } from '@/lib/imageGeneration';
 
-type Step = 'url' | 'connecting' | 'extracting' | 'processing' | 'template' | 'complete';
+type Step = 'url' | 'connecting' | 'extracting' | 'processing' | 'generating' | 'template' | 'complete';
 
 // Helper to truncate text
 const truncate = (text: string, maxLength: number) => {
@@ -90,11 +91,11 @@ export default function NewPreview() {
 
       const scraped = scrapeResult.data || scrapeResult;
       setScrapedData(scraped);
-      setProgress(50);
+      setProgress(40);
 
       // Step 2: Process with AI
       setStep('processing');
-      setProgress(60);
+      setProgress(50);
 
       const { data: processedResult, error: processError } = await supabase.functions.invoke(
         'process-content',
@@ -110,13 +111,50 @@ export default function NewPreview() {
         throw new Error(processError?.message || processedResult?.error || 'AI processing failed');
       }
 
-      setProcessedSchema(processedResult.schema);
+      let schema = processedResult.schema;
+      setProcessedSchema(schema);
+      setProgress(70);
+
+      // Step 3: Generate missing images if needed
+      const imageGaps = detectImageGaps(schema);
+      
+      if (needsImageGeneration(imageGaps)) {
+        setStep('generating');
+        setProgress(75);
+        
+        console.log('Generating images for gaps:', imageGaps);
+        
+        const primaryColor = scraped?.branding?.colors?.primary || '#4F46E5';
+        const businessType = schema?.businessIntelligence?.businessType || 'default';
+        const industry = schema?.businessIntelligence?.industry || 'general';
+        
+        const imageResult = await generateImages({
+          businessType,
+          industry,
+          companyName: clientName,
+          primaryColor,
+          missingImages: imageGaps
+        });
+
+        if (imageResult.success && imageResult.generatedImages) {
+          schema = mergeGeneratedImages(schema, imageResult.generatedImages);
+          setProcessedSchema(schema);
+          console.log('Images generated and merged:', imageResult.generatedImages);
+        } else {
+          console.warn('Image generation failed, continuing without:', imageResult.error);
+        }
+      }
+
       setProgress(100);
       setStep('template');
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
-      const stepHint = step === 'extracting' ? 'during website scraping' : 'during AI processing';
+      const stepHint = step === 'extracting' 
+        ? 'during website scraping' 
+        : step === 'generating' 
+          ? 'during image generation'
+          : 'during AI processing';
       toast({
         title: `Error ${stepHint}`,
         description: errorMessage.includes('Failed to fetch') 
@@ -192,7 +230,7 @@ export default function NewPreview() {
   const businessType = businessIntelligence?.businessType;
   const industryDisplayName = industry ? INDUSTRY_DISPLAY_NAMES[industry] || industry : null;
 
-  const isScanning = step === 'connecting' || step === 'extracting' || step === 'processing';
+  const isScanning = step === 'connecting' || step === 'extracting' || step === 'processing' || step === 'generating';
 
   // Helper to check if template is recommended
   const isRecommended = (templateId: string) => templateId === recommendedTemplate;
@@ -283,7 +321,7 @@ export default function NewPreview() {
         {/* Immersive Scanning Step */}
         {isScanning && (
           <ScanningProgress
-            phase={step as 'connecting' | 'extracting' | 'processing'}
+            phase={step as 'connecting' | 'extracting' | 'processing' | 'generating'}
             url={url}
             scrapedData={scrapedData}
             processedSchema={processedSchema}

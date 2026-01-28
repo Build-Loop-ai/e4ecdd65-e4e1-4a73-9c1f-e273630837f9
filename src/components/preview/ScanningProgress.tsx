@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, Check, Palette, Image, FileText, Sparkles, Loader2 } from 'lucide-react';
+import { Globe, Check, Palette, Image, FileText, Sparkles, Loader2, ImagePlus } from 'lucide-react';
 
-type ScanPhase = 'connecting' | 'extracting' | 'processing';
+type ScanPhase = 'connecting' | 'extracting' | 'processing' | 'generating';
 
 interface ScanningProgressProps {
   phase: ScanPhase;
@@ -357,6 +357,99 @@ export function ScanningProgress({ phase, url, scrapedData, processedSchema }: S
                       className="h-4 bg-muted rounded w-1/2"
                     />
                   </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Phase 4: Generating Images */}
+          {phase === 'generating' && (
+            <motion.div
+              key="generating"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="py-4"
+            >
+              <div className="flex items-center gap-2 mb-6">
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <ImagePlus className="w-5 h-5 text-primary" />
+                </motion.div>
+                <h3 className="text-lg font-semibold">Generating Stunning Visuals</h3>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Left: Generation steps */}
+                <div className="space-y-3">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </div>
+                    <span className="text-sm">Creating hero background...</span>
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+                      <Image className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm text-muted-foreground">Gallery images queued...</span>
+                  </motion.div>
+                  
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm text-muted-foreground">Service icons pending...</span>
+                  </motion.div>
+                </div>
+
+                {/* Right: Visual preview */}
+                <div className="space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-4 bg-muted/50 rounded-lg"
+                  >
+                    <p className="text-xs text-muted-foreground mb-3">AI is creating custom visuals</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          animate={{ 
+                            opacity: [0.3, 0.6, 0.3],
+                            scale: [0.98, 1, 0.98]
+                          }}
+                          transition={{ 
+                            duration: 2, 
+                            repeat: Infinity, 
+                            delay: i * 0.3 
+                          }}
+                          className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 rounded-lg"
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                  
+                  <p className="text-xs text-center text-muted-foreground">
+                    This may take 15-30 seconds...
+                  </p>
                 </div>
               </div>
             </motion.div>
