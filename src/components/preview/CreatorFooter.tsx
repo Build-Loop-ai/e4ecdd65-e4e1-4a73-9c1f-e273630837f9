@@ -60,9 +60,9 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
   // Don't render if loading, no profile, or branding is hidden
   if (loading || !profile || !profile.show_branding) {
     return (
-      <footer className="py-8 px-6 border-t border-border/50 bg-background">
+      <footer className="py-8 px-6 border-t border-slate-200 bg-slate-50">
         <div className="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-slate-500">
             Preview gegenereerd door Pitch
           </p>
           {clientLogo && (

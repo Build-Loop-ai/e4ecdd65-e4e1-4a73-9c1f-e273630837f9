@@ -37,6 +37,11 @@ export function ContactSection({
 
   // ========== ELEGANT MINIMAL - Centered text only, no cards ==========
   if (effectiveTemplateId === 'elegant-minimal') {
+    // Don't render section if no contact info at all
+    if (!hasContact && !hasSocial) {
+      return null;
+    }
+    
     return (
       <section className="py-40 px-6 bg-background">
         <div className="container mx-auto max-w-xl text-center">
