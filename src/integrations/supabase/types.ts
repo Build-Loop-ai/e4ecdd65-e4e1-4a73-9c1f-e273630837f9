@@ -97,6 +97,122 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          address: string | null
+          business_name: string
+          category: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          id: string
+          phone: string | null
+          preview_id: string | null
+          rating: number | null
+          source_query: string
+          status: Database["public"]["Enums"]["lead_status"]
+          user_id: string
+          website_url: string | null
+        }
+        Insert: {
+          address?: string | null
+          business_name: string
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          preview_id?: string | null
+          rating?: number | null
+          source_query: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          user_id: string
+          website_url?: string | null
+        }
+        Update: {
+          address?: string | null
+          business_name?: string
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          preview_id?: string | null
+          rating?: number | null
+          source_query?: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          user_id?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_preview_id_fkey"
+            columns: ["preview_id"]
+            isOneToOne: false
+            referencedRelation: "client_previews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outreach_emails: {
+        Row: {
+          created_at: string
+          id: string
+          lead_id: string | null
+          opened_at: string | null
+          preview_id: string
+          recipient_email: string
+          recipient_name: string | null
+          sent_at: string
+          status: Database["public"]["Enums"]["email_status"]
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          opened_at?: string | null
+          preview_id: string
+          recipient_email: string
+          recipient_name?: string | null
+          sent_at?: string
+          status?: Database["public"]["Enums"]["email_status"]
+          subject: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          opened_at?: string | null
+          preview_id?: string
+          recipient_email?: string
+          recipient_name?: string | null
+          sent_at?: string
+          status?: Database["public"]["Enums"]["email_status"]
+          subject?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outreach_emails_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outreach_emails_preview_id_fkey"
+            columns: ["preview_id"]
+            isOneToOne: false
+            referencedRelation: "client_previews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       preview_visits: {
         Row: {
           city: string | null
@@ -203,6 +319,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      email_status: "sent" | "opened" | "clicked" | "bounced"
+      lead_status: "new" | "pitched" | "converted"
       preview_status: "draft" | "sent" | "feedback_received"
     }
     CompositeTypes: {
@@ -331,6 +449,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      email_status: ["sent", "opened", "clicked", "bounced"],
+      lead_status: ["new", "pitched", "converted"],
       preview_status: ["draft", "sent", "feedback_received"],
     },
   },
