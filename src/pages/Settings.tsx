@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, User, Globe, Linkedin, Twitter, Instagram, Mail, Save, Upload, X, Camera } from 'lucide-react';
 import { EmailConnectionsSection } from '@/components/email/EmailConnectionCard';
-import { useEmailConnections } from '@/hooks/useEmailConnections';
+
 
 interface CreatorProfile {
   full_name: string | null;
@@ -32,10 +32,10 @@ interface CreatorProfile {
 export default function Settings() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { handleOAuthCallback } = useEmailConnections();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [oauthProcessed, setOauthProcessed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<CreatorProfile>({
     full_name: '',
@@ -50,18 +50,44 @@ export default function Settings() {
     show_branding: true,
   });
 
-  // Handle OAuth callback
+  // Handle OAuth callback - only process once
   useEffect(() => {
     const oauthProvider = searchParams.get('oauth');
     const code = searchParams.get('code');
     
-    if (oauthProvider && code && (oauthProvider === 'gmail' || oauthProvider === 'outlook')) {
-      // Clear the URL params
-      setSearchParams({});
-      // Process the callback
-      handleOAuthCallback(oauthProvider, code);
+    if (oauthProvider && code && !oauthProcessed && (oauthProvider === 'gmail' || oauthProvider === 'outlook')) {
+      setOauthProcessed(true);
+      // Clear the URL params first
+      setSearchParams({}, { replace: true });
+      
+      // Process the callback asynchronously
+      const processCallback = async () => {
+        try {
+          const { data: session } = await supabase.auth.getSession();
+          if (!session?.session?.access_token) {
+            toast.error('No active session');
+            return;
+          }
+
+          const redirectUri = `${window.location.origin}/settings?oauth=${oauthProvider}`;
+          const response = await supabase.functions.invoke('oauth-callback', {
+            body: { provider: oauthProvider, code, redirect_uri: redirectUri },
+          });
+
+          if (response.error) {
+            throw new Error(response.error.message || 'OAuth callback failed');
+          }
+
+          toast.success(`${oauthProvider === 'gmail' ? 'Gmail' : 'Outlook'} connected successfully!`);
+        } catch (error: any) {
+          console.error('OAuth callback error:', error);
+          toast.error(error.message || 'Failed to connect email');
+        }
+      };
+      
+      processCallback();
     }
-  }, [searchParams, setSearchParams, handleOAuthCallback]);
+  }, [searchParams, setSearchParams, oauthProcessed]);
 
   useEffect(() => {
     if (user) {
