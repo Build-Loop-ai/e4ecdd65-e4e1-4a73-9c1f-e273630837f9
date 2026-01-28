@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { firecrawlApi } from '@/lib/api/firecrawl';
@@ -30,6 +30,12 @@ import { cn } from '@/lib/utils';
 
 type Step = 'input' | 'scanning' | 'template' | 'complete';
 
+interface LocationState {
+  prefilledUrl?: string;
+  clientName?: string;
+  leadId?: string;
+}
+
 const truncate = (text: string, maxLength: number) => {
   if (!text) return '';
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
@@ -38,11 +44,17 @@ const truncate = (text: string, maxLength: number) => {
 export default function NewPitch() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   
+  // Get prefilled data from navigation state (from leads page)
+  const locationState = location.state as LocationState | null;
+  const autoStartRef = useRef(false);
+  
   const [step, setStep] = useState<Step>('input');
-  const [url, setUrl] = useState('');
-  const [clientName, setClientName] = useState('');
+  const [url, setUrl] = useState(locationState?.prefilledUrl || '');
+  const [clientName, setClientName] = useState(locationState?.clientName || '');
+  const [leadId, setLeadId] = useState<string | null>(locationState?.leadId || null);
   const [template, setTemplate] = useState('corporate-classic');
   const [scrapedData, setScrapedData] = useState<any>(null);
   const [processedSchema, setProcessedSchema] = useState<any>(null);
@@ -62,12 +74,69 @@ export default function NewPitch() {
     }
   }, [user]);
 
+  // Auto-start scraping if coming from leads page with prefilled data
+  useEffect(() => {
+    if (locationState?.prefilledUrl && locationState?.clientName && !autoStartRef.current) {
+      autoStartRef.current = true;
+      // Small delay to let the UI render first
+      setTimeout(() => {
+        handleScrapeAuto(locationState.prefilledUrl!, locationState.clientName!);
+      }, 500);
+    }
+  }, [locationState]);
+
   // Auto-select recommended template
   useEffect(() => {
     if (processedSchema?.businessIntelligence?.recommendedTemplate) {
       setTemplate(processedSchema.businessIntelligence.recommendedTemplate);
     }
   }, [processedSchema]);
+
+  const handleScrapeAuto = async (autoUrl: string, autoClientName: string) => {
+    setIsLoading(true);
+    setStep('scanning');
+    setScanPhase('connecting');
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      setScanPhase('extracting');
+      
+      const scrapeResult = await firecrawlApi.scrape(autoUrl, {
+        formats: ['markdown', 'html', 'links', 'branding'],
+      });
+
+      if (!scrapeResult.success) {
+        throw new Error(scrapeResult.error || 'Failed to scrape website');
+      }
+
+      const scraped = scrapeResult.data || scrapeResult;
+      setScrapedData(scraped);
+      
+      setScanPhase('processing');
+
+      const { data: processedResult, error: processError } = await supabase.functions.invoke(
+        'process-content',
+        { body: { scrapedContent: scraped, brandColors: scraped.branding } }
+      );
+
+      if (processError || !processedResult?.success) {
+        throw new Error(processError?.message || processedResult?.error || 'AI processing failed');
+      }
+
+      setProcessedSchema(processedResult.schema);
+      setStep('template');
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Error analyzing website',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive',
+      });
+      setStep('input');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleScrape = async () => {
     if (!url || !clientName) {
@@ -132,7 +201,7 @@ export default function NewPitch() {
       // Generate slug with user prefix and client name
       const slug = generatePitchSlug(clientName, userProfile?.full_name, user.email);
 
-      const { error } = await supabase.from('client_previews').insert({
+      const { data: newPreview, error } = await supabase.from('client_previews').insert({
         user_id: user.id,
         slug,
         client_name: clientName,
@@ -142,9 +211,18 @@ export default function NewPitch() {
         processed_schema: processedSchema,
         brand_colors: scrapedData?.branding || null,
         status: 'draft',
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // If this pitch was created from a lead, link them
+      if (leadId && newPreview) {
+        await supabase
+          .from('leads')
+          .update({ preview_id: newPreview.id, status: 'pitched' })
+          .eq('id', leadId)
+          .eq('user_id', user.id);
+      }
 
       setStep('complete');
       
