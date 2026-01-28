@@ -49,9 +49,24 @@ COLOR DETECTION RULES:
    - Common industry colors (tech=blue, food=red/orange, legal=navy, beauty=pink/purple)
 3. NEVER return null for primary - always provide a valid hex color
 4. If the brand uses dark colors predominantly, set colorScheme to "dark"
+
+LOGO COLOR ANALYSIS (when brand colors not found):
+1. Analyze the logo image for dominant colors
+2. Gold/tan logos → use #D4AF37 as primary
+3. Navy/dark logos → use #1E3A5F as primary
+4. Bright colored logos → use that hue as primary
+5. Black/white logos → fall back to industry defaults
+
+BARBER-SPECIFIC GUIDANCE:
+- Barbershops are traditionally masculine businesses
+- Prefer charcoal (#1F2937), navy (#1E3A5F), or gold (#D4AF37)
+- NEVER use pink or pastel colors for barbershops
+- Dutch terms: "kapper", "herenkapper", "barbershop" = barber
+
 5. Industry color defaults:
+   - Barbershop: #1F2937 (charcoal) with #D4AF37 (gold) accent
    - Technology: #3B82F6 (blue)
-   - Beauty/Wellness: #EC4899 (pink)
+   - Beauty/Wellness (salons, spas): #7C3AED (purple)
    - Food/Hospitality: #F97316 (orange)
    - Legal/Professional: #1E3A5F (navy)
    - Healthcare: #14B8A6 (teal)
@@ -108,7 +123,7 @@ Before extracting content, you MUST analyze the business to determine:
 For EVERY image URL found, you MUST analyze and classify it. This is essential for proper image placement.
 
 CLASSIFICATION CATEGORIES:
-- "hero": Wide/landscape images of interiors, exteriors, or abstract visuals WITHOUT embedded text/logos. Must be suitable as a full-width background. High-quality atmospheric shots.
+- "hero": Wide/landscape images of interiors, exteriors, or abstract visuals WITHOUT ANY embedded text/logos. Must be suitable as a full-width background. High-quality atmospheric shots ONLY.
 - "about": Portraits of individuals, headshots, founder photos, single person professional shots
 - "team": Group photos of multiple people together
 - "gallery": Work samples, portfolio pieces, finished products, food photos, project examples
@@ -117,12 +132,21 @@ CLASSIFICATION CATEGORIES:
 - "logo": Company logos, badges, icons, small graphics
 - "unusable": Images with heavy text overlays, poor quality, tiny images, icons, or screenshots with text
 
+CRITICAL TEXT DETECTION RULES (READ CAREFULLY):
+1. If you can read ANY words in the image (business name, tagline, hours, prices, signage), mark hasText: TRUE and DO NOT classify as "hero"
+2. Storefront photos with signage = hasText: true, NOT "hero"
+3. Images with logos overlaid = hasText: true, NOT "hero"
+4. Images with promotional text, prices, or menus = hasText: true
+5. When in doubt, mark hasText: true (safer to show pattern than ugly text overlap)
+6. Only pristine, completely text-free atmospheric shots should be "hero"
+
 CLASSIFICATION RULES:
-1. Images with visible embedded text, logos, or UI elements should NEVER be classified as "hero" - mark hasText: true
+1. Images with ANY visible embedded text, logos, signage, or UI elements should NEVER be classified as "hero" - mark hasText: true
 2. Portrait/headshot photos should be classified as "about", NOT "hero"
 3. Screenshots of websites or apps should be "unusable"
-4. Only wide, high-quality, text-free images should be "hero"
+4. Only wide, high-quality, completely text-free images should be "hero"
 5. If unsure whether an image has text, mark hasText: true to be safe
+6. Storefront/facade photos almost always have signage - default to hasText: true
 
 ## CONTENT EXTRACTION
 
