@@ -52,6 +52,7 @@ interface ProviderCardProps {
   onDisconnect: (id: string) => void;
   onSendTest: (id: string) => void;
   isConnecting: boolean;
+  comingSoon?: boolean;
 }
 
 function ProviderCard({ 
@@ -60,7 +61,8 @@ function ProviderCard({
   onConnect, 
   onDisconnect, 
   onSendTest,
-  isConnecting 
+  isConnecting,
+  comingSoon = false
 }: ProviderCardProps) {
   const [isSendingTest, setIsSendingTest] = useState(false);
 
@@ -82,7 +84,7 @@ function ProviderCard({
   };
 
   return (
-    <Card className={connection?.is_active ? 'border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20' : ''}>
+    <Card className={`${connection?.is_active ? 'border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20' : ''} ${comingSoon ? 'opacity-60' : ''}`}>
       <CardContent className="pt-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -92,7 +94,12 @@ function ProviderCard({
             <div>
               <h4 className="font-medium text-foreground flex items-center gap-2">
                 {name}
-                {connection?.is_active && (
+                {comingSoon && (
+                  <Badge variant="outline" className="text-xs">
+                    Coming Soon
+                  </Badge>
+                )}
+                {connection?.is_active && !comingSoon && (
                   <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
                     <Check className="h-3 w-3 mr-1" />
                     Connected
@@ -100,9 +107,9 @@ function ProviderCard({
                 )}
               </h4>
               <p className="text-sm text-muted-foreground">
-                {connection ? connection.email_address : description}
+                {connection && !comingSoon ? connection.email_address : description}
               </p>
-              {connection && (
+              {connection && !comingSoon && (
                 <p className="text-xs text-muted-foreground mt-1">
                   Connected {format(new Date(connection.created_at), 'MMM d, yyyy')}
                 </p>
@@ -111,7 +118,12 @@ function ProviderCard({
           </div>
 
           <div className="flex items-center gap-2">
-            {connection ? (
+            {comingSoon ? (
+              <Button variant="outline" size="sm" disabled>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Connect {name}
+              </Button>
+            ) : connection ? (
               <>
                 <Button
                   variant="outline"
@@ -244,6 +256,7 @@ export function EmailConnectionsSection() {
           onDisconnect={disconnectEmail}
           onSendTest={sendTestEmail}
           isConnecting={isConnecting}
+          comingSoon={true}
         />
 
         <Separator />
