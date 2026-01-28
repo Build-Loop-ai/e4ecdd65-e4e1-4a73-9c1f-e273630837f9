@@ -21,6 +21,7 @@ import {
   type ProcessedSchema 
 } from '@/lib/businessIntelligence';
 import { getIndustryColors } from '@/lib/industryColors';
+import { extractLogoColor } from '@/lib/logoColorExtraction';
 import type { Tables } from '@/integrations/supabase/types';
 
 type ClientPreview = Tables<'client_previews'>;
@@ -60,6 +61,9 @@ export default function Preview() {
   const [preview, setPreview] = useState<ClientPreview | null>(null);
   const [loading, setLoading] = useState(true);
   const hasTracked = useRef(false);
+  
+  // State for logo-extracted color (async fallback) - must be before any returns
+  const [logoExtractedColor, setLogoExtractedColor] = useState<string | null>(null);
 
   // Determine the full slug to search for
   const fullSlug = slug || (userPrefix && clientSlug ? `${userPrefix}/${clientSlug}` : null);
@@ -75,6 +79,25 @@ export default function Preview() {
       trackVisit(preview.id);
     }
   }, [preview]);
+  
+  // Extract dependent values for logo color extraction effect
+  const schema = preview?.processed_schema as unknown as ProcessedSchema | undefined;
+  const brandColors = preview?.brand_colors as any;
+  const aiColorsPrimary = schema?.brandColors?.primary;
+  const firecrawlColorsPrimary = brandColors?.colors?.primary || brandColors?.branding?.colors?.primary;
+  const logo = schema?.logo || brandColors?.logo || brandColors?.branding?.logo || brandColors?.branding?.images?.logo || null;
+  
+  // Extract color from logo if AI and Firecrawl didn't provide colors
+  useEffect(() => {
+    if (logo && !aiColorsPrimary && !firecrawlColorsPrimary) {
+      extractLogoColor(logo).then((color) => {
+        if (color) {
+          console.log('Logo color extracted:', color);
+          setLogoExtractedColor(color);
+        }
+      });
+    }
+  }, [logo, aiColorsPrimary, firecrawlColorsPrimary]);
 
   const fetchPreview = async () => {
     if (!fullSlug) return;
@@ -125,33 +148,30 @@ export default function Preview() {
     );
   }
 
-  const schema = preview.processed_schema as unknown as ProcessedSchema;
-  const brandColors = preview.brand_colors as any;
+  // Use the schema and brandColors already extracted above for hooks
+  const fullSchema = schema as ProcessedSchema;
   const templateId = (preview.template_id || 'corporate-classic') as TemplateId;
   const template = getTemplateStyle(templateId);
 
   // Get business intelligence and adapted content
-  const businessIntelligence = getBusinessIntelligence(schema);
-  const adaptedContent = getAdaptedContent(schema);
-  const sectionOrder = getSectionOrder(schema);
+  const businessIntelligence = getBusinessIntelligence(fullSchema);
+  const adaptedContent = getAdaptedContent(fullSchema);
+  const sectionOrder = getSectionOrder(fullSchema);
 
   // Extract colors from multiple sources with intelligent fallbacks
   const firecrawlColors = (brandColors?.colors || brandColors?.branding?.colors || {}) as Record<string, string | undefined>;
-  const aiColors = schema?.brandColors;
+  const aiColors = fullSchema?.brandColors;
   const industryFallback = getIndustryColors(businessIntelligence.industry);
   
-  // Priority: AI-validated colors > Firecrawl colors > Industry defaults
-  const primaryColor = aiColors?.primary || firecrawlColors?.primary || industryFallback.primary;
+  // Priority: AI-validated colors > Firecrawl colors > Logo-extracted color > Industry defaults
+  const primaryColor = aiColors?.primary || firecrawlColors?.primary || logoExtractedColor || industryFallback.primary;
   const secondaryColor = aiColors?.secondary || firecrawlColors?.secondary || industryFallback.secondary;
   const accentColor = aiColors?.accent || firecrawlColors?.accent || primaryColor || industryFallback.accent;
   const backgroundColor = aiColors?.background || firecrawlColors?.background || null;
   const textColor = aiColors?.textPrimary || firecrawlColors?.textPrimary || null;
   const colorScheme = aiColors?.colorScheme || 'light';
-  
-  // Get logo from schema or branding data
-  const logo = schema?.logo || brandColors?.logo || brandColors?.branding?.logo || brandColors?.branding?.images?.logo || null;
 
-  console.log('Brand colors - Primary:', primaryColor, 'Secondary:', secondaryColor, 'Source:', aiColors?.primary ? 'AI' : firecrawlColors?.primary ? 'Firecrawl' : 'Industry fallback');
+  console.log('Brand colors - Primary:', primaryColor, 'Secondary:', secondaryColor, 'Source:', aiColors?.primary ? 'AI' : firecrawlColors?.primary ? 'Firecrawl' : logoExtractedColor ? 'Logo extraction' : 'Industry fallback');
 
   // Create CSS variables for brand colors
   const brandStyles = {

@@ -26,10 +26,18 @@ export const industryColors: Record<string, IndustryColorPalette> = {
     name: 'AI Consultancy',
   },
   
-  // Beauty/Wellness - Soft, luxurious, calming
+  // Barbershop - Traditional masculine, premium feel
+  barber: {
+    primary: '#1F2937', // Charcoal gray (classic)
+    secondary: '#D4AF37', // Gold accent
+    accent: '#B8860B', // Dark gold
+    name: 'Barbershop',
+  },
+  
+  // Beauty/Wellness - Soft, luxurious, calming (more unisex than before)
   beauty: {
-    primary: '#EC4899', // Pink
-    secondary: '#F472B6', // Light pink
+    primary: '#7C3AED', // Purple (more unisex)
+    secondary: '#EC4899', // Pink as secondary
     accent: '#D946EF', // Fuchsia
     name: 'Beauty & Wellness',
   },
@@ -214,6 +222,10 @@ export function getIndustryColors(industry?: string | null): IndustryColorPalett
   }
   if (normalized.includes('ai') || normalized.includes('machine') || normalized.includes('data')) {
     return industryColors.ai_consultancy;
+  }
+  // Barber detection BEFORE beauty (barbers are masculine, not beauty/wellness)
+  if (normalized.includes('barber') || normalized.includes('kapper') || normalized.includes('herenkapper') || normalized.includes('barbershop')) {
+    return industryColors.barber;
   }
   if (normalized.includes('beauty') || normalized.includes('salon') || normalized.includes('spa')) {
     return industryColors.beauty;
