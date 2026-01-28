@@ -1,4 +1,7 @@
 project_id = "wylrvlvphndooigebwrg"
+[functions.get-oauth-url]
+verify_jwt = false
+
 
 [functions.firecrawl-scrape]
 verify_jwt = false

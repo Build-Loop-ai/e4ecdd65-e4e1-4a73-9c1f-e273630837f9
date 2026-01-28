@@ -200,13 +200,13 @@ export function EmailConnectionsSection() {
   const gmailConnection = connections.find(c => c.provider === 'gmail');
   const outlookConnection = connections.find(c => c.provider === 'outlook');
 
-  const handleConnectGmail = () => {
-    const url = getGoogleOAuthUrl();
+  const handleConnectGmail = async () => {
+    const url = await getGoogleOAuthUrl();
     if (url) window.location.href = url;
   };
 
-  const handleConnectOutlook = () => {
-    const url = getMicrosoftOAuthUrl();
+  const handleConnectOutlook = async () => {
+    const url = await getMicrosoftOAuthUrl();
     if (url) window.location.href = url;
   };
 
