@@ -47,31 +47,33 @@ export function useEmailConnections() {
     return connections.find(c => c.is_active);
   }, [connections]);
 
-  const getGoogleOAuthUrl = useCallback(() => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (!clientId) {
-      toast.error('Google OAuth not configured');
+  const getOAuthUrl = useCallback(async (provider: 'gmail' | 'outlook') => {
+    try {
+      const redirectUri = `${window.location.origin}/settings?oauth=${provider}`;
+      
+      const { data, error } = await supabase.functions.invoke('get-oauth-url', {
+        body: { provider, redirect_uri: redirectUri },
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to get OAuth URL');
+      }
+
+      return data.url;
+    } catch (error: any) {
+      console.error('Error getting OAuth URL:', error);
+      toast.error(error.message || 'Failed to start OAuth flow');
       return null;
     }
-
-    const redirectUri = `${window.location.origin}/settings?oauth=gmail`;
-    const scope = encodeURIComponent('https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email');
-    
-    return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
   }, []);
 
-  const getMicrosoftOAuthUrl = useCallback(() => {
-    const clientId = import.meta.env.VITE_MICROSOFT_CLIENT_ID;
-    if (!clientId) {
-      toast.error('Microsoft OAuth not configured');
-      return null;
-    }
+  const getGoogleOAuthUrl = useCallback(async () => {
+    return getOAuthUrl('gmail');
+  }, [getOAuthUrl]);
 
-    const redirectUri = `${window.location.origin}/settings?oauth=outlook`;
-    const scope = encodeURIComponent('https://graph.microsoft.com/Mail.Send offline_access openid email');
-    
-    return `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}`;
-  }, []);
+  const getMicrosoftOAuthUrl = useCallback(async () => {
+    return getOAuthUrl('outlook');
+  }, [getOAuthUrl]);
 
   const handleOAuthCallback = useCallback(async (provider: 'gmail' | 'outlook', code: string) => {
     if (!user) return false;
