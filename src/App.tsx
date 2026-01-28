@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Auth from "./pages/Auth";
@@ -18,6 +18,12 @@ import ManagePreview from "./pages/ManagePreview";
 import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
+
+const LegacyPreviewRedirect = () => {
+  const { userPrefix, clientSlug } = useParams<{ userPrefix: string; clientSlug: string }>();
+  if (!userPrefix || !clientSlug) return <Navigate to="/" replace />;
+  return <Navigate to={`/${userPrefix}/${clientSlug}`} replace />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -93,6 +99,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+             {/* Back-compat: users sometimes copy /preview/{userPrefix}/{clientSlug} */}
+             <Route path="/preview/:userPrefix/:clientSlug" element={<LegacyPreviewRedirect />} />
             {/* New URL structure: /:userPrefix/:clientSlug */}
             <Route path="/:userPrefix/:clientSlug" element={<Preview />} />
             {/* Legacy support for old slugs */}
