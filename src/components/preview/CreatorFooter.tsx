@@ -102,25 +102,16 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
   );
 
   return (
-    <footer className="relative overflow-hidden">
-      {/* Dark gradient background - using neutral colors */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-        style={{
-          backgroundImage: `radial-gradient(ellipse at top right, ${footerAccent}15 0%, transparent 50%),
-                           radial-gradient(ellipse at bottom left, ${footerAccent}10 0%, transparent 50%)`
-        }}
-      />
-
+    <footer className="bg-slate-900 border-t border-slate-800">
       {/* Subtle pattern overlay */}
       <div 
-        className="absolute inset-0 opacity-5"
+        className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
         }}
       />
 
-      <div className="relative z-10 py-12 sm:py-16 px-6">
+      <div className="relative py-12 sm:py-16 px-6">
         <div className="container mx-auto max-w-5xl">
           {/* Creator Section */}
           <motion.div 
@@ -137,12 +128,9 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
             >
-              <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-2 border-white/20 shadow-xl">
+              <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-2 border-slate-700 shadow-xl">
                 <AvatarImage src={profile.avatar_url || undefined} className="object-cover" />
-                <AvatarFallback 
-                  className="text-2xl font-bold text-white"
-                  style={{ backgroundColor: footerAccent + '60' }}
-                >
+                <AvatarFallback className="text-2xl font-bold text-white bg-indigo-600">
                   {profile.full_name?.charAt(0) || profile.business_name?.charAt(0) || '?'}
                 </AvatarFallback>
               </Avatar>
@@ -196,11 +184,7 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
                 >
                   <Button
                     asChild
-                    className="rounded-full px-6 py-5 font-semibold shadow-lg transition-all gap-2"
-                    style={{
-                      backgroundColor: footerAccent,
-                      color: '#fff',
-                    }}
+                    className="rounded-full px-6 py-5 font-semibold shadow-lg transition-all gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
                   >
                     <a href={`mailto:${profile.public_email}`}>
                       <Mail className="h-4 w-4" />
@@ -214,18 +198,13 @@ export function CreatorFooter({ userId, primaryColor, clientLogo, clientName }: 
           </motion.div>
 
           {/* Divider */}
-          <div 
-            className="h-px w-full mb-8"
-            style={{
-              background: `linear-gradient(90deg, transparent, ${footerAccent}30, transparent)`
-            }}
-          />
+          <div className="h-px w-full mb-8 bg-slate-700" />
 
           {/* Bottom row */}
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-400">
             <p>
               Preview gegenereerd door{' '}
-              <span className="text-slate-400 font-medium">Pitch</span>
+              <span className="text-slate-300 font-medium">Pitch</span>
             </p>
             {clientLogo && (
               <img 
