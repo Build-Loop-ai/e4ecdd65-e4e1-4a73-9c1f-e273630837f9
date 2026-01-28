@@ -1,250 +1,408 @@
 
-# AI Image Generation for Stunning Previews
+# Email Automation with Gmail & Outlook Integration
 
 ## Overview
 
-When scraped websites lack quality images, automatically generate professional, industry-specific visuals using AI to ensure every preview looks like a premium, real website.
+Allow users to connect their own Gmail and Outlook accounts via OAuth 2.0, then automate sending personalized pitch emails directly from the platform.
 
-## Current Image Gaps
+## Current State
 
-| Section | Current Behavior | Impact |
-|---------|-----------------|--------|
-| Hero | Falls back to SVG pattern | Looks generic |
-| Gallery | Hidden if < 3 images | Section missing entirely |
-| Services | Shows colored squares | Unprofessional |
-| About | No image at all | Less engaging |
+| Component | Status |
+|-----------|--------|
+| `outreach_emails` table | Exists (tracks sent emails) |
+| Email sending capability | Not implemented |
+| OAuth integrations | Not available |
+| Email UI in leads | Only mailto: links |
 
-## Solution Architecture
+## Architecture
 
 ```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                    AI IMAGE GENERATION PIPELINE                        │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│  1. Scrape Website (Firecrawl)                                        │
-│              ↓                                                         │
-│  2. Process Content (AI analysis + image classification)              │
-│              ↓                                                         │
-│  3. Detect Image Gaps                                                 │
-│     • Hero: No text-free images?                                      │
-│     • Gallery: < 3 images?                                            │
-│     • Services: No service images?                                    │
-│              ↓                                                         │
-│  4. Generate Missing Images (NEW)                                     │
-│     • Industry-specific prompts                                       │
-│     • Brand color integration                                         │
-│     • Upload to Supabase Storage                                      │
-│              ↓                                                         │
-│  5. Return Complete Schema with All Images                            │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      EMAIL AUTOMATION SYSTEM                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─────────────┐     ┌─────────────────────────────────────────────┐   │
+│  │   SETTINGS  │────▶│ Connect Gmail / Outlook via OAuth 2.0       │   │
+│  └─────────────┘     │ Store encrypted tokens in email_connections │   │
+│                      └─────────────────────────────────────────────┘   │
+│                                       │                                 │
+│                                       ▼                                 │
+│  ┌─────────────┐     ┌─────────────────────────────────────────────┐   │
+│  │  LEADS /    │────▶│ "Send Pitch Email" Button                   │   │
+│  │  PREVIEWS   │     │ Opens compose dialog with template          │   │
+│  └─────────────┘     └─────────────────────────────────────────────┘   │
+│                                       │                                 │
+│                                       ▼                                 │
+│                      ┌─────────────────────────────────────────────┐   │
+│                      │ Edge Function: send-email                    │   │
+│                      │ • Fetch user's OAuth tokens                  │   │
+│                      │ • Call Gmail/Outlook API                     │   │
+│                      │ • Log to outreach_emails table               │   │
+│                      └─────────────────────────────────────────────┘   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Part 1: New Edge Function - `generate-images`
+## Part 1: Database Schema
 
-Creates an edge function that generates industry-specific images on demand.
+### New Table: `email_connections`
 
-### Input Structure
-```json
-{
-  "businessType": "barber",
-  "industry": "beauty_wellness",
-  "companyName": "SNIP Barbershop",
-  "primaryColor": "#D4AF37",
-  "missingImages": {
-    "hero": true,
-    "gallery": 4,
-    "services": ["Haircut", "Beard Trim"]
-  }
-}
-```
-
-### Output Structure
-```json
-{
-  "generatedImages": {
-    "hero": "https://storage.../generated/hero-abc123.png",
-    "gallery": [
-      "https://storage.../generated/gallery-1.png",
-      "https://storage.../generated/gallery-2.png"
-    ],
-    "services": {
-      "Haircut": "https://storage.../generated/service-haircut.png",
-      "Beard Trim": "https://storage.../generated/service-beard.png"
-    }
-  }
-}
-```
-
----
-
-## Part 2: Industry-Specific Prompt Templates
-
-Each business type gets tailored image generation prompts:
-
-| Industry | Hero Prompt | Gallery Prompt |
-|----------|-------------|----------------|
-| Barber | "Modern barbershop interior, warm lighting, vintage leather chairs, brass fixtures, NO text, NO people" | "Stylish men's haircut result, professional photography" |
-| Restaurant | "Elegant restaurant interior, ambient lighting, beautifully set tables, NO text, NO logos" | "Gourmet dish, professional food photography, artistic plating" |
-| Dentist | "Modern dental clinic, clean white interior, professional medical environment, NO text" | "Healthy bright smile, dental care concept" |
-| Lawyer | "Professional law office, wood paneling, legal books, sophisticated lighting, NO text" | "Scales of justice, legal documents, professional setting" |
-| Florist | "Beautiful flower shop interior, colorful arrangements, natural light, NO text" | "Stunning floral arrangement, vibrant colors" |
-
-### Color Integration
-All prompts include: "Color palette featuring {primaryColor} accents"
-
----
-
-## Part 3: Storage Bucket Setup
-
-Create a dedicated storage bucket for generated images:
+Stores OAuth tokens for connected email providers.
 
 ```sql
--- Storage bucket for AI-generated preview images
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('generated-images', 'generated-images', true);
+CREATE TABLE public.email_connections (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  provider TEXT NOT NULL CHECK (provider IN ('gmail', 'outlook')),
+  email_address TEXT NOT NULL,
+  access_token TEXT NOT NULL,
+  refresh_token TEXT,
+  token_expires_at TIMESTAMPTZ,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (user_id, provider)
+);
 
--- Policy: Allow public reads
-CREATE POLICY "Public read access"
-ON storage.objects FOR SELECT
-USING (bucket_id = 'generated-images');
+-- RLS Policies
+ALTER TABLE public.email_connections ENABLE ROW LEVEL SECURITY;
 
--- Policy: Allow authenticated writes (edge functions use service role)
-CREATE POLICY "Service role write access"
-ON storage.objects FOR INSERT
-WITH CHECK (bucket_id = 'generated-images');
+CREATE POLICY "Users can manage their own email connections"
+  ON public.email_connections FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+```
+
+### New Table: `email_templates`
+
+Pre-built templates for pitch emails.
+
+```sql
+CREATE TABLE public.email_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  body_html TEXT NOT NULL,
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
 ```
 
 ---
 
-## Part 4: Integration with Preview Flow
+## Part 2: OAuth Flow
 
-### Updated NewPreview.tsx Flow
+### Gmail OAuth
+
+| Step | Description |
+|------|-------------|
+| 1 | User clicks "Connect Gmail" in Settings |
+| 2 | Redirect to Google OAuth consent screen |
+| 3 | Google redirects back with authorization code |
+| 4 | Edge function exchanges code for tokens |
+| 5 | Store tokens in `email_connections` table |
+
+### Outlook OAuth
+
+| Step | Description |
+|------|-------------|
+| 1 | User clicks "Connect Outlook" in Settings |
+| 2 | Redirect to Microsoft OAuth consent screen |
+| 3 | Microsoft redirects back with authorization code |
+| 4 | Edge function exchanges code for tokens |
+| 5 | Store tokens in `email_connections` table |
+
+### Required Secrets
+
+| Secret | Purpose |
+|--------|---------|
+| `GOOGLE_CLIENT_ID` | Gmail OAuth app ID |
+| `GOOGLE_CLIENT_SECRET` | Gmail OAuth secret |
+| `MICROSOFT_CLIENT_ID` | Outlook OAuth app ID |
+| `MICROSOFT_CLIENT_SECRET` | Outlook OAuth secret |
+
+---
+
+## Part 3: Edge Functions
+
+### 1. `oauth-callback` Function
+
+Handles OAuth redirects from Google/Microsoft.
+
+```typescript
+// POST /oauth-callback
+{
+  "provider": "gmail" | "outlook",
+  "code": "authorization_code",
+  "redirect_uri": "https://..."
+}
+
+// Returns: { success: true, email: "user@gmail.com" }
+```
+
+### 2. `send-email` Function
+
+Sends emails via connected provider.
+
+```typescript
+// POST /send-email
+{
+  "to": "recipient@example.com",
+  "toName": "John's Bakery",
+  "subject": "Your new website preview is ready!",
+  "bodyHtml": "<html>...</html>",
+  "previewId": "uuid",
+  "leadId": "uuid" // optional
+}
+
+// Returns: { success: true, messageId: "..." }
+```
+
+### 3. `refresh-token` Function
+
+Refreshes expired OAuth tokens automatically.
+
+---
+
+## Part 4: Settings UI - Email Integrations
+
+Add new section to Settings page:
 
 ```text
-1. User enters URL
-           ↓
-2. Firecrawl scrapes content + branding
-           ↓
-3. process-content analyzes & classifies images
-           ↓
-4. Check for image gaps:
-   • heroImages.length === 0?
-   • galleryImages.length < 3?
-   • services without images?
-           ↓
-5. If gaps exist → Call generate-images
-           ↓
-6. Merge generated images into schema
-           ↓
-7. Save to client_previews with complete imagery
+┌─────────────────────────────────────────────────────────────────┐
+│  🔗 Email Integrations                                          │
+│  Connect your email to send pitch emails directly               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ 📧 Gmail                                                 │   │
+│  │                                                          │   │
+│  │ ○ Not connected                                          │   │
+│  │                                                          │   │
+│  │                              [ Connect Gmail ]           │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ 📬 Outlook                                               │   │
+│  │                                                          │   │
+│  │ ○ Not connected                                          │   │
+│  │                                                          │   │
+│  │                              [ Connect Outlook ]         │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+When connected:
+┌─────────────────────────────────────────────────────────────────┐
+│  │ ✅ Gmail - john@gmail.com                                │   │
+│  │    Connected on Jan 28, 2026                             │   │
+│  │                                                          │   │
+│  │                   [ Send Test ]  [ Disconnect ]          │   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Part 5: Prompt Engineering Details
+## Part 5: Send Pitch Email Dialog
 
-### Hero Image Prompt Template
-```
-Professional {industry} environment photograph.
-{specific_scene_description}
-Interior/exterior establishing shot.
-High-end commercial photography style.
-Warm ambient lighting with {primaryColor} accent tones.
-Ultra wide angle, 4K quality.
-CRITICAL: Absolutely NO text, NO logos, NO signs, NO words visible anywhere.
-Photorealistic, magazine quality.
+Add "Send Email" button to leads and preview management.
+
+### Dialog Design
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│  ✉️ Send Pitch Email                                     [ X ]  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  From: john@gmail.com (Gmail)  ▼                               │
+│                                                                 │
+│  To:                                                            │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ info@johnsbakery.com                                     │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  Recipient Name:                                                │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ John's Bakery                                            │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  Subject:                                                       │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Your new website preview is ready, John's Bakery!        │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│  Template: [ Default Pitch Email ▼ ]                           │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Preview of HTML email...                                 │   │
+│  │                                                          │   │
+│  │ Hi John's Bakery,                                        │   │
+│  │                                                          │   │
+│  │ I've created a modern website preview for your           │   │
+│  │ business. Click below to see it:                         │   │
+│  │                                                          │   │
+│  │      [ View Your Preview ]                               │   │
+│  │                                                          │   │
+│  └─────────────────────────────────────────────────────────┘   │
+│                                                                 │
+│                           [ Cancel ]  [ Send Email ]            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Gallery Image Prompt Template
-```
-{service_or_product} photograph for {businessType}.
-Professional {industry} photography.
-Clean background, studio quality lighting.
-Brand colors: {primaryColor} accents where appropriate.
-Photorealistic, commercial photography style.
-NO text, NO watermarks.
-```
+### Email Template Variables
 
-### Service Icon Prompt Template
-```
-Minimalist icon illustration representing "{serviceName}".
-Simple, elegant, modern design.
-{primaryColor} color scheme.
-White background, clean vector-style.
-Professional service icon for business website.
+| Variable | Replaced With |
+|----------|---------------|
+| `{{recipient_name}}` | Business name |
+| `{{preview_url}}` | Full preview URL |
+| `{{sender_name}}` | User's name from profile |
+| `{{sender_business}}` | User's business name |
+
+---
+
+## Part 6: Email Template (HTML)
+
+Professional pitch email template:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .cta-button {
+      background: {{primary_color}};
+      color: white;
+      padding: 16px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body style="font-family: system-ui; max-width: 600px; margin: 0 auto;">
+  <h1>Hi {{recipient_name}},</h1>
+  
+  <p>I've created a modern website preview specifically for your business. 
+  I'd love for you to take a look and let me know what you think!</p>
+  
+  <p style="text-align: center; margin: 32px 0;">
+    <a href="{{preview_url}}" class="cta-button">
+      View Your Preview
+    </a>
+  </p>
+  
+  <p>If you have any questions or would like to discuss changes, 
+  just reply to this email.</p>
+  
+  <p>Best regards,<br>
+  {{sender_name}}<br>
+  {{sender_business}}</p>
+</body>
+</html>
 ```
 
 ---
 
-## Part 6: Files to Create/Modify
+## Part 7: Integration Points
+
+### In SavedLeadsList.tsx
+
+Add "Send Email" to dropdown menu:
+
+```typescript
+<DropdownMenuItem onClick={() => openSendEmailDialog(lead)}>
+  <Send className="h-4 w-4 mr-2" />
+  Send Pitch Email
+</DropdownMenuItem>
+```
+
+### In ManagePreview.tsx
+
+Add "Send Email" button to toolbar:
+
+```typescript
+<Button onClick={() => openSendEmailDialog(preview)}>
+  <Send className="h-4 w-4 mr-2" />
+  Send to Client
+</Button>
+```
+
+---
+
+## Part 8: Files to Create/Modify
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `supabase/functions/generate-images/index.ts` | CREATE | Main image generation edge function |
-| `src/lib/imageGeneration.ts` | CREATE | Client-side API wrapper + prompt templates |
-| `src/pages/NewPreview.tsx` | MODIFY | Add image generation step after processing |
-| `src/components/preview/ScanningProgress.tsx` | MODIFY | Add "Generating visuals" step |
+| `supabase/functions/oauth-callback/index.ts` | CREATE | Handle OAuth redirects |
+| `supabase/functions/send-email/index.ts` | CREATE | Send emails via Gmail/Outlook |
+| `src/components/email/EmailConnectionCard.tsx` | CREATE | Connection UI component |
+| `src/components/email/SendEmailDialog.tsx` | CREATE | Compose email dialog |
+| `src/hooks/useEmailConnections.ts` | CREATE | Manage connections state |
+| `src/lib/emailTemplates.ts` | CREATE | Default email templates |
+| `src/pages/Settings.tsx` | MODIFY | Add Email Integrations section |
+| `src/components/leads/SavedLeadsList.tsx` | MODIFY | Add Send Email action |
+| `src/components/manage/ManageToolbar.tsx` | MODIFY | Add Send Email button |
 
 ---
 
-## Part 7: User Experience
+## Part 9: User Flow
 
-### Scanning Animation Updates
-```text
-Step 1: "Scanning website..." ✓
-Step 2: "Extracting content..." ✓
-Step 3: "Analyzing brand..." ✓
-Step 4: "Generating visuals..." ← NEW (only if needed)
-Step 5: "Building preview..." ✓
-```
+### Connect Email Account
 
-### Visual Feedback
-- Show "Creating stunning visuals for your preview" message
-- Display placeholder shimmer effects while generating
-- Estimated time: 10-20 seconds for image generation
+1. User goes to Settings → Email Integrations
+2. Clicks "Connect Gmail" or "Connect Outlook"
+3. Redirected to OAuth consent screen
+4. Grants permissions
+5. Redirected back to app
+6. Connection saved and displayed
 
----
+### Send Pitch Email
 
-## Part 8: Cost Optimization
-
-To manage AI usage costs:
-
-1. **Generate only what's needed**
-   - Skip hero generation if suitable image exists
-   - Generate minimum gallery images (3-4, not 12)
-   - Only generate for services without images
-
-2. **Cache generated images**
-   - Store in Supabase storage permanently
-   - Reuse for same business if re-scraped
-
-3. **Use efficient model**
-   - `google/gemini-2.5-flash-image` for standard generation
-   - `google/gemini-3-pro-image-preview` only for hero images (higher quality)
+1. User views a lead or preview
+2. Clicks "Send Pitch Email"
+3. Dialog opens with pre-filled data
+4. User reviews and edits message
+5. Clicks "Send Email"
+6. Email sent via connected account
+7. Logged in `outreach_emails` table
+8. Success notification shown
 
 ---
 
-## Expected Results
+## Required Setup
 
-### Before (No Images)
-- Hero: Generic SVG pattern
-- Gallery: Section hidden
-- Services: Colored squares as placeholders
+Before implementation, you'll need to:
 
-### After (AI Generated)
-- Hero: Professional industry-specific interior/exterior shot
-- Gallery: 4-6 relevant professional photos
-- Services: Custom icons/images for each service
+1. **Create Google Cloud OAuth App**
+   - Go to Google Cloud Console
+   - Create OAuth 2.0 credentials
+   - Add redirect URI
+   - Get Client ID and Secret
+
+2. **Create Microsoft Azure AD App**
+   - Go to Azure Portal → App Registrations
+   - Create new registration
+   - Add redirect URI
+   - Get Client ID and Secret
+
+3. **Add Secrets to Project**
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+   - `MICROSOFT_CLIENT_ID`
+   - `MICROSOFT_CLIENT_SECRET`
 
 ---
 
-## Technical Summary
+## Security Considerations
 
-- **New edge function** for AI image generation with industry prompts
-- **Supabase storage bucket** for generated images
-- **Smart gap detection** to only generate what's missing
-- **Prompt engineering** tailored to 60+ business types
-- **Integrated UX** with progress feedback during generation
+| Risk | Mitigation |
+|------|------------|
+| Token theft | Tokens stored server-side only, never exposed to client |
+| Token expiry | Auto-refresh mechanism before sending |
+| Unauthorized access | RLS policies ensure users only access own connections |
+| OAuth scope | Request minimal permissions (send email only) |
+
