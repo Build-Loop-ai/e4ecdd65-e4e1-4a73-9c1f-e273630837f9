@@ -1,6 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, BarChart3, LogOut, Menu, X, Plus, Settings } from 'lucide-react';
+import { LayoutDashboard, FileText, BarChart3, LogOut, Menu, X, Plus, Settings, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PitchLogo } from '@/components/ui/PitchLogo';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ interface DashboardLayoutProps {
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
+  { to: '/dashboard/leads', icon: Search, label: 'Find Leads' },
   { to: '/dashboard/previews', icon: FileText, label: 'My Pitches' },
   { to: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/dashboard/settings', icon: Settings, label: 'Settings' },
