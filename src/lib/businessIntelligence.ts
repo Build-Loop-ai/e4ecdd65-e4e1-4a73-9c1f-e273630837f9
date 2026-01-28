@@ -178,18 +178,19 @@ export function getBusinessIntelligence(schema: ProcessedSchema | null): Busines
 }
 
 // Get suitable hero images (images classified as hero that don't have text)
+// STRICT MODE: Only return images that are EXPLICITLY classified as hero without text
 export function getSuitableHeroImages(schema: ProcessedSchema | null): string[] {
   if (!schema?.classifiedImages || !schema.hero?.backgroundImages) {
-    // Fall back to all background images if no classification available
-    return schema?.hero?.backgroundImages || [];
+    // No classification data = no suitable images (forces pattern fallback)
+    return [];
   }
   
-  // Filter to only images classified as 'hero' without text
+  // STRICT: Only include images that are explicitly classified as 'hero' AND have hasText: false
   return schema.hero.backgroundImages.filter(imgUrl => {
     const classification = schema.classifiedImages?.find(c => c.url === imgUrl);
-    // Include if classified as hero and doesn't have text, OR if not classified (for backwards compatibility)
-    if (!classification) return true;
-    return classification.classification === 'hero' && !classification.hasText;
+    // Must be explicitly classified as hero with no text
+    if (!classification) return false;
+    return classification.classification === 'hero' && classification.hasText === false;
   });
 }
 

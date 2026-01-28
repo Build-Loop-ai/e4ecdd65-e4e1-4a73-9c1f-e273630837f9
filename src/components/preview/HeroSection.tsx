@@ -82,25 +82,31 @@ export function HeroSection({
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.1]);
 
-  // Determine suitable hero image using classification
+  // Determine suitable hero image using STRICT classification
+  // Only use images that are explicitly classified as 'hero' with hasText: false
   const getSuitableImage = (): string | null => {
     if (!backgroundImages?.length) return null;
     
-    // If we have classified images, filter for suitable hero images
-    if (classifiedImages?.length) {
-      for (const imgUrl of backgroundImages) {
-        const classification = classifiedImages.find(c => c.url === imgUrl);
-        // Only use if classified as 'hero' and doesn't have text
-        if (classification?.classification === 'hero' && !classification.hasText) {
-          return imgUrl;
-        }
-      }
-      // No suitable classified image found
+    // STRICT MODE: Require classification data
+    if (!classifiedImages?.length) {
+      // No classification = no image (forces pattern fallback instead of showing text-heavy images)
+      console.log('No classified images available, using pattern fallback');
       return null;
     }
     
-    // Fallback: use first image if no classification available (backwards compatibility)
-    return backgroundImages[0] || null;
+    // Find first image that is explicitly classified as 'hero' with no text
+    for (const imgUrl of backgroundImages) {
+      const classification = classifiedImages.find(c => c.url === imgUrl);
+      // Must be explicitly classified as hero AND hasText must be explicitly false
+      if (classification?.classification === 'hero' && classification.hasText === false) {
+        console.log('Found suitable hero image:', imgUrl);
+        return imgUrl;
+      }
+    }
+    
+    // No suitable classified image found - use pattern fallback
+    console.log('No suitable hero images found (all have text or wrong classification), using pattern fallback');
+    return null;
   };
 
   const bgImage = getSuitableImage();
