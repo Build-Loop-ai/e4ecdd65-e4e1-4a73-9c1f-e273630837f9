@@ -94,6 +94,9 @@ serve(async (req: Request) => {
       );
     }
 
+    // Get the origin from the request for redirect_uri
+    const origin = req.headers.get("origin") || "https://website4u.lovable.app";
+    
     // Build Warmy registration payload
     let mailboxPayload: any;
 
@@ -102,6 +105,9 @@ serve(async (req: Request) => {
       const expiresAt = connection.token_expires_at 
         ? Math.floor(new Date(connection.token_expires_at).getTime() / 1000)
         : Math.floor(Date.now() / 1000) + 3600;
+
+      // Use the same redirect_uri that was used during OAuth
+      const redirectUri = `${origin}/dashboard/settings?oauth=gmail`;
 
       mailboxPayload = {
         mailbox: {
@@ -114,13 +120,26 @@ serve(async (req: Request) => {
           expires_at: expiresAt,
           client_id: GOOGLE_CLIENT_ID,
           client_secret: GOOGLE_CLIENT_SECRET,
-          redirect_uri: `${Deno.env.get("SUPABASE_URL")}/functions/v1/oauth-callback`,
+          redirect_uri: redirectUri,
           token_credential_uri: "https://oauth2.googleapis.com/token",
           setting_attributes: {
             speed_mode: speed_mode,
           },
         },
       };
+
+      // Log payload structure for debugging (without secrets)
+      console.log("Warmy Gmail registration - payload structure:", {
+        email: connection.email_address,
+        provider: "oauth_google",
+        from_name: mailboxPayload.mailbox.from_name,
+        expires_at: expiresAt,
+        redirect_uri: redirectUri,
+        has_access_token: !!connection.access_token,
+        has_refresh_token: !!connection.refresh_token,
+        has_client_id: !!GOOGLE_CLIENT_ID,
+        has_client_secret: !!GOOGLE_CLIENT_SECRET,
+      });
     } else if (connection.provider === "outlook") {
       // Outlook OAuth registration
       const MICROSOFT_CLIENT_ID = Deno.env.get("MICROSOFT_CLIENT_ID");
@@ -129,6 +148,8 @@ serve(async (req: Request) => {
       const expiresAt = connection.token_expires_at 
         ? Math.floor(new Date(connection.token_expires_at).getTime() / 1000)
         : Math.floor(Date.now() / 1000) + 3600;
+
+      const redirectUri = `${origin}/dashboard/settings?oauth=outlook`;
 
       mailboxPayload = {
         mailbox: {
@@ -141,17 +162,32 @@ serve(async (req: Request) => {
           expires_at: expiresAt,
           client_id: MICROSOFT_CLIENT_ID,
           client_secret: MICROSOFT_CLIENT_SECRET,
+          redirect_uri: redirectUri,
           setting_attributes: {
             speed_mode: speed_mode,
           },
         },
       };
+
+      console.log("Warmy Outlook registration - payload structure:", {
+        email: connection.email_address,
+        provider: "oauth_microsoft",
+        from_name: mailboxPayload.mailbox.from_name,
+        expires_at: expiresAt,
+        redirect_uri: redirectUri,
+        has_access_token: !!connection.access_token,
+        has_refresh_token: !!connection.refresh_token,
+        has_client_id: !!MICROSOFT_CLIENT_ID,
+        has_client_secret: !!MICROSOFT_CLIENT_SECRET,
+      });
     } else {
       return new Response(
         JSON.stringify({ error: `Unsupported provider: ${connection.provider}` }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    console.log("Sending request to Warmy API...");
 
     // Register with Warmy API
     const warmyResponse = await fetch(`${WARMY_API_BASE}/api/v2/mailboxes`, {
@@ -165,11 +201,32 @@ serve(async (req: Request) => {
     });
 
     const warmyResult = await warmyResponse.json();
+    
+    // Log full Warmy response for debugging
+    console.log("Warmy API response:", {
+      status: warmyResponse.status,
+      statusText: warmyResponse.statusText,
+      result: warmyResult,
+    });
 
     if (!warmyResponse.ok) {
-      console.error("Warmy registration failed:", warmyResult);
+      // Extract detailed error message from Warmy response
+      const errorMessage = warmyResult.message 
+        || warmyResult.error 
+        || warmyResult.errors?.join(", ")
+        || JSON.stringify(warmyResult);
+      
+      console.error("Warmy registration failed:", { 
+        status: warmyResponse.status, 
+        error: errorMessage,
+        fullResponse: warmyResult 
+      });
+      
       return new Response(
-        JSON.stringify({ error: warmyResult.message || "Failed to register with Warmy" }),
+        JSON.stringify({ 
+          error: errorMessage,
+          details: warmyResult,
+        }),
         { status: warmyResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
