@@ -3,6 +3,29 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+function getFunctionInvokeErrorMessage(err: unknown): string | null {
+  const anyErr = err as any;
+  // supabase-js FunctionError typically has `context` with `body` (string)
+  const body = anyErr?.context?.body;
+  if (typeof body === 'string' && body.length) {
+    try {
+      const parsed = JSON.parse(body);
+      if (typeof parsed?.error === 'string') return parsed.error;
+      if (typeof parsed?.message === 'string') return parsed.message;
+    } catch {
+      // if it's plain text, just surface it
+      return body;
+    }
+  }
+  // sometimes it's already structured
+  const structured = anyErr?.context?.json;
+  if (structured && typeof structured === 'object') {
+    if (typeof structured.error === 'string') return structured.error;
+    if (typeof structured.message === 'string') return structured.message;
+  }
+  return null;
+}
+
 export interface WarmyConnection {
   id: string;
   email_address: string;
@@ -125,7 +148,11 @@ export function useWarmyStatus() {
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to pause');
+        const msg =
+          getFunctionInvokeErrorMessage(response.error) ||
+          response.error.message ||
+          'Failed to pause';
+        throw new Error(msg);
       }
 
       toast.success('Warmup paused');
@@ -145,7 +172,11 @@ export function useWarmyStatus() {
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to resume');
+        const msg =
+          getFunctionInvokeErrorMessage(response.error) ||
+          response.error.message ||
+          'Failed to resume';
+        throw new Error(msg);
       }
 
       toast.success('Warmup resumed');
@@ -165,7 +196,11 @@ export function useWarmyStatus() {
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to run test');
+        const msg =
+          getFunctionInvokeErrorMessage(response.error) ||
+          response.error.message ||
+          'Failed to run test';
+        throw new Error(msg);
       }
 
       toast.success('Deliverability test started. Results will be available shortly.');
@@ -184,7 +219,11 @@ export function useWarmyStatus() {
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to disconnect');
+        const msg =
+          getFunctionInvokeErrorMessage(response.error) ||
+          response.error.message ||
+          'Failed to disconnect';
+        throw new Error(msg);
       }
 
       toast.success('Disconnected from Warmy');
@@ -204,7 +243,11 @@ export function useWarmyStatus() {
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to get details');
+        const msg =
+          getFunctionInvokeErrorMessage(response.error) ||
+          response.error.message ||
+          'Failed to get details';
+        throw new Error(msg);
       }
 
       return response.data?.data || null;
@@ -222,7 +265,11 @@ export function useWarmyStatus() {
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to get alerts');
+        const msg =
+          getFunctionInvokeErrorMessage(response.error) ||
+          response.error.message ||
+          'Failed to get alerts';
+        throw new Error(msg);
       }
 
       const alertsData = response.data?.data || [];
