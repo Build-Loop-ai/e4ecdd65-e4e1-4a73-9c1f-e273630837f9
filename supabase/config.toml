@@ -2,7 +2,6 @@ project_id = "wylrvlvphndooigebwrg"
 [functions.get-oauth-url]
 verify_jwt = false
 
-
 [functions.firecrawl-scrape]
 verify_jwt = false
 
@@ -22,4 +21,13 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.send-email]
+verify_jwt = false
+
+[functions.warmy-register]
+verify_jwt = false
+
+[functions.warmy-sync]
+verify_jwt = false
+
+[functions.warmy-actions]
 verify_jwt = false

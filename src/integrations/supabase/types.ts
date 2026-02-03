@@ -101,38 +101,59 @@ export type Database = {
         Row: {
           access_token: string
           created_at: string | null
+          deliverability_score: number | null
+          dns_score: number | null
           email_address: string
           id: string
           is_active: boolean | null
+          last_warmy_sync: string | null
+          placement_score: number | null
           provider: string
           refresh_token: string | null
           token_expires_at: string | null
           updated_at: string | null
           user_id: string
+          warmy_mailbox_id: number | null
+          warmy_state: string | null
+          warmy_temperature: number | null
         }
         Insert: {
           access_token: string
           created_at?: string | null
+          deliverability_score?: number | null
+          dns_score?: number | null
           email_address: string
           id?: string
           is_active?: boolean | null
+          last_warmy_sync?: string | null
+          placement_score?: number | null
           provider: string
           refresh_token?: string | null
           token_expires_at?: string | null
           updated_at?: string | null
           user_id: string
+          warmy_mailbox_id?: number | null
+          warmy_state?: string | null
+          warmy_temperature?: number | null
         }
         Update: {
           access_token?: string
           created_at?: string | null
+          deliverability_score?: number | null
+          dns_score?: number | null
           email_address?: string
           id?: string
           is_active?: boolean | null
+          last_warmy_sync?: string | null
+          placement_score?: number | null
           provider?: string
           refresh_token?: string | null
           token_expires_at?: string | null
           updated_at?: string | null
           user_id?: string
+          warmy_mailbox_id?: number | null
+          warmy_state?: string | null
+          warmy_temperature?: number | null
         }
         Relationships: []
       }

@@ -181,6 +181,21 @@ serve(async (req: Request) => {
       );
     }
 
+    // Check deliverability score before sending
+    if (connection.deliverability_score !== null && connection.deliverability_score < 50) {
+      return new Response(
+        JSON.stringify({ 
+          error: `Email sending paused due to low deliverability score (${connection.deliverability_score}%). Please wait for warmup to complete or check your email settings.`,
+          deliverability_blocked: true,
+          score: connection.deliverability_score
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Warning for low but not critical deliverability
+    const deliverabilityWarning = connection.deliverability_score !== null && connection.deliverability_score < 70;
+
     let accessToken = connection.access_token;
 
     // Check if token is expired and refresh if needed
@@ -258,7 +273,9 @@ serve(async (req: Request) => {
         success: true, 
         messageId: sendResult.messageId,
         sentFrom: connection.email_address,
-        provider: connection.provider 
+        provider: connection.provider,
+        deliverability_warning: deliverabilityWarning,
+        deliverability_score: connection.deliverability_score,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
