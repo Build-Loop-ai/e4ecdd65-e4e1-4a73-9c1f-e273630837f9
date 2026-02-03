@@ -101,6 +101,16 @@ serve(async (req: Request) => {
       "Content-Type": "application/json",
     };
 
+    // Helper to safely parse response (Warmy sometimes returns plain text like "success")
+    const safeParseResponse = async (response: Response): Promise<any> => {
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { message: text, raw: true };
+      }
+    };
+
     let warmyResponse: Response;
     let result: any;
 
@@ -114,7 +124,7 @@ serve(async (req: Request) => {
             body: JSON.stringify({ mailbox: { state: "pause!" } }),
           }
         );
-        result = await warmyResponse.json();
+        result = await safeParseResponse(warmyResponse);
         
         if (warmyResponse.ok) {
           await adminSupabase
@@ -133,7 +143,7 @@ serve(async (req: Request) => {
             body: JSON.stringify({ mailbox: { state: "activate!" } }),
           }
         );
-        result = await warmyResponse.json();
+        result = await safeParseResponse(warmyResponse);
         
         if (warmyResponse.ok) {
           await adminSupabase
@@ -153,7 +163,7 @@ serve(async (req: Request) => {
             body: JSON.stringify({ providers: testProviders }),
           }
         );
-        result = await warmyResponse.json();
+        result = await safeParseResponse(warmyResponse);
         break;
 
       case "disconnect":
@@ -170,7 +180,7 @@ serve(async (req: Request) => {
             }),
           }
         );
-        result = await warmyResponse.json();
+        result = await safeParseResponse(warmyResponse);
         
         if (warmyResponse.ok) {
           await adminSupabase
@@ -196,7 +206,7 @@ serve(async (req: Request) => {
             headers: warmyHeaders,
           }
         );
-        result = await warmyResponse.json();
+        result = await safeParseResponse(warmyResponse);
         break;
 
       case "get_alerts":
@@ -208,7 +218,7 @@ serve(async (req: Request) => {
             headers: warmyHeaders,
           }
         );
-        result = await warmyResponse.json();
+        result = await safeParseResponse(warmyResponse);
         break;
 
       default:
