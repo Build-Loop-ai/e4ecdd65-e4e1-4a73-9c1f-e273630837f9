@@ -211,10 +211,17 @@ serve(async (req: Request) => {
 
     if (!warmyResponse.ok) {
       // Extract detailed error message from Warmy response
-      const errorMessage = warmyResult.message 
-        || warmyResult.error 
-        || warmyResult.errors?.join(", ")
-        || JSON.stringify(warmyResult);
+      let errorMessage = "Unknown Warmy error";
+      
+      if (warmyResult.message) {
+        errorMessage = warmyResult.message;
+      } else if (warmyResult.error) {
+        errorMessage = typeof warmyResult.error === 'string' ? warmyResult.error : JSON.stringify(warmyResult.error);
+      } else if (warmyResult.errors) {
+        errorMessage = Array.isArray(warmyResult.errors) ? warmyResult.errors.join(", ") : JSON.stringify(warmyResult.errors);
+      } else {
+        errorMessage = JSON.stringify(warmyResult);
+      }
       
       console.error("Warmy registration failed:", { 
         status: warmyResponse.status, 
