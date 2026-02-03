@@ -62,8 +62,9 @@ serve(async (req: Request) => {
         );
       }
 
+      // Full Gmail access required for Warmy warmup (read/send/modify)
       const scope = encodeURIComponent(
-        "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email"
+        "https://mail.google.com/ https://www.googleapis.com/auth/userinfo.email"
       );
 
       oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirect_uri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;

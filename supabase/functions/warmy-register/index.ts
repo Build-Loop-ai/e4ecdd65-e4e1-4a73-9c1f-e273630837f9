@@ -159,7 +159,7 @@ serve(async (req: Request) => {
       mailboxPayload = {
         mailbox: {
           email: connection.email_address,
-          provider: "oauth_microsoft",
+          provider: "oauth_outlook",
           from_name: from_name || connection.email_address.split("@")[0],
           tariff_plan_type_id: 1,
           access_token: connection.access_token,
@@ -176,7 +176,7 @@ serve(async (req: Request) => {
 
       console.log("Warmy Outlook registration - payload structure:", {
         email: connection.email_address,
-        provider: "oauth_microsoft",
+        provider: "oauth_outlook",
         from_name: mailboxPayload.mailbox.from_name,
         expires_at: expiresAt,
         redirect_uri: redirectUri,
@@ -243,11 +243,16 @@ serve(async (req: Request) => {
       );
     }
 
+    // Parse Warmy response - API v2 returns { data: { id: ... } }
+    const warmyMailboxId = warmyResult.data?.id ?? warmyResult.id;
+    
+    console.log("Warmy registration successful - mailbox ID:", warmyMailboxId);
+
     // Update email connection with Warmy data
     const { error: updateError } = await adminSupabase
       .from("email_connections")
       .update({
-        warmy_mailbox_id: warmyResult.id,
+        warmy_mailbox_id: warmyMailboxId,
         warmy_state: "active",
         last_warmy_sync: new Date().toISOString(),
       })
@@ -260,7 +265,7 @@ serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         success: true,
-        warmy_mailbox_id: warmyResult.id,
+        warmy_mailbox_id: warmyMailboxId,
         message: "Email warmup enabled successfully",
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
