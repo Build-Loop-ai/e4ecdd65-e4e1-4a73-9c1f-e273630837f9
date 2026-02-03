@@ -1,408 +1,373 @@
 
-# Email Automation with Gmail & Outlook Integration
+# Warmy.io Email Warmup Integration
 
 ## Overview
 
-Allow users to connect their own Gmail and Outlook accounts via OAuth 2.0, then automate sending personalized pitch emails directly from the platform.
-
-## Current State
-
-| Component | Status |
-|-----------|--------|
-| `outreach_emails` table | Exists (tracks sent emails) |
-| Email sending capability | Not implemented |
-| OAuth integrations | Not available |
-| Email UI in leads | Only mailto: links |
+Integrate Warmy.io to provide automatic email warmup and deliverability monitoring for connected mailboxes. This will help users improve their email sender reputation before running outreach campaigns.
 
 ## Architecture
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│                      EMAIL AUTOMATION SYSTEM                            │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  ┌─────────────┐     ┌─────────────────────────────────────────────┐   │
-│  │   SETTINGS  │────▶│ Connect Gmail / Outlook via OAuth 2.0       │   │
-│  └─────────────┘     │ Store encrypted tokens in email_connections │   │
-│                      └─────────────────────────────────────────────┘   │
-│                                       │                                 │
-│                                       ▼                                 │
-│  ┌─────────────┐     ┌─────────────────────────────────────────────┐   │
-│  │  LEADS /    │────▶│ "Send Pitch Email" Button                   │   │
-│  │  PREVIEWS   │     │ Opens compose dialog with template          │   │
-│  └─────────────┘     └─────────────────────────────────────────────┘   │
-│                                       │                                 │
-│                                       ▼                                 │
-│                      ┌─────────────────────────────────────────────┐   │
-│                      │ Edge Function: send-email                    │   │
-│                      │ • Fetch user's OAuth tokens                  │   │
-│                      │ • Call Gmail/Outlook API                     │   │
-│                      │ • Log to outreach_emails table               │   │
-│                      └─────────────────────────────────────────────┘   │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        WARMY.IO INTEGRATION SYSTEM                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ DATABASE: email_connections (extended)                               │   │
+│  │ + warmy_mailbox_id (integer)                                         │   │
+│  │ + warmy_state (text: active, paused, disconnected)                   │   │
+│  │ + deliverability_score, placement_score, dns_score (0-100)           │   │
+│  │ + warmy_temperature (0-100)                                          │   │
+│  │ + last_warmy_sync (timestamp)                                        │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────────────┐   │
+│  │ warmy-register  │   │ warmy-sync      │   │ warmy-actions           │   │
+│  │ Edge Function   │   │ Edge Function   │   │ Edge Function           │   │
+│  │                 │   │ (cron/manual)   │   │                         │   │
+│  │ POST mailbox    │   │ GET all scores  │   │ pause/resume/test/del   │   │
+│  │ to Warmy API    │   │ update DB       │   │                         │   │
+│  └─────────────────┘   └─────────────────┘   └─────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ UI: Settings Page - Email Warmup Section                            │   │
+│  │ - Warmup status card per mailbox                                     │   │
+│  │ - Temperature gauge, health scores                                   │   │
+│  │ - Pause/Resume toggle, Run Test button                               │   │
+│  │ - DNS records checklist                                              │   │
+│  │ - Alerts display                                                     │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ UI: Dashboard Overview Widget                                        │   │
+│  │ - Total mailboxes warming                                            │   │
+│  │ - Average deliverability score                                       │   │
+│  │ - Alerts count                                                       │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Part 1: Database Schema
+## Part 1: Database Schema Changes
 
-### New Table: `email_connections`
-
-Stores OAuth tokens for connected email providers.
+Extend the existing `email_connections` table with Warmy-specific fields:
 
 ```sql
-CREATE TABLE public.email_connections (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  provider TEXT NOT NULL CHECK (provider IN ('gmail', 'outlook')),
-  email_address TEXT NOT NULL,
-  access_token TEXT NOT NULL,
-  refresh_token TEXT,
-  token_expires_at TIMESTAMPTZ,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  UNIQUE (user_id, provider)
-);
-
--- RLS Policies
-ALTER TABLE public.email_connections ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can manage their own email connections"
-  ON public.email_connections FOR ALL
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-```
-
-### New Table: `email_templates`
-
-Pre-built templates for pitch emails.
-
-```sql
-CREATE TABLE public.email_templates (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  subject TEXT NOT NULL,
-  body_html TEXT NOT NULL,
-  is_default BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
+ALTER TABLE public.email_connections
+ADD COLUMN warmy_mailbox_id INTEGER,
+ADD COLUMN warmy_state TEXT CHECK (warmy_state IN ('active', 'paused', 'disconnected')),
+ADD COLUMN deliverability_score INTEGER CHECK (deliverability_score >= 0 AND deliverability_score <= 100),
+ADD COLUMN placement_score INTEGER CHECK (placement_score >= 0 AND placement_score <= 100),
+ADD COLUMN dns_score INTEGER CHECK (dns_score >= 0 AND dns_score <= 100),
+ADD COLUMN warmy_temperature INTEGER CHECK (warmy_temperature >= 0 AND warmy_temperature <= 100),
+ADD COLUMN last_warmy_sync TIMESTAMPTZ;
 ```
 
 ---
 
-## Part 2: OAuth Flow
-
-### Gmail OAuth
-
-| Step | Description |
-|------|-------------|
-| 1 | User clicks "Connect Gmail" in Settings |
-| 2 | Redirect to Google OAuth consent screen |
-| 3 | Google redirects back with authorization code |
-| 4 | Edge function exchanges code for tokens |
-| 5 | Store tokens in `email_connections` table |
-
-### Outlook OAuth
-
-| Step | Description |
-|------|-------------|
-| 1 | User clicks "Connect Outlook" in Settings |
-| 2 | Redirect to Microsoft OAuth consent screen |
-| 3 | Microsoft redirects back with authorization code |
-| 4 | Edge function exchanges code for tokens |
-| 5 | Store tokens in `email_connections` table |
-
-### Required Secrets
+## Part 2: Required Secrets
 
 | Secret | Purpose |
 |--------|---------|
-| `GOOGLE_CLIENT_ID` | Gmail OAuth app ID |
-| `GOOGLE_CLIENT_SECRET` | Gmail OAuth secret |
-| `MICROSOFT_CLIENT_ID` | Outlook OAuth app ID |
-| `MICROSOFT_CLIENT_SECRET` | Outlook OAuth secret |
+| WARMY_API_KEY | Bearer token for Warmy API authentication |
+| WARMY_HOLDER_UID | Required header for all Warmy API requests |
 
 ---
 
 ## Part 3: Edge Functions
 
-### 1. `oauth-callback` Function
+### 1. `warmy-register` - Register mailbox with Warmy
 
-Handles OAuth redirects from Google/Microsoft.
+Called after a Gmail OAuth connection is established.
 
-```typescript
-// POST /oauth-callback
-{
-  "provider": "gmail" | "outlook",
-  "code": "authorization_code",
-  "redirect_uri": "https://..."
-}
+**Endpoint**: POST to Warmy API `/api/v2/mailboxes`
 
-// Returns: { success: true, email: "user@gmail.com" }
-```
-
-### 2. `send-email` Function
-
-Sends emails via connected provider.
+**Process**:
+1. Receive connection_id from client
+2. Fetch email connection from database (including OAuth tokens)
+3. Build Warmy registration payload for OAuth Google
+4. POST to Warmy API with Bearer token and holder-uid headers
+5. Store returned mailbox ID in `warmy_mailbox_id` column
+6. Set `warmy_state` to 'active'
 
 ```typescript
-// POST /send-email
+// Request payload for OAuth Google
 {
-  "to": "recipient@example.com",
-  "toName": "John's Bakery",
-  "subject": "Your new website preview is ready!",
-  "bodyHtml": "<html>...</html>",
-  "previewId": "uuid",
-  "leadId": "uuid" // optional
-}
-
-// Returns: { success: true, messageId: "..." }
-```
-
-### 3. `refresh-token` Function
-
-Refreshes expired OAuth tokens automatically.
-
----
-
-## Part 4: Settings UI - Email Integrations
-
-Add new section to Settings page:
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│  🔗 Email Integrations                                          │
-│  Connect your email to send pitch emails directly               │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │ 📧 Gmail                                                 │   │
-│  │                                                          │   │
-│  │ ○ Not connected                                          │   │
-│  │                                                          │   │
-│  │                              [ Connect Gmail ]           │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │ 📬 Outlook                                               │   │
-│  │                                                          │   │
-│  │ ○ Not connected                                          │   │
-│  │                                                          │   │
-│  │                              [ Connect Outlook ]         │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-
-When connected:
-┌─────────────────────────────────────────────────────────────────┐
-│  │ ✅ Gmail - john@gmail.com                                │   │
-│  │    Connected on Jan 28, 2026                             │   │
-│  │                                                          │   │
-│  │                   [ Send Test ]  [ Disconnect ]          │   │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Part 5: Send Pitch Email Dialog
-
-Add "Send Email" button to leads and preview management.
-
-### Dialog Design
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│  ✉️ Send Pitch Email                                     [ X ]  │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  From: john@gmail.com (Gmail)  ▼                               │
-│                                                                 │
-│  To:                                                            │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │ info@johnsbakery.com                                     │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│  Recipient Name:                                                │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │ John's Bakery                                            │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│  Subject:                                                       │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │ Your new website preview is ready, John's Bakery!        │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│  Template: [ Default Pitch Email ▼ ]                           │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │ Preview of HTML email...                                 │   │
-│  │                                                          │   │
-│  │ Hi John's Bakery,                                        │   │
-│  │                                                          │   │
-│  │ I've created a modern website preview for your           │   │
-│  │ business. Click below to see it:                         │   │
-│  │                                                          │   │
-│  │      [ View Your Preview ]                               │   │
-│  │                                                          │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-│                           [ Cancel ]  [ Send Email ]            │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Email Template Variables
-
-| Variable | Replaced With |
-|----------|---------------|
-| `{{recipient_name}}` | Business name |
-| `{{preview_url}}` | Full preview URL |
-| `{{sender_name}}` | User's name from profile |
-| `{{sender_business}}` | User's business name |
-
----
-
-## Part 6: Email Template (HTML)
-
-Professional pitch email template:
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    .cta-button {
-      background: {{primary_color}};
-      color: white;
-      padding: 16px 32px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
+  "mailbox": {
+    "email": "user@gmail.com",
+    "provider": "oauth_google",
+    "from_name": "User Name",
+    "tariff_plan_type_id": 1,
+    "access_token": "...",
+    "refresh_token": "...",
+    "expires_at": 1729259022,
+    "client_id": GOOGLE_CLIENT_ID,
+    "client_secret": GOOGLE_CLIENT_SECRET,
+    "redirect_uri": "...",
+    "token_credential_uri": "https://oauth2.googleapis.com/token",
+    "setting_attributes": {
+      "speed_mode": "medium"
     }
-  </style>
-</head>
-<body style="font-family: system-ui; max-width: 600px; margin: 0 auto;">
-  <h1>Hi {{recipient_name}},</h1>
-  
-  <p>I've created a modern website preview specifically for your business. 
-  I'd love for you to take a look and let me know what you think!</p>
-  
-  <p style="text-align: center; margin: 32px 0;">
-    <a href="{{preview_url}}" class="cta-button">
-      View Your Preview
-    </a>
-  </p>
-  
-  <p>If you have any questions or would like to discuss changes, 
-  just reply to this email.</p>
-  
-  <p>Best regards,<br>
-  {{sender_name}}<br>
-  {{sender_business}}</p>
-</body>
-</html>
+  }
+}
+```
+
+### 2. `warmy-sync` - Sync health scores
+
+Can be called manually or via cron (hourly).
+
+**Endpoint**: GET from Warmy API `/api/v2/mailboxes`
+
+**Process**:
+1. Fetch all user's mailboxes from Warmy
+2. For each mailbox in response:
+   - Extract scores: deliverability_score, placement_score, dns_score
+   - Extract temperature and state
+3. Update `email_connections` table with new values
+4. Set `last_warmy_sync` to current timestamp
+
+### 3. `warmy-actions` - Pause/Resume/Test/Disconnect
+
+Handles various Warmy actions.
+
+**Actions**:
+
+| Action | Warmy Endpoint | Method |
+|--------|----------------|--------|
+| pause | `/api/v2/mailboxes/{id}/update_state` | PUT with `{"mailbox": {"state": "pause!"}}` |
+| resume | `/api/v2/mailboxes/{id}/update_state` | PUT with `{"mailbox": {"state": "activate!"}}` |
+| test | `/api/v2/mailboxes/{id}/deliverability_checkers` | POST with providers array |
+| disconnect | `/api/v2/mailboxes/{id}` | DELETE with reason |
+| get_details | `/api/v2/mailboxes/{id}` | GET for full mailbox info |
+| get_alerts | `/api/v2/warmup_alerts` | GET filtered by domain |
+
+---
+
+## Part 4: React Hook - useWarmyStatus
+
+New hook to manage Warmy state and actions.
+
+```typescript
+// src/hooks/useWarmyStatus.ts
+export function useWarmyStatus() {
+  return {
+    // Data
+    warmyConnections,  // email_connections with warmy data
+    isLoading,
+    alerts,            // warmup alerts from API
+    
+    // Actions
+    registerWithWarmy, // Register after OAuth
+    syncScores,        // Manual refresh
+    pauseWarmup,
+    resumeWarmup,
+    runDeliverabilityTest,
+    disconnectFromWarmy,
+    getMailboxDetails, // Get DNS records, etc.
+  };
+}
 ```
 
 ---
 
-## Part 7: Integration Points
+## Part 5: UI Components
 
-### In SavedLeadsList.tsx
+### 1. WarmyStatusCard Component
 
-Add "Send Email" to dropdown menu:
+Displays warmup status for a single mailbox.
 
-```typescript
-<DropdownMenuItem onClick={() => openSendEmailDialog(lead)}>
-  <Send className="h-4 w-4 mr-2" />
-  Send Pitch Email
-</DropdownMenuItem>
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│ 📧 john@gmail.com                              [🔥 Warming]     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Temperature                    Health Scores                   │
+│  ┌───────────┐                 ┌─────────────────────────────┐ │
+│  │    72     │                 │ Deliverability    85/100    │ │
+│  │   /100    │                 │ Placement         78/100    │ │
+│  │  ██████░░ │                 │ DNS               92/100    │ │
+│  └───────────┘                 └─────────────────────────────┘ │
+│                                                                 │
+│  📊 Sent Today: 24  |  📥 Received Today: 18  |  Day 14        │
+│                                                                 │
+│  [ Pause Warmup ]    [ Run Test ]    [ View Details ]          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### In ManagePreview.tsx
+**States**:
+- Warming (active) - green badge, animated thermometer
+- Paused - yellow badge, dimmed card
+- Ready (temperature >= 90) - blue "Ready" badge
+- Needs Attention (score < 70) - orange warning badge
 
-Add "Send Email" button to toolbar:
+### 2. WarmyDetailsSheet Component
 
-```typescript
-<Button onClick={() => openSendEmailDialog(preview)}>
-  <Send className="h-4 w-4 mr-2" />
-  Send to Client
-</Button>
+Slide-in sheet showing detailed mailbox info.
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│ Mailbox Details - john@gmail.com                          [X]  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ DNS Records                                                     │
+│ ┌─────────────────────────────────────────────────────────────┐│
+│ │ ✅ SPF Record         Configured correctly                  ││
+│ │ ✅ DKIM Record        Valid                                 ││
+│ │ ⚠️ DMARC Record       Missing - Recommended                 ││
+│ │ ✅ MX Record          Valid                                 ││
+│ │ ✅ A Record           Valid                                 ││
+│ │ ✅ Reverse DNS        Configured                            ││
+│ └─────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│ Warmup Settings                                                 │
+│ Speed: [ Slow ] [ Medium ●] [ Fast ]                           │
+│                                                                 │
+│ Latest Deliverability Test                                      │
+│ ┌─────────────────────────────────────────────────────────────┐│
+│ │ Google: 95% Inbox  |  Outlook: 88% Inbox  |  Yahoo: 92%    ││
+│ │ Tested: 2 hours ago                                         ││
+│ └─────────────────────────────────────────────────────────────┘│
+│                                                                 │
+│ [ Run New Test ]              [ Disconnect from Warmy ]         │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 3. Dashboard Widget - Email Health Overview
+
+Small card on main dashboard.
+
+```text
+┌─────────────────────────────────────────┐
+│ 📨 Email Health                         │
+├─────────────────────────────────────────┤
+│                                         │
+│  2 mailboxes warming                    │
+│  Avg. Deliverability: 82%               │
+│                                         │
+│  ⚠️ 1 mailbox needs attention           │
+│                                         │
+│            [ View Details → ]           │
+└─────────────────────────────────────────┘
+```
+
+### 4. Alert Banner Component
+
+Shows when deliverability is low.
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│ ⚠️ Low Deliverability Alert                                     │
+│ john@gmail.com has a deliverability score of 48%.               │
+│ Outreach campaigns from this mailbox are auto-paused.           │
+│                                 [ View in Settings ]            │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Part 8: Files to Create/Modify
+## Part 6: Integration Flow
+
+### When User Connects Gmail
+
+1. User completes Gmail OAuth (existing flow)
+2. Show prompt: "Enable email warmup?"
+3. If yes, call `warmy-register` edge function
+4. Update UI to show warmup status card
+
+### Auto-Pause Logic
+
+In the `send-email` edge function, add check:
+
+```typescript
+// Before sending, check deliverability
+if (connection.deliverability_score && connection.deliverability_score < 50) {
+  return { error: "Email sending paused due to low deliverability score (${score}%). Please wait for warmup to complete." };
+}
+
+if (connection.deliverability_score && connection.deliverability_score < 70) {
+  // Still send, but include warning in response
+  // UI shows warning toast
+}
+```
+
+### Hourly Sync (Optional Cron)
+
+Set up pg_cron to call `warmy-sync` every hour:
+
+```sql
+SELECT cron.schedule(
+  'warmy-hourly-sync',
+  '0 * * * *',
+  $$
+  SELECT net.http_post(
+    url := 'https://PROJECT_ID.supabase.co/functions/v1/warmy-sync',
+    headers := '{"Authorization": "Bearer ANON_KEY"}'::jsonb,
+    body := '{}'::jsonb
+  );
+  $$
+);
+```
+
+---
+
+## Part 7: Files to Create/Modify
 
 | File | Action | Purpose |
 |------|--------|---------|
-| `supabase/functions/oauth-callback/index.ts` | CREATE | Handle OAuth redirects |
-| `supabase/functions/send-email/index.ts` | CREATE | Send emails via Gmail/Outlook |
-| `src/components/email/EmailConnectionCard.tsx` | CREATE | Connection UI component |
-| `src/components/email/SendEmailDialog.tsx` | CREATE | Compose email dialog |
-| `src/hooks/useEmailConnections.ts` | CREATE | Manage connections state |
-| `src/lib/emailTemplates.ts` | CREATE | Default email templates |
-| `src/pages/Settings.tsx` | MODIFY | Add Email Integrations section |
-| `src/components/leads/SavedLeadsList.tsx` | MODIFY | Add Send Email action |
-| `src/components/manage/ManageToolbar.tsx` | MODIFY | Add Send Email button |
+| `supabase/functions/warmy-register/index.ts` | CREATE | Register mailbox with Warmy |
+| `supabase/functions/warmy-sync/index.ts` | CREATE | Sync health scores |
+| `supabase/functions/warmy-actions/index.ts` | CREATE | Pause/resume/test/disconnect |
+| `src/hooks/useWarmyStatus.ts` | CREATE | React hook for Warmy state |
+| `src/components/email/WarmyStatusCard.tsx` | CREATE | Mailbox warmup status display |
+| `src/components/email/WarmyDetailsSheet.tsx` | CREATE | Detailed mailbox info sheet |
+| `src/components/email/WarmyAlertBanner.tsx` | CREATE | Low deliverability warning |
+| `src/components/dashboard/EmailHealthWidget.tsx` | CREATE | Dashboard overview widget |
+| `src/pages/Settings.tsx` | MODIFY | Add Warmy section below Email Integrations |
+| `src/pages/Dashboard.tsx` | MODIFY | Add Email Health widget |
+| `supabase/functions/send-email/index.ts` | MODIFY | Add deliverability check before sending |
+| `supabase/functions/oauth-callback/index.ts` | MODIFY | Optionally auto-register with Warmy |
+| `supabase/config.toml` | MODIFY | Add new function configurations |
 
 ---
 
-## Part 9: User Flow
+## Part 8: Implementation Order
 
-### Connect Email Account
-
-1. User goes to Settings → Email Integrations
-2. Clicks "Connect Gmail" or "Connect Outlook"
-3. Redirected to OAuth consent screen
-4. Grants permissions
-5. Redirected back to app
-6. Connection saved and displayed
-
-### Send Pitch Email
-
-1. User views a lead or preview
-2. Clicks "Send Pitch Email"
-3. Dialog opens with pre-filled data
-4. User reviews and edits message
-5. Clicks "Send Email"
-6. Email sent via connected account
-7. Logged in `outreach_emails` table
-8. Success notification shown
+1. **Secrets**: Add WARMY_API_KEY and WARMY_HOLDER_UID secrets
+2. **Database**: Run migration to add Warmy columns to email_connections
+3. **Edge Function**: Create `warmy-register` function
+4. **Edge Function**: Create `warmy-sync` function
+5. **Edge Function**: Create `warmy-actions` function
+6. **Hook**: Create useWarmyStatus hook
+7. **UI**: Create WarmyStatusCard component
+8. **UI**: Create WarmyDetailsSheet component
+9. **Settings**: Add Warmy section to Settings page
+10. **Dashboard**: Add EmailHealthWidget to Dashboard
+11. **Send Email**: Add deliverability check to send-email function
+12. **Alerts**: Create WarmyAlertBanner and integrate
+13. **Cron (optional)**: Set up hourly sync job
 
 ---
 
-## Required Setup
+## Technical Notes
 
-Before implementation, you'll need to:
+### API Rate Limiting
+Warmy API has a 60 requests/minute limit. The sync function should batch requests and implement retry logic with exponential backoff.
 
-1. **Create Google Cloud OAuth App**
-   - Go to Google Cloud Console
-   - Create OAuth 2.0 credentials
-   - Add redirect URI
-   - Get Client ID and Secret
+### Token Sharing
+When registering with Warmy, we share the user's OAuth tokens. Warmy uses these to send/receive warmup emails on their behalf. Users should be informed about this.
 
-2. **Create Microsoft Azure AD App**
-   - Go to Azure Portal → App Registrations
-   - Create new registration
-   - Add redirect URI
-   - Get Client ID and Secret
+### Error Handling
+If Warmy registration fails, the Gmail connection still works for sending. Warmy is an optional enhancement.
 
-3. **Add Secrets to Project**
-   - `GOOGLE_CLIENT_ID`
-   - `GOOGLE_CLIENT_SECRET`
-   - `MICROSOFT_CLIENT_ID`
-   - `MICROSOFT_CLIENT_SECRET`
+### Score Thresholds
 
----
-
-## Security Considerations
-
-| Risk | Mitigation |
-|------|------------|
-| Token theft | Tokens stored server-side only, never exposed to client |
-| Token expiry | Auto-refresh mechanism before sending |
-| Unauthorized access | RLS policies ensure users only access own connections |
-| OAuth scope | Request minimal permissions (send email only) |
-
+| Score Range | Status | Action |
+|-------------|--------|--------|
+| 90-100 | Excellent | Green, fully ready |
+| 70-89 | Good | Yellow, proceed with caution |
+| 50-69 | Fair | Orange, show warning before sending |
+| 0-49 | Poor | Red, auto-pause outreach |
