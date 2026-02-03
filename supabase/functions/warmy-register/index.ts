@@ -94,8 +94,13 @@ serve(async (req: Request) => {
       );
     }
 
-    // Use configured APP_ORIGIN, or fall back to published URL
-    const appOrigin = Deno.env.get("APP_ORIGIN") || "https://website4u.lovable.app";
+    // Use request origin for dynamic redirect_uri (works from any domain)
+    const requestOrigin = req.headers.get("origin");
+    const refererUrl = req.headers.get("referer");
+    const refererOrigin = refererUrl ? new URL(refererUrl).origin : null;
+    const appOrigin = requestOrigin || refererOrigin || Deno.env.get("APP_ORIGIN") || "https://website4u.lovable.app";
+    
+    console.log("Using origin for redirect_uri:", appOrigin);
     
     // Build Warmy registration payload
     let mailboxPayload: any;
