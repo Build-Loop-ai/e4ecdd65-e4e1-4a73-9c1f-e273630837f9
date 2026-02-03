@@ -101,11 +101,14 @@ export type Database = {
         Row: {
           access_token: string
           created_at: string | null
+          daily_send_limit: number | null
           deliverability_score: number | null
           dns_score: number | null
           email_address: string
+          emails_sent_today: number | null
           id: string
           is_active: boolean | null
+          last_send_count_reset: string | null
           last_warmy_sync: string | null
           placement_score: number | null
           provider: string
@@ -113,6 +116,7 @@ export type Database = {
           token_expires_at: string | null
           updated_at: string | null
           user_id: string
+          warmup_started_at: string | null
           warmy_mailbox_id: number | null
           warmy_state: string | null
           warmy_temperature: number | null
@@ -120,11 +124,14 @@ export type Database = {
         Insert: {
           access_token: string
           created_at?: string | null
+          daily_send_limit?: number | null
           deliverability_score?: number | null
           dns_score?: number | null
           email_address: string
+          emails_sent_today?: number | null
           id?: string
           is_active?: boolean | null
+          last_send_count_reset?: string | null
           last_warmy_sync?: string | null
           placement_score?: number | null
           provider: string
@@ -132,6 +139,7 @@ export type Database = {
           token_expires_at?: string | null
           updated_at?: string | null
           user_id: string
+          warmup_started_at?: string | null
           warmy_mailbox_id?: number | null
           warmy_state?: string | null
           warmy_temperature?: number | null
@@ -139,11 +147,14 @@ export type Database = {
         Update: {
           access_token?: string
           created_at?: string | null
+          daily_send_limit?: number | null
           deliverability_score?: number | null
           dns_score?: number | null
           email_address?: string
+          emails_sent_today?: number | null
           id?: string
           is_active?: boolean | null
+          last_send_count_reset?: string | null
           last_warmy_sync?: string | null
           placement_score?: number | null
           provider?: string
@@ -151,6 +162,7 @@ export type Database = {
           token_expires_at?: string | null
           updated_at?: string | null
           user_id?: string
+          warmup_started_at?: string | null
           warmy_mailbox_id?: number | null
           warmy_state?: string | null
           warmy_temperature?: number | null

@@ -9,6 +9,19 @@ const corsHeaders = {
 
 const WARMY_API_BASE = "https://api.warmy.io";
 
+// Calculate daily send limit based on temperature
+const calculateDailyLimit = (temperature: number): number => {
+  if (temperature >= 90) return 50;
+  if (temperature >= 80) return 40;
+  if (temperature >= 70) return 30;
+  if (temperature >= 60) return 20;
+  if (temperature >= 50) return 15;
+  if (temperature >= 40) return 10;
+  if (temperature >= 30) return 8;
+  if (temperature >= 20) return 6;
+  return 5; // Default minimum
+};
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -68,7 +81,7 @@ serve(async (req: Request) => {
     // Get email connections from our database
     let query = adminSupabase
       .from("email_connections")
-      .select("id, warmy_mailbox_id, email_address")
+      .select("id, warmy_mailbox_id, email_address, last_send_count_reset, warmup_started_at")
       .not("warmy_mailbox_id", "is", null);
 
     if (userId) {
@@ -99,18 +112,39 @@ serve(async (req: Request) => {
 
     // Update each connection with Warmy data
     const updates: any[] = [];
+    const now = new Date();
+    
     for (const conn of connections || []) {
       const warmyData = warmyMap.get(conn.warmy_mailbox_id);
       
       if (warmyData) {
-        const updateData = {
+        const temperature = warmyData.temperature ?? 0;
+        const calculatedLimit = calculateDailyLimit(temperature);
+        
+        // Check if we need to reset daily counter
+        const lastReset = conn.last_send_count_reset ? new Date(conn.last_send_count_reset) : new Date(0);
+        const isNewDay = lastReset.toDateString() !== now.toDateString();
+        
+        const updateData: any = {
           warmy_state: warmyData.state || warmyData.status || "active",
           deliverability_score: warmyData.deliverability_score ?? null,
           placement_score: warmyData.placement_score ?? null,
           dns_score: warmyData.dns_score ?? null,
-          warmy_temperature: warmyData.temperature ?? null,
-          last_warmy_sync: new Date().toISOString(),
+          warmy_temperature: temperature,
+          daily_send_limit: calculatedLimit,
+          last_warmy_sync: now.toISOString(),
         };
+
+        // Reset daily counter if new day
+        if (isNewDay) {
+          updateData.emails_sent_today = 0;
+          updateData.last_send_count_reset = now.toISOString();
+        }
+
+        // Set warmup_started_at if not already set
+        if (!conn.warmup_started_at && warmyData) {
+          updateData.warmup_started_at = now.toISOString();
+        }
 
         const { error: updateError } = await adminSupabase
           .from("email_connections")

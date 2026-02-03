@@ -15,6 +15,10 @@ export interface WarmyConnection {
   dns_score: number | null;
   warmy_temperature: number | null;
   last_warmy_sync: string | null;
+  daily_send_limit: number | null;
+  emails_sent_today: number | null;
+  last_send_count_reset: string | null;
+  warmup_started_at: string | null;
 }
 
 export interface WarmyMailboxDetails {
@@ -58,7 +62,7 @@ export function useWarmyStatus() {
     try {
       const { data, error } = await supabase
         .from('email_connections')
-        .select('id, email_address, provider, is_active, warmy_mailbox_id, warmy_state, deliverability_score, placement_score, dns_score, warmy_temperature, last_warmy_sync')
+        .select('id, email_address, provider, is_active, warmy_mailbox_id, warmy_state, deliverability_score, placement_score, dns_score, warmy_temperature, last_warmy_sync, daily_send_limit, emails_sent_today, last_send_count_reset, warmup_started_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
