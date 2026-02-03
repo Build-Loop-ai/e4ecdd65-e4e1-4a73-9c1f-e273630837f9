@@ -1,105 +1,217 @@
 
-## What’s happening (root cause)
-Your Warmy authentication headers are now correct (Bearer token + `Holder-Uid`). The fact you’ve moved from `401` to a `400` strongly suggests Warmy is now accepting your Warmy API credentials, but is rejecting the *mailbox credentials payload*.
+# Comprehensive Email Health & Smart Sending System
 
-For Gmail OAuth mailboxes, Warmy needs OAuth tokens with sufficient Gmail permissions to run warmup (send + read/modify). Right now our Gmail OAuth flow only requests:
-
-- `https://www.googleapis.com/auth/gmail.send`
-- `https://www.googleapis.com/auth/userinfo.email`
-
-That’s typically not enough for warmup, because Warmy needs to read incoming mail / move messages / mark as read, etc. When Warmy tries to use the token, Google denies the needed operations, and Warmy surfaces that as the generic:
-> “Please recheck your credentials and try again”
-
-So the missing piece is: **our Gmail OAuth scopes are too limited**.  
-This won’t be fixed by changing Warmy headers again.
+## Overview
+Transform the Warmy.io integration into a seamless, user-friendly email health management system. Users will see their email readiness at a glance, understand sending limits, and have automatic protection against damaging their sender reputation.
 
 ---
 
-## Plan to fix it
-### 1) Update the Gmail OAuth scopes we request
-In `supabase/functions/get-oauth-url/index.ts`, change the Gmail scope string to request a scope that allows full mailbox access.
+## What We'll Build
 
-Recommended (simplest, most compatible for warmup):
-- `https://mail.google.com/` (full Gmail access)
+### 1. Enhanced Dashboard Email Health Card
+Replace the simple widget with a rich, informative "Email Readiness" card showing:
+- **Sending Readiness Status**: Clear indicator (Ready / Warming Up / Paused)
+- **Daily Sending Capacity**: Shows recommended emails per day based on warmup temperature
+- **Temperature Gauge**: Visual thermometer showing warmup progress (0-100)
+- **Quick Stats**: Sent today / Received today from Warmy
+- **Next Action**: Smart suggestion ("Run deliverability test", "Your mailbox needs attention", etc.)
 
-So Gmail scope becomes something like:
-- `https://mail.google.com/ https://www.googleapis.com/auth/userinfo.email`
+### 2. Smart Sending Gate in Send Email Dialog
+Before sending, automatically check:
+- Is warmup complete (temperature >= 85)?
+- Is deliverability score healthy (>= 70)?
+- Have they exceeded daily recommended sending limit?
 
-We’ll keep:
-- `access_type=offline`
-- `prompt=consent`
-so you reliably receive a refresh token.
+Show users:
+- A "Sending Health Check" panel before send
+- Warnings if sending could hurt reputation
+- Recommended wait time if limit exceeded
 
-Why this works: Warmy will be able to use the refresh token to obtain access tokens that can actually operate the mailbox the way warmup requires.
+### 3. Daily Sending Limit Tracking
+Add new columns to `email_connections` table:
+- `daily_send_limit` - Warmy-recommended limit based on temperature
+- `emails_sent_today` - Counter that resets daily
+- `last_send_count_reset` - Timestamp for daily reset
 
-### 2) Ensure Warmy “create mailbox” response parsing is correct
-Warmy’s doc snippet shows the create mailbox response as:
-```json
-{ "message": [...], "data": { "id": 123, "tariff_plan_type_id": 1 } }
+Add to `warmy-sync`:
+- Fetch and store the current recommended sending limit
+- Calculate based on temperature (e.g., temp 15 = ~5-10 emails, temp 90+ = 50+ emails)
+
+### 4. Pre-Send Email Validation
+Create new endpoint `check-send-readiness`:
+- Returns current sending capacity
+- Returns whether user can send more today
+- Returns health score and warnings
+- Returns suggested wait time if at limit
+
+### 5. Improved Warmy Details in Settings
+Enhance the WarmyDetailsSheet with:
+- **Warmup Progress Timeline**: Visual showing warmup journey
+- **Provider Deliverability Breakdown**: Google/Outlook/Yahoo scores with visual bars
+- **DNS Health Checklist**: Clear pass/fail indicators with fix suggestions
+- **Sending Statistics**: Chart showing sent/received over time
+- **Smart Recommendations**: AI-generated tips based on current status
+
+### 6. Email Readiness Onboarding
+When a user first enables warmup, show:
+- Explanation of what warmup does
+- Expected timeline (typically 2-4 weeks)
+- What they can do now vs later
+- Daily check-in prompts
+
+---
+
+## User Experience Flow
+
+```text
++------------------------------------------+
+|         DASHBOARD - EMAIL HEALTH         |
++------------------------------------------+
+|                                          |
+|  [Thermometer Icon] Email Readiness      |
+|  ----------------------------------------|
+|  Temperature: ████████░░░░ 72/100        |
+|  Status: Warming Up (8 days remaining)   |
+|                                          |
+|  Today's Capacity                        |
+|  [===-----] 3/25 emails sent             |
+|                                          |
+|  Deliverability: 85% [Good]              |
+|  DNS Health: 5/6 records OK              |
+|                                          |
+|  [View Details] [Run Test]               |
++------------------------------------------+
 ```
-Our `warmy-register` currently assumes `warmyResult.id`.
 
-Even though you’re failing before success right now, after we fix scopes, this would become the next bug. We will update:
-- `warmy_mailbox_id` assignment to use `warmyResult.data.id` (with a fallback in case Warmy sometimes returns `id` at top-level).
+When clicking "Send Email":
 
-### 3) Fix Outlook provider string (small correctness fix)
-In the OpenAPI discriminator mapping you pasted, Warmy expects:
-- `oauth_outlook` (not `oauth_microsoft`)
-
-This doesn’t affect your Gmail issue, but we should correct it to prevent a similar failure for Outlook connections.
-
-### 4) Add targeted logging to confirm the diagnosis (without leaking secrets)
-In `warmy-register`, add logs that confirm:
-- which provider payload is being sent (`oauth_google`)
-- the `expires_at` value
-- whether Warmy returns 400 vs 422
-- include Warmy response body exactly as returned (we already do, but we’ll ensure it’s not being stringified in a confusing way)
-
-This helps us quickly distinguish:
-- “Warmy auth rejected” (would be 401)
-vs
-- “Warmy couldn’t use Google token” (often 400 with this generic message)
-vs
-- “Payload validation” (often 422 with field errors)
+```text
++------------------------------------------+
+|         PRE-SEND HEALTH CHECK            |
++------------------------------------------+
+|                                          |
+|  ✓ Mailbox is warmed up (72/100)         |
+|  ✓ Deliverability healthy (85%)          |
+|  ✓ Daily limit OK (3/25 sent today)      |
+|                                          |
+|  [Send Email] or [Schedule for Later]    |
++------------------------------------------+
+```
 
 ---
 
-## Required user action after code change (important)
-Because OAuth scopes are embedded in the refresh token you received, simply changing code is not enough.
+## Technical Implementation
 
-After we update scopes, you must:
-1. In the app’s Settings page, disconnect/remove the Gmail connection.
-2. Reconnect Gmail (this triggers a new OAuth consent with the new scopes).
-3. Then click “Enable Warmup” again.
+### Database Changes
+Add columns to `email_connections`:
+```sql
+ALTER TABLE email_connections ADD COLUMN IF NOT EXISTS 
+  daily_send_limit integer DEFAULT 5,
+  emails_sent_today integer DEFAULT 0,
+  last_send_count_reset timestamp with time zone DEFAULT now(),
+  warmup_started_at timestamp with time zone;
+```
 
-If you don’t reconnect, Warmy will still receive the old tokens with insufficient permissions and keep failing.
+### New/Updated Edge Functions
+
+**1. Update `warmy-sync`**
+- Fetch sending_limit from Warmy mailbox details
+- Store temperature-based recommended daily limit
+- Parse and store more detailed scores
+
+**2. Update `send-email`**
+- Check daily limit before sending
+- Increment `emails_sent_today` counter
+- Reset counter if new day
+- Return remaining capacity in response
+
+**3. New `check-send-readiness`**
+- Quick check endpoint for UI
+- Returns: canSend, remainingToday, temperatureReady, warnings[]
+
+### Frontend Components
+
+**1. New: `EmailReadinessCard.tsx`**
+- Rich dashboard widget replacing EmailHealthWidget
+- Temperature gauge with animation
+- Sending capacity bar
+- Quick actions
+
+**2. New: `SendHealthCheck.tsx`**
+- Pre-send validation panel
+- Shows in SendEmailDialog before confirmation
+- Clear pass/fail indicators
+
+**3. Updated: `WarmyDetailsSheet.tsx`**
+- Add warmup timeline visualization
+- Provider score breakdown bars
+- Better DNS record display
+- Sending statistics section
+
+**4. New: `WarmupOnboarding.tsx`**
+- Modal shown when first enabling warmup
+- Explains the process
+- Sets expectations
+
+**5. Updated: `WarmyStatusCard.tsx`**
+- Add daily capacity indicator
+- Show warmup progress more prominently
+- Add "days remaining" estimate
+
+### Hook Updates
+
+**Update `useWarmyStatus.ts`**
+- Add `checkSendReadiness()` function
+- Add `getSendingCapacity()` helper
+- Add computed values for daily limits
+- Add warmup progress percentage
 
 ---
 
-## Files we will change
-1. `supabase/functions/get-oauth-url/index.ts`
-   - Update Gmail OAuth scope to include `https://mail.google.com/`.
+## Files to Create/Modify
 
-2. `supabase/functions/warmy-register/index.ts`
-   - Parse Warmy response as `warmyResult.data.id`.
-   - Fix Outlook provider string to `oauth_outlook` (and/or adjust payload mapping accordingly).
-   - Add a couple of safe debug logs.
+### New Files
+1. `src/components/email/EmailReadinessCard.tsx` - Rich dashboard widget
+2. `src/components/email/SendHealthCheck.tsx` - Pre-send validation
+3. `src/components/email/WarmupOnboarding.tsx` - First-time setup modal
+4. `src/components/email/TemperatureGauge.tsx` - Animated temperature display
+5. `src/components/email/SendingCapacityBar.tsx` - Daily limit progress bar
+6. `supabase/functions/check-send-readiness/index.ts` - Quick validation endpoint
 
-(We likely won’t need to change `warmy-actions` / `warmy-sync` again since headers are already aligned with Warmy docs.)
+### Modified Files
+1. `supabase/functions/warmy-sync/index.ts` - Fetch more data, calculate limits
+2. `supabase/functions/send-email/index.ts` - Add limit checking and tracking
+3. `src/hooks/useWarmyStatus.ts` - Add send readiness functions
+4. `src/components/email/SendEmailDialog.tsx` - Add health check panel
+5. `src/components/email/WarmyDetailsSheet.tsx` - Enhanced details view
+6. `src/components/email/WarmyStatusCard.tsx` - Better progress display
+7. `src/pages/Dashboard.tsx` - Use new EmailReadinessCard
+
+### Database Migration
+- Add columns: `daily_send_limit`, `emails_sent_today`, `last_send_count_reset`, `warmup_started_at`
 
 ---
 
-## Verification checklist (how we’ll know it’s fixed)
-1. Reconnect Gmail from `/dashboard/settings`.
-2. Trigger “Enable Warmup”.
-3. `warmy-register` returns 200/201 and stores `warmy_mailbox_id` in `email_connections`.
-4. Warmy status widgets populate after `warmy-sync` runs (or manual refresh triggers it).
+## Key User Benefits
+
+1. **No Confusion**: Users always know if they're ready to send
+2. **Protected Reputation**: Auto-limits prevent over-sending
+3. **Clear Progress**: See exactly how warmup is progressing
+4. **Smart Guidance**: System tells them what to do next
+5. **Zero Technical Knowledge Required**: Everything is simplified
+6. **Automatic Safety**: Can't accidentally damage deliverability
 
 ---
 
-## If it still fails after this
-Next most likely causes (in order):
-1. Google OAuth app is in “Testing” mode and the connected user is not a test user.
-2. Refresh token is missing (Google sometimes won’t return it if consent wasn’t forced; we already use `prompt=consent`, but we’ll confirm).
-3. `expires_at` format mismatch (Warmy expects ms vs seconds). If needed, we’ll match Warmy schema once we can see the exact expected type from the OpenAPI components (or infer from their error details if they return 422).
+## Implementation Order
 
+1. Database migration (add new columns)
+2. Update `warmy-sync` to fetch and store more data
+3. Create `check-send-readiness` endpoint
+4. Update `send-email` with limit tracking
+5. Build `TemperatureGauge` and `SendingCapacityBar` components
+6. Create `EmailReadinessCard` for dashboard
+7. Add `SendHealthCheck` to SendEmailDialog
+8. Enhance `WarmyDetailsSheet`
+9. Create `WarmupOnboarding` modal
+10. Update hook with new functions
