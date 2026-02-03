@@ -23,13 +23,12 @@ serve(async (req: Request) => {
   try {
     const WARMY_API_KEY = Deno.env.get("WARMY_API_KEY");
     const WARMY_HOLDER_UID = Deno.env.get("WARMY_HOLDER_UID");
-    const WARMY_UID = Deno.env.get("WARMY_UID");
     const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
     const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
 
-    if (!WARMY_API_KEY || !WARMY_HOLDER_UID || !WARMY_UID) {
+    if (!WARMY_API_KEY || !WARMY_HOLDER_UID) {
       return new Response(
-        JSON.stringify({ error: "Warmy API not configured. Missing WARMY_API_KEY, WARMY_HOLDER_UID, or WARMY_UID." }),
+        JSON.stringify({ error: "Warmy API not configured. Missing WARMY_API_KEY or WARMY_HOLDER_UID." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -195,15 +194,12 @@ serve(async (req: Request) => {
 
     console.log("Sending request to Warmy API...");
 
-    // Register with Warmy API using their expected header format
-    console.log("Warmy headers: access-token, uid, holder-uid (matching Warmy docs)");
-    
+    // Register with Warmy API using Bearer token authentication
     const warmyResponse = await fetch(`${WARMY_API_BASE}/api/v2/mailboxes`, {
       method: "POST",
       headers: {
-        "access-token": WARMY_API_KEY,
-        "uid": WARMY_UID,
-        "holder-uid": WARMY_HOLDER_UID,
+        "Authorization": `Bearer ${WARMY_API_KEY}`,
+        "Holder-Uid": WARMY_HOLDER_UID,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(mailboxPayload),

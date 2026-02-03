@@ -97,7 +97,7 @@ serve(async (req: Request) => {
 
     const warmyHeaders = {
       "Authorization": `Bearer ${WARMY_API_KEY}`,
-      "holder-uid": WARMY_HOLDER_UID,
+      "Holder-Uid": WARMY_HOLDER_UID,
       "Content-Type": "application/json",
     };
 

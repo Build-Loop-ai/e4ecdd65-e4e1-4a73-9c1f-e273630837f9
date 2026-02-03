@@ -49,7 +49,7 @@ serve(async (req: Request) => {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${WARMY_API_KEY}`,
-        "holder-uid": WARMY_HOLDER_UID,
+        "Holder-Uid": WARMY_HOLDER_UID,
         "Content-Type": "application/json",
       },
     });
