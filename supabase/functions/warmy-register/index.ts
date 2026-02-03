@@ -94,8 +94,8 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get the origin from the request for redirect_uri
-    const origin = req.headers.get("origin") || "https://website4u.lovable.app";
+    // Use configured APP_ORIGIN, or fall back to published URL
+    const appOrigin = Deno.env.get("APP_ORIGIN") || "https://website4u.lovable.app";
     
     // Build Warmy registration payload
     let mailboxPayload: any;
@@ -107,7 +107,7 @@ serve(async (req: Request) => {
         : Math.floor(Date.now() / 1000) + 3600;
 
       // Use the same redirect_uri that was used during OAuth
-      const redirectUri = `${origin}/dashboard/settings?oauth=gmail`;
+      const redirectUri = `${appOrigin}/dashboard/settings?oauth=gmail`;
 
       mailboxPayload = {
         mailbox: {
@@ -149,7 +149,7 @@ serve(async (req: Request) => {
         ? Math.floor(new Date(connection.token_expires_at).getTime() / 1000)
         : Math.floor(Date.now() / 1000) + 3600;
 
-      const redirectUri = `${origin}/dashboard/settings?oauth=outlook`;
+      const redirectUri = `${appOrigin}/dashboard/settings?oauth=outlook`;
 
       mailboxPayload = {
         mailbox: {
