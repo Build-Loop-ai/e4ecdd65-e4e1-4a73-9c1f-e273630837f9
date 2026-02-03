@@ -36,6 +36,12 @@ export function WarmyStatusCard({
 }: WarmyStatusCardProps) {
   const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
 
+  // Warmy may reject pause/resume when warmup hasn't started yet.
+  // We treat "warmup_started_at" as a signal that the mailbox is actually warming.
+  const warmupStarted = Boolean(connection.warmup_started_at);
+  const canPause = warmupStarted && connection.warmy_state !== 'paused';
+  const canResume = warmupStarted && connection.warmy_state === 'paused';
+
   const handlePause = async () => {
     setIsActionLoading('pause');
     await onPause(connection.id);
@@ -169,7 +175,8 @@ export function WarmyStatusCard({
               size="sm" 
               className="flex-1"
               onClick={handleResume}
-              disabled={isActionLoading !== null}
+              disabled={isActionLoading !== null || !canResume}
+              title={!warmupStarted ? 'Warmup has not started yet—sync first, then try again.' : undefined}
             >
               {isActionLoading === 'resume' ? (
                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
@@ -184,7 +191,8 @@ export function WarmyStatusCard({
               size="sm" 
               className="flex-1"
               onClick={handlePause}
-              disabled={isActionLoading !== null}
+              disabled={isActionLoading !== null || !canPause}
+              title={!warmupStarted ? 'Warmup has not started yet—sync first, then try again.' : undefined}
             >
               {isActionLoading === 'pause' ? (
                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
