@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Loader2, User, Globe, Linkedin, Twitter, Instagram, Mail, Save, Upload, X, Camera } from 'lucide-react';
 import { EmailConnectionsSection } from '@/components/email/EmailConnectionCard';
 import { WarmySection } from '@/components/email/WarmySection';
+import { getEmailOAuthRedirectUri } from '@/lib/oauthRedirect';
 
 
 interface CreatorProfile {
@@ -70,7 +71,7 @@ export default function Settings() {
             return;
           }
 
-          const redirectUri = `${window.location.origin}/settings?oauth=${oauthProvider}`;
+          const redirectUri = getEmailOAuthRedirectUri(oauthProvider);
           const response = await supabase.functions.invoke('oauth-callback', {
             body: { provider: oauthProvider, code, redirect_uri: redirectUri },
           });

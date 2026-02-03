@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getEmailOAuthRedirectUri } from '@/lib/oauthRedirect';
 
 export interface EmailConnection {
   id: string;
@@ -49,7 +50,7 @@ export function useEmailConnections() {
 
   const getOAuthUrl = useCallback(async (provider: 'gmail' | 'outlook') => {
     try {
-      const redirectUri = `${window.location.origin}/settings?oauth=${provider}`;
+      const redirectUri = getEmailOAuthRedirectUri(provider);
       
       const { data, error } = await supabase.functions.invoke('get-oauth-url', {
         body: { provider, redirect_uri: redirectUri },
@@ -81,7 +82,7 @@ export function useEmailConnections() {
     setIsConnecting(true);
     
     try {
-      const redirectUri = `${window.location.origin}/settings?oauth=${provider}`;
+      const redirectUri = getEmailOAuthRedirectUri(provider);
       
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.access_token) {
