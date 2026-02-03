@@ -100,14 +100,70 @@ serve(async (req: Request) => {
 
     // Create a map of warmy_mailbox_id to warmy data
     const warmyMap = new Map();
+    
+    // Handle different response formats from Warmy API
+    let mailboxList: any[] = [];
     if (Array.isArray(warmyMailboxes)) {
-      warmyMailboxes.forEach((mb: any) => {
-        warmyMap.set(mb.id, mb);
-      });
-    } else if (warmyMailboxes.data && Array.isArray(warmyMailboxes.data)) {
-      warmyMailboxes.data.forEach((mb: any) => {
-        warmyMap.set(mb.id, mb);
-      });
+      mailboxList = warmyMailboxes;
+    } else if (warmyMailboxes?.items && Array.isArray(warmyMailboxes.items)) {
+      mailboxList = warmyMailboxes.items;
+    } else if (warmyMailboxes?.data && Array.isArray(warmyMailboxes.data)) {
+      mailboxList = warmyMailboxes.data;
+    } else if (warmyMailboxes?.mailboxes && Array.isArray(warmyMailboxes.mailboxes)) {
+      mailboxList = warmyMailboxes.mailboxes;
+    }
+
+    console.log("Warmy API response type:", typeof warmyMailboxes);
+    console.log("Warmy API response keys:", warmyMailboxes ? Object.keys(warmyMailboxes) : "null");
+    console.log("Mailbox list length:", mailboxList.length);
+    
+    mailboxList.forEach((mb: any) => {
+      // Warmy uses 'id' as the mailbox identifier
+      const mailboxId = mb.id;
+      if (mailboxId) {
+        warmyMap.set(mailboxId, mb);
+        warmyMap.set(String(mailboxId), mb); // Also store as string for flexible matching
+      }
+    });
+
+    console.log("Warmy map size:", warmyMap.size);
+    console.log("DB connections with warmy_mailbox_id:", connections?.length || 0);
+    if (connections?.length) {
+      console.log("Connection warmy_mailbox_ids:", connections.map(c => c.warmy_mailbox_id));
+    }
+
+    // If the list endpoint returns empty, try fetching individual mailboxes
+    if (mailboxList.length === 0 && connections && connections.length > 0) {
+      console.log("List empty, fetching individual mailboxes...");
+      for (const conn of connections) {
+        try {
+          const singleResponse = await fetch(
+            `${WARMY_API_BASE}/api/v2/mailboxes/${conn.warmy_mailbox_id}`,
+            {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${WARMY_API_KEY}`,
+                "Holder-Uid": WARMY_HOLDER_UID,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          
+          if (singleResponse.ok) {
+            const mailboxData = await singleResponse.json();
+            console.log(`Fetched mailbox ${conn.warmy_mailbox_id}:`, JSON.stringify(mailboxData).substring(0, 200));
+            if (mailboxData && (mailboxData.id || mailboxData.mailbox)) {
+              const mb = mailboxData.mailbox || mailboxData;
+              warmyMap.set(conn.warmy_mailbox_id, mb);
+              warmyMap.set(String(conn.warmy_mailbox_id), mb);
+            }
+          } else {
+            console.log(`Failed to fetch mailbox ${conn.warmy_mailbox_id}: ${singleResponse.status}`);
+          }
+        } catch (e) {
+          console.error(`Error fetching mailbox ${conn.warmy_mailbox_id}:`, e);
+        }
+      }
     }
 
     // Update each connection with Warmy data
@@ -115,11 +171,26 @@ serve(async (req: Request) => {
     const now = new Date();
     
     for (const conn of connections || []) {
-      const warmyData = warmyMap.get(conn.warmy_mailbox_id);
+      // Try both number and string matching
+      let warmyData = warmyMap.get(conn.warmy_mailbox_id);
+      if (!warmyData) {
+        warmyData = warmyMap.get(String(conn.warmy_mailbox_id));
+      }
+      
+      console.log(`Connection ${conn.email_address}: warmy_mailbox_id=${conn.warmy_mailbox_id}, found=${!!warmyData}`);
       
       if (warmyData) {
-        const temperature = warmyData.temperature ?? 0;
+        // Temperature can be a decimal string like "8.3", round to integer
+        const rawTemp = warmyData.temperature ?? warmyData.warmth_level ?? 0;
+        const temperature = Math.round(parseFloat(String(rawTemp)) || 0);
         const calculatedLimit = calculateDailyLimit(temperature);
+        
+        // Parse scores as integers (they might come as decimals too)
+        const parseScore = (val: any): number | null => {
+          if (val === null || val === undefined) return null;
+          const parsed = parseFloat(String(val));
+          return isNaN(parsed) ? null : Math.round(parsed);
+        };
         
         // Check if we need to reset daily counter
         const lastReset = conn.last_send_count_reset ? new Date(conn.last_send_count_reset) : new Date(0);
@@ -127,9 +198,9 @@ serve(async (req: Request) => {
         
         const updateData: any = {
           warmy_state: warmyData.state || warmyData.status || "active",
-          deliverability_score: warmyData.deliverability_score ?? null,
-          placement_score: warmyData.placement_score ?? null,
-          dns_score: warmyData.dns_score ?? null,
+          deliverability_score: parseScore(warmyData.deliverability_score ?? warmyData.deliverability),
+          placement_score: parseScore(warmyData.placement_score),
+          dns_score: parseScore(warmyData.dns_score),
           warmy_temperature: temperature,
           daily_send_limit: calculatedLimit,
           last_warmy_sync: now.toISOString(),
