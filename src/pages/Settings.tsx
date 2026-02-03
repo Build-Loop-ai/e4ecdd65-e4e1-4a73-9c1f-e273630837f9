@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, User, Globe, Linkedin, Twitter, Instagram, Mail, Save, Upload, X, Camera } from 'lucide-react';
 import { EmailConnectionsSection } from '@/components/email/EmailConnectionCard';
+import { WarmySection } from '@/components/email/WarmySection';
 
 
 interface CreatorProfile {
@@ -467,6 +468,9 @@ export default function Settings() {
 
         {/* Email Integrations Section */}
         <EmailConnectionsSection />
+
+        {/* Email Warmup Section */}
+        <WarmySection />
 
         {/* Preview Card */}
         <Card>

@@ -1,0 +1,206 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+const WARMY_API_BASE = "https://api.warmy.io";
+
+interface RegisterRequest {
+  connection_id: string;
+  from_name?: string;
+  speed_mode?: "slow" | "medium" | "fast";
+}
+
+serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const WARMY_API_KEY = Deno.env.get("WARMY_API_KEY");
+    const WARMY_HOLDER_UID = Deno.env.get("WARMY_HOLDER_UID");
+    const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
+    const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
+
+    if (!WARMY_API_KEY || !WARMY_HOLDER_UID) {
+      return new Response(
+        JSON.stringify({ error: "Warmy API not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify user authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = claimsData.claims.sub;
+
+    const { connection_id, from_name, speed_mode = "medium" }: RegisterRequest = await req.json();
+
+    if (!connection_id) {
+      return new Response(
+        JSON.stringify({ error: "connection_id is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Get email connection with tokens
+    const adminSupabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const { data: connection, error: connError } = await adminSupabase
+      .from("email_connections")
+      .select("*")
+      .eq("id", connection_id)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (connError || !connection) {
+      return new Response(
+        JSON.stringify({ error: "Email connection not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (connection.warmy_mailbox_id) {
+      return new Response(
+        JSON.stringify({ error: "This mailbox is already registered with Warmy" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Build Warmy registration payload
+    let mailboxPayload: any;
+
+    if (connection.provider === "gmail") {
+      // Calculate token expiry timestamp
+      const expiresAt = connection.token_expires_at 
+        ? Math.floor(new Date(connection.token_expires_at).getTime() / 1000)
+        : Math.floor(Date.now() / 1000) + 3600;
+
+      mailboxPayload = {
+        mailbox: {
+          email: connection.email_address,
+          provider: "oauth_google",
+          from_name: from_name || connection.email_address.split("@")[0],
+          tariff_plan_type_id: 1,
+          access_token: connection.access_token,
+          refresh_token: connection.refresh_token,
+          expires_at: expiresAt,
+          client_id: GOOGLE_CLIENT_ID,
+          client_secret: GOOGLE_CLIENT_SECRET,
+          redirect_uri: `${Deno.env.get("SUPABASE_URL")}/functions/v1/oauth-callback`,
+          token_credential_uri: "https://oauth2.googleapis.com/token",
+          setting_attributes: {
+            speed_mode: speed_mode,
+          },
+        },
+      };
+    } else if (connection.provider === "outlook") {
+      // Outlook OAuth registration
+      const MICROSOFT_CLIENT_ID = Deno.env.get("MICROSOFT_CLIENT_ID");
+      const MICROSOFT_CLIENT_SECRET = Deno.env.get("MICROSOFT_CLIENT_SECRET");
+      
+      const expiresAt = connection.token_expires_at 
+        ? Math.floor(new Date(connection.token_expires_at).getTime() / 1000)
+        : Math.floor(Date.now() / 1000) + 3600;
+
+      mailboxPayload = {
+        mailbox: {
+          email: connection.email_address,
+          provider: "oauth_microsoft",
+          from_name: from_name || connection.email_address.split("@")[0],
+          tariff_plan_type_id: 1,
+          access_token: connection.access_token,
+          refresh_token: connection.refresh_token,
+          expires_at: expiresAt,
+          client_id: MICROSOFT_CLIENT_ID,
+          client_secret: MICROSOFT_CLIENT_SECRET,
+          setting_attributes: {
+            speed_mode: speed_mode,
+          },
+        },
+      };
+    } else {
+      return new Response(
+        JSON.stringify({ error: `Unsupported provider: ${connection.provider}` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Register with Warmy API
+    const warmyResponse = await fetch(`${WARMY_API_BASE}/api/v2/mailboxes`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${WARMY_API_KEY}`,
+        "holder-uid": WARMY_HOLDER_UID,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(mailboxPayload),
+    });
+
+    const warmyResult = await warmyResponse.json();
+
+    if (!warmyResponse.ok) {
+      console.error("Warmy registration failed:", warmyResult);
+      return new Response(
+        JSON.stringify({ error: warmyResult.message || "Failed to register with Warmy" }),
+        { status: warmyResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Update email connection with Warmy data
+    const { error: updateError } = await adminSupabase
+      .from("email_connections")
+      .update({
+        warmy_mailbox_id: warmyResult.id,
+        warmy_state: "active",
+        last_warmy_sync: new Date().toISOString(),
+      })
+      .eq("id", connection_id);
+
+    if (updateError) {
+      console.error("Failed to update connection with Warmy ID:", updateError);
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        warmy_mailbox_id: warmyResult.id,
+        message: "Email warmup enabled successfully",
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (error: any) {
+    console.error("Warmy register error:", error);
+    return new Response(
+      JSON.stringify({ error: error.message || "Internal server error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
