@@ -1,102 +1,48 @@
 
-## Why you still get `redirect_uri_mismatch`
-Right now the app is generating the Google OAuth redirect URI using the **wrong path** in two places:
 
-- `src/hooks/useEmailConnections.ts` uses:
-  - `${window.location.origin}/settings?oauth=gmail`
-- `src/pages/Settings.tsx` (OAuth callback exchange) also uses:
-  - `${window.location.origin}/settings?oauth=gmail`
+## Problem Analysis
 
-But your actual Settings page route is **`/dashboard/settings`** (as confirmed by your Google error details and by `App.tsx`).
+The Warmy API returns a generic error `"Please recheck your credentials and try again"`. This is not just about WARMY_API_KEY - the issue is that **Warmy validates multiple credentials**:
 
-So Google receives a redirect_uri like:
-- `https://website4u.lovable.app/dashboard/settings?oauth=gmail`
+1. `WARMY_API_KEY` + `WARMY_HOLDER_UID` (for Warmy authentication)
+2. `GOOGLE_CLIENT_ID` + `GOOGLE_CLIENT_SECRET` (for Gmail OAuth - Warmy needs these to refresh tokens)
+3. The `redirect_uri` sent to Warmy (line 117 currently uses `SUPABASE_URL/functions/v1/oauth-callback`)
 
-…while your Google OAuth client currently has redirect URIs like:
-- `https://website4u.lovable.app/settings?oauth=gmail`
-- `https://id-preview--...lovable.app` (missing the `/dashboard/settings?...` path)
+Your Gmail connection exists with valid tokens, so the OAuth flow worked. But Warmy may be rejecting because:
+- The Google credentials passed to Warmy don't match what was used to get the tokens
+- The redirect_uri format doesn't match what Warmy expects
 
-Google requires the redirect URI to match **exactly** (scheme + domain + path + query), so it blocks with error 400.
+## What I Will Change
 
----
+### 1. Add Better Debug Logging
+Update `warmy-register/index.ts` to log the exact payload being sent (without secrets) and the full Warmy response, so we can see what's actually happening.
 
-## What I will change in the app (code fixes)
-### A) Fix redirect URI generation everywhere
-1. Update `src/hooks/useEmailConnections.ts`
-   - Change both:
-     - `redirectUri = ${origin}/settings?oauth=${provider}`
-   - to:
-     - `redirectUri = ${origin}/dashboard/settings?oauth=${provider}`
+### 2. Fix the Redirect URI
+The current code uses:
+```
+redirect_uri: `${Deno.env.get("SUPABASE_URL")}/functions/v1/oauth-callback`
+```
 
-2. Update `src/pages/Settings.tsx`
-   - Change:
-     - `redirectUri = ${origin}/settings?oauth=${oauthProvider}`
-   - to:
-     - `redirectUri = ${origin}/dashboard/settings?oauth=${oauthProvider}`
+But this should match the redirect URI used during the Gmail OAuth flow, which is now:
+```
+${origin}/dashboard/settings?oauth=gmail
+```
 
-3. (Optional but recommended) Add one shared helper function (to avoid future mismatch):
-   - Example: `getEmailOAuthRedirectUri(provider)` used in both files
-   - Ensures we never accidentally drift between `/settings` and `/dashboard/settings` again.
+### 3. Return the Actual Warmy Error
+Currently we only return `"Failed to register with Warmy"`. I'll change it to return the actual error message from Warmy so you can see exactly what went wrong.
 
-### B) Add a legacy redirect route (nice-to-have)
-To prevent old links from breaking (and to match what you already added in Google Console), add a route:
-- `/settings` → redirects to `/dashboard/settings`
+## Files to Edit
 
-This does not “fix” OAuth by itself, but it prevents confusion and broken navigation.
+1. **`supabase/functions/warmy-register/index.ts`**
+   - Add detailed logging of the request payload (without exposing secrets)
+   - Log the full Warmy API response
+   - Return the actual Warmy error message to the client
+   - Fix the redirect_uri to match what was used in OAuth
 
----
+## Expected Outcome
 
-## What you must change in Google Cloud Console (configuration fixes)
-You must add the **exact redirect URIs** for every environment you test on.
+After these changes:
+- You'll see the exact Warmy error in the browser (not just "Failed to register")
+- The Edge Function logs will show the full request/response for debugging
+- We can identify whether it's a Warmy credential issue, Google credential issue, or redirect_uri mismatch
 
-### 1) Published domain
-Add this to “Authorized redirect URIs”:
-- `https://website4u.lovable.app/dashboard/settings?oauth=gmail`
-
-### 2) Preview domain (lovable.app preview)
-Add:
-- `https://id-preview--71e14fb3-a780-45e5-af36-d44386990efc.lovable.app/dashboard/settings?oauth=gmail`
-
-### 3) Preview domain (lovableproject.com, you’re hitting this too)
-From your stack trace, you also run on `...lovableproject.com`, so add:
-- `https://id-preview--71e14fb3-a780-45e5-af36-d44386990efc.lovableproject.com/dashboard/settings?oauth=gmail`
-
-### 4) If you have a custom domain
-Also add:
-- `https://YOURDOMAIN.COM/dashboard/settings?oauth=gmail`
-(and if you use www)
-- `https://www.YOURDOMAIN.COM/dashboard/settings?oauth=gmail`
-
-Important: **Keep** your “Authorized JavaScript origins” as origins only (no path). That part in your screenshot looks fine.
-
----
-
-## Verification checklist (end-to-end)
-1. Clear cookies for accounts.google.com (or try in an incognito window).
-2. From each environment (published + preview + custom), click “Connect Gmail”.
-3. Confirm Google now accepts the redirect and returns you to:
-   - `/dashboard/settings?oauth=gmail&code=...`
-4. Confirm our app successfully exchanges the code (toast success) and your mailbox appears connected.
-5. Confirm no repeated callback processing (your `oauthProcessed` guard continues to prevent double-processing).
-
----
-
-## Follow-up improvements (after OAuth works)
-1. Update Warmy registration flow to run only after the Gmail connection is confirmed.
-2. In Settings, show a clearer “Warmup not enabled yet” state when `warmy_mailbox_id` is null.
-3. Add a small debug panel (dev-only) that prints the exact redirect URI the app is using, to avoid future confusion.
-
----
-
-## Files I will edit (implementation)
-- `src/hooks/useEmailConnections.ts` (fix redirectUri path)
-- `src/pages/Settings.tsx` (fix redirectUri path used in callback exchange)
-- `src/App.tsx` (optional: add `/settings` → `/dashboard/settings` redirect)
-- (Optional) `src/lib/...` new helper for redirect URI construction
-
----
-
-## Expected outcome
-After these code + Google Console updates:
-- Google OAuth will stop throwing `Error 400: redirect_uri_mismatch`
-- Gmail connection will complete successfully on **all** environments (published, preview, and custom domain), as long as each domain’s exact redirect URI is registered.
