@@ -26,6 +26,11 @@ const LegacyPreviewRedirect = () => {
   return <Navigate to={`/${userPrefix}/${clientSlug}`} replace />;
 };
 
+// Legacy redirect for /settings → /dashboard/settings
+const LegacySettingsRedirect = () => {
+  return <Navigate to="/dashboard/settings" replace />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -108,6 +113,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            {/* Legacy redirect: /settings → /dashboard/settings */}
+            <Route path="/settings" element={<LegacySettingsRedirect />} />
              {/* Back-compat: users sometimes copy /preview/{userPrefix}/{clientSlug} */}
              <Route path="/preview/:userPrefix/:clientSlug" element={<LegacyPreviewRedirect />} />
             {/* New URL structure: /:userPrefix/:clientSlug */}
