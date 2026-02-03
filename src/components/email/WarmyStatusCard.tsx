@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { 
   Flame, 
   Pause, 
@@ -12,9 +11,12 @@ import {
   Loader2,
   AlertTriangle,
   CheckCircle2,
-  Thermometer
+  Thermometer,
+  Mail
 } from 'lucide-react';
 import { WarmyConnection } from '@/hooks/useWarmyStatus';
+import { TemperatureGauge } from './TemperatureGauge';
+import { SendingCapacityBar } from './SendingCapacityBar';
 import { cn } from '@/lib/utils';
 
 interface WarmyStatusCardProps {
@@ -99,6 +101,8 @@ export function WarmyStatusCard({
   };
 
   const temperature = connection.warmy_temperature || 0;
+  const dailyLimit = connection.daily_send_limit || 5;
+  const sentToday = connection.emails_sent_today || 0;
 
   return (
     <Card className={cn(
@@ -121,18 +125,14 @@ export function WarmyStatusCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Temperature Gauge */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Temperature</span>
-            <span className="font-semibold">{temperature}/100</span>
-          </div>
-          <Progress 
-            value={temperature} 
-            className="h-2"
-          />
-        </div>
+        <TemperatureGauge temperature={temperature} size="sm" />
 
-        {/* Health Scores */}
+        {/* Daily Capacity */}
+        <SendingCapacityBar 
+          sent={sentToday} 
+          limit={dailyLimit} 
+          size="sm" 
+        />
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center p-2 rounded-lg bg-muted/50">
             <p className={cn("text-lg font-bold", getScoreColor(connection.deliverability_score))}>

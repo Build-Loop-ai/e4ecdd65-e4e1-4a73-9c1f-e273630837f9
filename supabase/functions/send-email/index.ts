@@ -193,6 +193,37 @@ serve(async (req: Request) => {
       );
     }
 
+    // Check daily sending limit
+    const now = new Date();
+    const lastReset = connection.last_send_count_reset ? new Date(connection.last_send_count_reset) : new Date(0);
+    const isNewDay = lastReset.toDateString() !== now.toDateString();
+    
+    let currentSentToday = connection.emails_sent_today || 0;
+    if (isNewDay) {
+      currentSentToday = 0;
+      // Reset counter
+      await adminSupabase
+        .from("email_connections")
+        .update({
+          emails_sent_today: 0,
+          last_send_count_reset: now.toISOString(),
+        })
+        .eq("id", connection.id);
+    }
+
+    const dailyLimit = connection.daily_send_limit || 5;
+    if (currentSentToday >= dailyLimit) {
+      return new Response(
+        JSON.stringify({ 
+          error: `Daily sending limit reached (${dailyLimit} emails). Sending will resume tomorrow to protect your sender reputation.`,
+          daily_limit_reached: true,
+          sent_today: currentSentToday,
+          daily_limit: dailyLimit
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Warning for low but not critical deliverability
     const deliverabilityWarning = connection.deliverability_score !== null && connection.deliverability_score < 70;
 
@@ -251,6 +282,15 @@ serve(async (req: Request) => {
       );
     }
 
+    // Increment sent counter
+    await adminSupabase
+      .from("email_connections")
+      .update({
+        emails_sent_today: currentSentToday + 1,
+        updated_at: now.toISOString(),
+      })
+      .eq("id", connection.id);
+
     // Log email in outreach_emails table
     const { error: logError } = await adminSupabase.from("outreach_emails").insert({
       user_id: userId,
@@ -276,6 +316,9 @@ serve(async (req: Request) => {
         provider: connection.provider,
         deliverability_warning: deliverabilityWarning,
         deliverability_score: connection.deliverability_score,
+        sent_today: currentSentToday + 1,
+        daily_limit: dailyLimit,
+        remaining_today: dailyLimit - (currentSentToday + 1),
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

@@ -10,7 +10,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -19,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Send, Mail, AlertCircle, Settings } from 'lucide-react';
+import { Loader2, Send, Mail, AlertCircle, Settings, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEmailConnections } from '@/hooks/useEmailConnections';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +30,7 @@ import {
   renderEmailTemplate,
   renderSubject,
 } from '@/lib/emailTemplates';
+import { SendHealthCheck } from './SendHealthCheck';
 
 interface SendEmailDialogProps {
   open: boolean;
@@ -61,6 +61,7 @@ export function SendEmailDialog({
   const [toName, setToName] = useState(recipientName);
   const [subject, setSubject] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [canSend, setCanSend] = useState(true);
   const [senderProfile, setSenderProfile] = useState<{ full_name: string; business_name: string } | null>(null);
   const [selectedConnectionId, setSelectedConnectionId] = useState<string>('');
 
@@ -181,8 +182,17 @@ export function SendEmailDialog({
             </Button>
           </div>
         ) : (
-          <>
+        <>
             <div className="space-y-4">
+              {/* Send Health Check */}
+              {selectedConnection?.warmy_mailbox_id && (
+                <SendHealthCheck 
+                  connectionId={selectedConnectionId}
+                  onReadinessChange={setCanSend}
+                  compact={true}
+                />
+              )}
+
               {/* From Selector */}
               <div className="space-y-2">
                 <Label>From</Label>
@@ -248,7 +258,7 @@ export function SendEmailDialog({
                 <Label>Preview</Label>
                 <div className="border rounded-lg overflow-hidden bg-white">
                   <div 
-                    className="p-4 text-sm max-h-[300px] overflow-y-auto"
+                    className="p-4 text-sm max-h-[200px] overflow-y-auto"
                     dangerouslySetInnerHTML={{ __html: emailPreviewHtml }}
                   />
                 </div>
@@ -259,7 +269,10 @@ export function SendEmailDialog({
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSend} disabled={isSending || !to || !subject}>
+              <Button 
+                onClick={handleSend} 
+                disabled={isSending || !to || !subject || (!canSend && !!selectedConnection?.warmy_mailbox_id)}
+              >
                 {isSending ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (

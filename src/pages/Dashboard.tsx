@@ -8,7 +8,7 @@ import { Plus, ExternalLink, Copy, Trash2, MoreHorizontal, Eye, FileText } from 
 import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatsCards } from '@/components/dashboard/StatsCards';
-import { EmailHealthWidget } from '@/components/dashboard/EmailHealthWidget';
+import { EmailReadinessCard } from '@/components/email/EmailReadinessCard';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -129,7 +129,7 @@ export default function Dashboard() {
           <div className="lg:col-span-3">
             <StatsCards />
           </div>
-          <EmailHealthWidget />
+          <EmailReadinessCard />
         </div>
 
         {/* Recent Pitches Section */}
