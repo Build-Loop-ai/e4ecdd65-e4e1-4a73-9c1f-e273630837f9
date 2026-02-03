@@ -230,8 +230,28 @@ serve(async (req: Request) => {
 
     if (!warmyResponse.ok) {
       console.error(`Warmy ${action} failed:`, result);
+      
+      // Extract meaningful error message from Warmy response
+      let errorMessage = `Failed to ${action}`;
+      if (result.errors && Array.isArray(result.errors)) {
+        const warmyError = result.errors[0];
+        if (warmyError === "not allowed transmission") {
+          errorMessage = action === "pause" 
+            ? "Cannot pause: mailbox may already be paused or not ready yet"
+            : action === "resume"
+            ? "Cannot resume: mailbox may already be active or not ready yet"
+            : `Action not allowed: ${warmyError}`;
+        } else {
+          errorMessage = warmyError;
+        }
+      } else if (result.message) {
+        errorMessage = result.message;
+      } else if (result.error) {
+        errorMessage = result.error;
+      }
+      
       return new Response(
-        JSON.stringify({ error: result.message || `Failed to ${action}` }),
+        JSON.stringify({ error: errorMessage }),
         { status: warmyResponse.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
