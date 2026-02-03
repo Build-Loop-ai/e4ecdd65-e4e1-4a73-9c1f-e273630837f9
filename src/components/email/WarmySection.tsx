@@ -107,6 +107,7 @@ export function WarmySection() {
                   onResume={resumeWarmup}
                   onRunTest={runDeliverabilityTest}
                   onViewDetails={handleViewDetails}
+                  onDisconnect={disconnectFromWarmy}
                 />
               ))}
             </div>

@@ -2,6 +2,17 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { 
   Flame, 
   Pause, 
@@ -12,7 +23,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Thermometer,
-  Mail
+  Trash2
 } from 'lucide-react';
 import { WarmyConnection } from '@/hooks/useWarmyStatus';
 import { TemperatureGauge } from './TemperatureGauge';
@@ -25,6 +36,7 @@ interface WarmyStatusCardProps {
   onResume: (id: string) => Promise<boolean>;
   onRunTest: (id: string) => Promise<any>;
   onViewDetails: (connection: WarmyConnection) => void;
+  onDisconnect: (id: string) => Promise<boolean>;
 }
 
 export function WarmyStatusCard({ 
@@ -32,7 +44,8 @@ export function WarmyStatusCard({
   onPause, 
   onResume, 
   onRunTest,
-  onViewDetails 
+  onViewDetails,
+  onDisconnect
 }: WarmyStatusCardProps) {
   const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
 
@@ -57,6 +70,12 @@ export function WarmyStatusCard({
   const handleTest = async () => {
     setIsActionLoading('test');
     await onRunTest(connection.id);
+    setIsActionLoading(null);
+  };
+
+  const handleDisconnect = async () => {
+    setIsActionLoading('disconnect');
+    await onDisconnect(connection.id);
     setIsActionLoading(null);
   };
 
@@ -225,6 +244,42 @@ export function WarmyStatusCard({
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                disabled={isActionLoading !== null}
+              >
+                {isActionLoading === 'disconnect' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Disable Email Warmup?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will completely remove the warmup for <strong>{connection.email_address}</strong>. 
+                  Your email will be disconnected from the warmup service and all warmup progress will be lost.
+                  You can re-enable warmup later, but it will start from the beginning.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDisconnect}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Disable Warmup
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardContent>
     </Card>
