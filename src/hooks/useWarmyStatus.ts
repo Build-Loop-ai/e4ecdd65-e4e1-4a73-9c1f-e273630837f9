@@ -282,7 +282,28 @@ export function useWarmyStatus() {
   }, []);
 
   // Computed values
-  const warmyConnections = connections.filter(c => c.warmy_mailbox_id !== null);
+  const realWarmyConnections = connections.filter(c => c.warmy_mailbox_id !== null);
+  
+  // Demo data: show mock warmy connection when user has no real ones
+  const demoConnection: WarmyConnection = {
+    id: 'demo-warmy-1',
+    email_address: user?.email || 'you@yourcompany.com',
+    provider: 'gmail',
+    is_active: true,
+    warmy_mailbox_id: 99999,
+    warmy_state: 'active',
+    deliverability_score: 72,
+    placement_score: 85,
+    dns_score: 90,
+    warmy_temperature: 64,
+    last_warmy_sync: new Date().toISOString(),
+    daily_send_limit: 20,
+    emails_sent_today: 3,
+    last_send_count_reset: new Date().toISOString(),
+    warmup_started_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(), // 12 days ago
+  };
+
+  const warmyConnections = realWarmyConnections.length > 0 ? realWarmyConnections : [demoConnection];
   const averageDeliverability = warmyConnections.length > 0
     ? Math.round(warmyConnections.reduce((sum, c) => sum + (c.deliverability_score || 0), 0) / warmyConnections.length)
     : null;
