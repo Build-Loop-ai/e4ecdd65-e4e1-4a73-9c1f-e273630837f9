@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { Plus, ExternalLink, Copy, Trash2, MoreHorizontal, Eye, Search, FileText } from 'lucide-react';
+import { Plus, ExternalLink, Copy, Trash2, MoreHorizontal, Eye, Search, FileText, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import {
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Tables } from '@/integrations/supabase/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { SendEmailDialog } from '@/components/email/SendEmailDialog';
 
 type ClientPreview = Tables<'client_previews'>;
 
@@ -42,7 +43,7 @@ export default function Previews() {
   const [previews, setPreviews] = useState<ClientPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-
+  const [emailDialogPreview, setEmailDialogPreview] = useState<ClientPreview | null>(null);
   useEffect(() => {
     fetchPreviews();
   }, []);
@@ -254,6 +255,15 @@ export default function Previews() {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0"
+                      onClick={(e) => { e.stopPropagation(); setEmailDialogPreview(preview); }}
+                      title="Send pitch email"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
                       onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}
                     >
                       <Eye className="h-4 w-4" />
@@ -302,6 +312,17 @@ export default function Previews() {
           </div>
         )}
       </div>
+
+      {/* Send Email Dialog */}
+      {emailDialogPreview && (
+        <SendEmailDialog
+          open={!!emailDialogPreview}
+          onOpenChange={(open) => { if (!open) setEmailDialogPreview(null); }}
+          previewId={emailDialogPreview.id}
+          previewUrl={`${window.location.origin}/preview/${emailDialogPreview.slug}`}
+          recipientName={extractPreviewData(emailDialogPreview).companyName}
+        />
+      )}
     </DashboardLayout>
   );
 }
