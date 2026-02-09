@@ -108,8 +108,7 @@ const Index = () => {
       </header>
 
       {/* Hero - with gradient background image & parallax */}
-      <motion.section 
-        style={{ scale: heroScale }}
+      <section 
         className="relative pt-32 md:pt-40 pb-24 md:pb-32 px-6 overflow-hidden"
       >
         {/* Background image */}
@@ -201,7 +200,7 @@ const Index = () => {
             </motion.p>
           </motion.div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Trusted by - Infinite marquee */}
       <section className="py-12 border-y border-border/40 overflow-hidden">
