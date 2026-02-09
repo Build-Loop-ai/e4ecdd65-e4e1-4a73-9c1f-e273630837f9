@@ -125,10 +125,8 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid gap-6 lg:grid-cols-4">
-          <div className="lg:col-span-3">
-            <StatsCards />
-          </div>
+        <div className="grid gap-6 grid-cols-1">
+          <StatsCards />
           <EmailReadinessCard />
         </div>
 
