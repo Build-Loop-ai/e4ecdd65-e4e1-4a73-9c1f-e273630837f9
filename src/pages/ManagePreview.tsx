@@ -203,6 +203,10 @@ export default function ManagePreview() {
         onOpenFeedback={() => setFeedbackOpen(true)}
         onEdit={() => setEditOpen(true)}
         onDelete={handleDelete}
+        onPreviewUpdate={(updates) => {
+          setPreview(prev => prev ? { ...prev, ...updates } : prev);
+          setIframeKey(k => k + 1);
+        }}
         feedbackCount={feedbackCount}
       />
 
