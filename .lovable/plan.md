@@ -1,99 +1,57 @@
 
 
-# AI Image Quality Guard -- Auto-detect and replace ugly images
+# Fix: Email Address Collection for Leads
 
-## Problem
-Currently, the system only checks if images are *missing*. But scraped images from websites are often:
-- Low resolution / blurry
-- Have text overlays, watermarks, or heavy compression artifacts
-- Are broken URLs (404s)
-- Are tiny icons that slipped through filters
-- Are screenshots or stock-placeholder-quality imagery
+## The Problem
 
-These ugly images make it through to the final pitch, hurting the professional look.
+Right now, leads almost never have email addresses. There are two potential sources, and neither works well:
 
-## Solution: Two-Layer Image Quality System
+1. **Google Maps (Apify)**: The current scraper actor (`compass~crawler-google-places`) rarely returns emails because Google Maps listings don't typically expose them directly.
 
-### Layer 1: Post-Processing Quality Audit (Automatic)
-After `process-content` returns the schema, run a new **`audit-images`** edge function that:
+2. **Website scraping (Firecrawl + AI processing)**: When a pitch is created, the AI *does* extract `contact.email` from the scraped website content. However, this email is stored inside the pitch data (`processed_schema.contact.email`) and is **never written back to the lead record** in the database.
 
-1. **Checks each image URL is reachable** (HEAD request, check status + content-type + content-length)
-2. **Sends reachable images to AI vision** for quality scoring (using Gemini flash with image input)
-3. Returns a quality verdict per image: `pass` / `fail` with reason
-4. Any `fail` image gets flagged for auto-replacement
+## The Fix (Two Parts)
 
-The AI vision prompt scores on:
-- Resolution adequacy (not tiny/pixelated)
-- Text/watermark contamination
-- Professional quality (composition, lighting)
-- Relevance to business type
+### Part 1: Backfill lead email from scraped website content
 
-### Layer 2: Auto-Replace Pipeline
-Images that fail the audit are automatically regenerated using the existing `generate-images` or `regenerate-image` infrastructure, with prompts driven by business context (location, industry, services).
+When a pitch is created from a lead, and the AI extracts an email from the website, automatically update the lead's `email` field in the database.
 
-## Implementation Plan
+**Where**: `src/pages/NewPreview.tsx` -- after `process-content` returns the schema and before/after saving the pitch, check if a `leadId` was passed and if `processedSchema.contact.email` exists. If the lead currently has no email, update it.
 
-### 1. New Edge Function: `supabase/functions/audit-images/index.ts`
-- Accepts: `{ images: string[], businessType: string, industry: string }`
-- For each image URL:
-  - HEAD request to check accessibility (timeout 5s)
-  - If accessible, send to Gemini flash vision with a quality-check prompt
-  - Return `{ url, status: 'pass'|'fail'|'unreachable', reason, score }[]`
-- Uses `LOVABLE_API_KEY` (already available)
-- Rate-limit aware: processes images in batches of 3-4
+**Also**: `src/pages/NewPreview.tsx` already receives lead context (client name, URL). Need to also pass the `leadId` through the flow so we can update it.
 
-### 2. New Client Utility: `src/lib/imageQualityAudit.ts`
-- `auditAndFixImages(schema, previewId)` function
-- Collects all image URLs from hero, gallery, and services
-- Calls `audit-images` edge function
-- For any failed/unreachable images, calls `regenerate-image` to replace them
-- Returns the updated schema with bad images swapped out
+### Part 2: Extract emails during lead discovery (Apify enrichment)
 
-### 3. Integrate into Pitch Creation Flow
-- In `src/pages/NewPreview.tsx`: after `process-content` and before saving, run the audit
-- Add a new scanning animation step: "Checking Image Quality" between processing and generating
-- Only regenerate images that fail the audit (not all missing ones)
+Enhance the `apify-google-maps` edge function to also extract emails from website content when a lead has a website but no email. This uses a lightweight approach:
 
-### 4. Integrate into Manage Page
-- In `src/components/manage/ImageRegenerator.tsx`: add a "Check Quality" button
-- Shows which images passed/failed with visual indicators (green check / red X)
-- One-click "Fix All" to regenerate all failed images at once
+- After getting results from Apify, for each lead that has a `website` but no `email`, do a quick fetch of the website HTML and use a regex to find email addresses on the page.
+- This runs server-side in the edge function, so it doesn't slow down the client.
+- Batch process with a concurrency limit (3 at a time) to avoid timeouts.
 
-### 5. Update `supabase/config.toml`
-- Add `[functions.audit-images]` with `verify_jwt = false`
+**Where**: `supabase/functions/apify-google-maps/index.ts` -- add email extraction step after receiving Apify results.
+
+### Part 3: Show email status in lead cards
+
+Update the lead card UI to clearly show when an email is available vs missing, making it obvious which leads are ready for outreach.
+
+**Where**: `src/components/leads/LeadCard.tsx` -- add visual indicator for email availability.
 
 ## Technical Details
 
-### AI Vision Quality Prompt (used in audit-images)
-```
-Analyze this image for use on a professional {businessType} website.
-Score from 1-10 on: resolution, professionalism, relevance, text-free.
-If any score is below 5, verdict is FAIL.
-Return JSON: { score: number, verdict: "pass"|"fail", reason: string }
-```
-
-### New Pitch Flow Steps
-```text
-URL Input -> Scraping -> Processing Content -> Auditing Images -> Generating Replacements -> Template Selection -> Done
-```
-
-### Image Audit Response Shape
+### Email extraction regex (for Part 2)
 ```typescript
-interface ImageAuditResult {
-  url: string;
-  status: 'pass' | 'fail' | 'unreachable';
-  score: number;       // 1-10
-  reason: string;      // e.g. "Low resolution", "Contains text overlay"
-  replacement?: string; // If auto-replaced, the new URL
-}
+const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 ```
+Filter out common false positives like `noreply@`, `admin@`, `info@wix.com`, `support@wordpress.com`, etc.
 
-## Files to Create
-- `supabase/functions/audit-images/index.ts` -- Edge function for AI-powered image quality check
-- `src/lib/imageQualityAudit.ts` -- Client-side orchestrator
+### Files to modify
+- `supabase/functions/apify-google-maps/index.ts` -- Add website email scraping after Apify results
+- `src/pages/NewPreview.tsx` -- Write extracted email back to lead record after pitch processing
+- `src/components/leads/LeadCard.tsx` -- Visual email status indicator
 
-## Files to Modify
-- `src/pages/NewPreview.tsx` -- Add audit step to pitch creation pipeline
-- `src/components/manage/ImageRegenerator.tsx` -- Add quality check UI + "Fix All" button
-- `supabase/config.toml` -- Register new edge function
+### Edge cases handled
+- Don't overwrite existing emails
+- Timeout per website fetch (5 seconds)
+- Filter out generic/platform emails (wix, wordpress, squarespace domains)
+- Gracefully handle failed fetches (lead still saved, just without email)
 
