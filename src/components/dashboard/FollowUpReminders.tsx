@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 import { Bell, Eye, MessageSquare, Send } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -26,7 +27,6 @@ export function FollowUpReminders() {
       const threeDaysAgo = new Date();
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
-      // Get emails sent more than 3 days ago
       const { data: emails } = await supabase
         .from('outreach_emails')
         .select('*')
@@ -40,7 +40,6 @@ export function FollowUpReminders() {
 
       const previewIds = [...new Set(emails.map(e => e.preview_id))];
 
-      // Check which previews have visits
       const { data: visits } = await supabase
         .from('preview_visits')
         .select('preview_id')
@@ -48,7 +47,6 @@ export function FollowUpReminders() {
 
       const visitedPreviews = new Set((visits || []).map(v => v.preview_id));
 
-      // Check which previews have feedback
       const { data: feedback } = await supabase
         .from('client_feedback')
         .select('preview_id')
@@ -92,7 +90,7 @@ export function FollowUpReminders() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Bell className="h-4 w-4 text-primary" />
+        <GlowIcon icon={Bell} variant="warning" size="sm" />
         <h2 className="text-lg font-medium text-foreground">Follow-Up Suggestions</h2>
       </div>
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -100,15 +98,11 @@ export function FollowUpReminders() {
           <Card key={i} className="border-border hover:shadow-sm transition-shadow">
             <CardContent className="p-4 space-y-3">
               <div className="flex items-start gap-3">
-                <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${
-                  r.type === 'no_visit' ? 'bg-destructive/10' : 'bg-primary/10'
-                }`}>
-                  {r.type === 'no_visit' ? (
-                    <Eye className="h-4 w-4 text-destructive" />
-                  ) : (
-                    <MessageSquare className="h-4 w-4 text-primary" />
-                  )}
-                </div>
+                <GlowIcon
+                  icon={r.type === 'no_visit' ? Eye : MessageSquare}
+                  variant={r.type === 'no_visit' ? 'danger' : 'primary'}
+                  size="sm"
+                />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{r.leadName}</p>
                   <p className="text-xs text-muted-foreground">
