@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, FileText, BarChart3, LogOut, Menu, X, Plus, Settings, Search, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 import { PitchLogo } from '@/components/ui/PitchLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -11,12 +12,14 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
+type GlowVariant = 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'muted';
+
 const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
-  { to: '/dashboard/leads', icon: Search, label: 'Find Leads' },
-  { to: '/dashboard/previews', icon: FileText, label: 'My Pitches' },
-  { to: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
-  { to: '/dashboard/settings', icon: Settings, label: 'Settings' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Overview', variant: 'primary' as GlowVariant },
+  { to: '/dashboard/leads', icon: Search, label: 'Find Leads', variant: 'info' as GlowVariant },
+  { to: '/dashboard/previews', icon: FileText, label: 'My Pitches', variant: 'success' as GlowVariant },
+  { to: '/dashboard/analytics', icon: BarChart3, label: 'Analytics', variant: 'warning' as GlowVariant },
+  { to: '/dashboard/settings', icon: Settings, label: 'Settings', variant: 'muted' as GlowVariant },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -26,7 +29,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const allNavItems = isAdmin
-    ? [...navItems, { to: '/dashboard/admin', icon: ShieldCheck, label: 'Admin' }]
+    ? [...navItems, { to: '/dashboard/admin', icon: ShieldCheck, label: 'Admin', variant: 'danger' as GlowVariant }]
     : navItems;
 
   const handleSignOut = async () => {
@@ -44,7 +47,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      {/* Sidebar - Light and professional */}
+      {/* Sidebar */}
       <aside className={cn(
         "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 lg:translate-x-0",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -88,8 +91,16 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               )}
               onClick={() => setSidebarOpen(false)}
             >
-              <item.icon className="h-4 w-4" />
-              {item.label}
+              {({ isActive }) => (
+                <>
+                  {isActive ? (
+                    <GlowIcon icon={item.icon} variant={item.variant} size="xs" />
+                  ) : (
+                    <item.icon className="h-4 w-4" />
+                  )}
+                  {item.label}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -97,7 +108,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* User section */}
         <div className="p-4 border-t border-sidebar-border">
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-sm font-medium text-primary shadow-sm shadow-primary/10">
               {user?.email?.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">

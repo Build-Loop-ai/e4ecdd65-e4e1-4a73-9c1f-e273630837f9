@@ -6,6 +6,7 @@ import { DeviceBreakdown } from '@/components/dashboard/DeviceBreakdown';
 import { RecentVisitors } from '@/components/dashboard/RecentVisitors';
 import { TopPreviews } from '@/components/dashboard/TopPreviews';
 import { Button } from '@/components/ui/button';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 import { useAnalytics, type DateRange } from '@/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
 
@@ -15,20 +16,21 @@ const dateRanges: { value: DateRange; label: string }[] = [
   { value: '30d', label: '30 days' },
 ];
 
+type GlowVariant = 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'muted';
+
 interface MetricCardProps {
   icon: React.ElementType;
+  iconVariant?: GlowVariant;
   label: string;
   value: string | number;
   subtext?: string;
 }
 
-function MetricCard({ icon: Icon, label, value, subtext }: MetricCardProps) {
+function MetricCard({ icon, iconVariant = 'primary', label, value }: MetricCardProps) {
   return (
     <div className="p-5 rounded-xl border border-border bg-card">
       <div className="flex items-center gap-3">
-        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
+        <GlowIcon icon={icon} variant={iconVariant} size="md" />
         <div>
           <p className="text-xl font-semibold text-foreground">{value}</p>
           <p className="text-xs text-muted-foreground">{label}</p>
@@ -70,7 +72,6 @@ export default function Analytics() {
           </p>
           </div>
           
-          {/* Date range selector */}
           <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
             {dateRanges.map((range) => (
               <Button
@@ -95,31 +96,31 @@ export default function Analytics() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <MetricCard
             icon={Eye}
+            iconVariant="info"
             label={`Views · Last ${dateRange === '7d' ? '7' : dateRange === '14d' ? '14' : '30'} days`}
             value={totalViews.toLocaleString()}
           />
           <MetricCard
             icon={Users}
+            iconVariant="success"
             label="Total visits"
             value={uniqueVisitors.toLocaleString()}
           />
           <MetricCard
             icon={Clock}
+            iconVariant="warning"
             label="Avg. session"
             value={formatDuration(avgSessionDuration)}
           />
         </div>
 
-        {/* Views chart */}
         <ViewsChart data={dailyStats} loading={isLoading} />
 
-        {/* Device breakdown and top previews */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <DeviceBreakdown data={deviceStats} loading={isLoading} />
           <TopPreviews previews={topPreviews} loading={isLoading} />
         </div>
 
-        {/* Recent visitors */}
         <RecentVisitors visits={recentVisits} loading={isLoading} />
       </div>
     </DashboardLayout>
