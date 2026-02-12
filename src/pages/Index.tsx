@@ -75,16 +75,16 @@ const Index = () => {
   return (
     <div ref={containerRef} className="min-h-screen flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl">
+      <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl px-1">
         <motion.div 
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="bg-white/90 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 rounded-2xl px-6 h-14 flex items-center justify-between"
+          className="bg-white/90 backdrop-blur-xl border border-white/50 shadow-lg shadow-black/5 rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between"
         >
           <PitchLogo size="md" />
           {!loading && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-shrink-0">
               {user ? (
                 <Button asChild size="sm" className="rounded-xl">
                   <Link to="/dashboard">Dashboard</Link>
@@ -123,7 +123,7 @@ const Index = () => {
               <span className="text-sm font-medium text-white">The outreach tool for web designers</span>
             </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-6">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-[1.1] mb-6">
               <motion.span initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }} className="inline-block">
                 Turn any website into a
               </motion.span>
@@ -182,7 +182,7 @@ const Index = () => {
       {/* Stats */}
       <section className="py-16 bg-foreground text-background">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
             {[
               { value: '500+', label: 'Active designers' },
               { value: '12k', label: 'Pitches sent' },
@@ -190,7 +190,7 @@ const Index = () => {
               { value: '5 min', label: 'Avg. pitch time' },
             ].map((stat, index) => (
               <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}>
-                <div className="text-3xl md:text-4xl font-bold mb-1">{stat.value}</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1">{stat.value}</div>
                 <div className="text-sm text-background/60">{stat.label}</div>
               </motion.div>
             ))}
@@ -208,7 +208,7 @@ const Index = () => {
             <p className="text-lg text-muted-foreground">Three steps to your next closed deal</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               { step: '01', title: 'Scan any site', description: 'Paste a URL. We extract logos, colors, images, and copy in seconds.', gradient: 'from-primary/10 to-primary/5' },
               { step: '02', title: 'AI rebuilds it', description: 'Choose from 5 premium templates. Content is organized beautifully.', gradient: 'from-primary/15 to-primary/5' },
@@ -290,8 +290,8 @@ const Index = () => {
           </motion.div>
 
           <div className="max-w-2xl mx-auto">
-            <motion.div key={activeTestimonial} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 text-center">
-              <p className="text-xl md:text-2xl text-white font-medium leading-relaxed mb-8">
+            <motion.div key={activeTestimonial} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 sm:p-8 text-center">
+              <p className="text-lg sm:text-xl md:text-2xl text-white font-medium leading-relaxed mb-6 sm:mb-8">
                 "{testimonials[activeTestimonial].quote}"
               </p>
               <div className="flex items-center justify-center gap-3">
@@ -343,9 +343,9 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t border-border py-8 px-6">
-        <div className="container mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="container mx-auto max-w-5xl flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
           <PitchLogo size="sm" />
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
             <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
             <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
             <p className="text-sm text-muted-foreground">
