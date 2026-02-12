@@ -345,9 +345,13 @@ const Index = () => {
       <footer className="border-t border-border py-8 px-6">
         <div className="container mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-4">
           <PitchLogo size="sm" />
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Pitch. All rights reserved.
-          </p>
+          <div className="flex items-center gap-6">
+            <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
+            <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Pitch
+            </p>
+          </div>
         </div>
       </footer>
     </div>
