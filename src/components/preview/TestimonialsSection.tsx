@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
 import { MarqueeText } from '@/components/animations/MarqueeText';
@@ -27,7 +27,6 @@ export function TestimonialsSection({
 }: TestimonialsSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [typedText, setTypedText] = useState('');
 
   const template = getTemplateStyle(templateId);
 
@@ -356,22 +355,7 @@ export function TestimonialsSection({
     );
   }
 
-  // ========== CORPORATE CLASSIC - Single quote with typewriter effect ==========
-  // Typewriter effect
-  useEffect(() => {
-    setTypedText('');
-    const quote = validTestimonials[activeIndex]?.quote || '';
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i <= quote.length) {
-        setTypedText(quote.slice(0, i));
-        i++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 30);
-    return () => clearInterval(interval);
-  }, [activeIndex, validTestimonials]);
+  // ========== CORPORATE CLASSIC - Clean fade between quotes ==========
 
   return (
     <section ref={containerRef} className="py-32 bg-background">
@@ -391,24 +375,33 @@ export function TestimonialsSection({
           />
         </motion.div>
 
-        {/* Single large quote with typewriter */}
+        {/* Single large quote with fade */}
         <div className="text-center min-h-[250px]">
           <Quote 
             className="w-16 h-16 mx-auto mb-8 opacity-20"
             style={{ color: primaryColor || 'hsl(var(--primary))' }}
           />
-          <p className="text-xl md:text-2xl lg:text-3xl text-foreground leading-relaxed mb-10 min-h-[120px]">
-            "{typedText}"
-            <span className="animate-pulse">|</span>
-          </p>
-          <p className="text-lg font-semibold text-foreground">
-            {validTestimonials[activeIndex]?.author}
-          </p>
-          {validTestimonials[activeIndex]?.role && (
-            <p className="text-muted-foreground mt-1">
-              {validTestimonials[activeIndex].role}
-            </p>
-          )}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIndex}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.5 }}
+            >
+              <p className="text-xl md:text-2xl lg:text-3xl text-foreground leading-relaxed mb-10">
+                "{validTestimonials[activeIndex]?.quote}"
+              </p>
+              <p className="text-lg font-semibold text-foreground">
+                {validTestimonials[activeIndex]?.author}
+              </p>
+              {validTestimonials[activeIndex]?.role && (
+                <p className="text-muted-foreground mt-1">
+                  {validTestimonials[activeIndex].role}
+                </p>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Dots navigation */}
