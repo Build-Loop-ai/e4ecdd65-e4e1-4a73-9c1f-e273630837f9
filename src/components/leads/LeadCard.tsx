@@ -88,12 +88,14 @@ export function LeadCard({
                 </a>
               </div>
             )}
-            {lead.email && (
-              <div className="flex items-center gap-2">
-                <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+            <div className="flex items-center gap-2">
+              <Mail className={`h-3.5 w-3.5 flex-shrink-0 ${lead.email ? 'text-green-500' : 'text-muted-foreground/40'}`} />
+              {lead.email ? (
                 <span className="truncate">{lead.email}</span>
-              </div>
-            )}
+              ) : (
+                <span className="text-muted-foreground/40 italic text-xs">No email found</span>
+              )}
+            </div>
             {lead.phone && (
               <div className="flex items-center gap-2">
                 <Phone className="h-3.5 w-3.5 flex-shrink-0" />

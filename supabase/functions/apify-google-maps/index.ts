@@ -22,6 +22,85 @@ interface ApifyPlace {
   url?: string;
 }
 
+const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
+const BLOCKED_DOMAINS = new Set([
+  'wix.com', 'wordpress.com', 'squarespace.com', 'weebly.com',
+  'godaddy.com', 'sentry.io', 'sentry-next.wixpress.com',
+  'example.com', 'domain.com', 'email.com', 'test.com',
+]);
+
+const BLOCKED_PREFIXES = new Set([
+  'noreply', 'no-reply', 'mailer-daemon', 'postmaster',
+  'webmaster', 'hostmaster', 'abuse',
+]);
+
+function isValidBusinessEmail(email: string): boolean {
+  const lower = email.toLowerCase();
+  const domain = lower.split('@')[1];
+  const prefix = lower.split('@')[0];
+
+  if (!domain || !prefix) return false;
+  if (BLOCKED_DOMAINS.has(domain)) return false;
+  if (BLOCKED_PREFIXES.has(prefix)) return false;
+  // Filter out image-like false positives (e.g. "2x@img.png")
+  if (/\.(png|jpg|jpeg|gif|svg|webp|css|js)$/i.test(domain)) return false;
+
+  return true;
+}
+
+async function extractEmailFromWebsite(websiteUrl: string): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const response = await fetch(websiteUrl, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PitchBot/1.0)' },
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) return null;
+
+    const html = await response.text();
+    const matches = html.match(EMAIL_REGEX);
+    if (!matches) return null;
+
+    // Deduplicate and filter
+    const unique = [...new Set(matches)];
+    const valid = unique.filter(isValidBusinessEmail);
+
+    // Prefer contact/info emails, then first valid one
+    const preferred = valid.find(e => {
+      const prefix = e.split('@')[0].toLowerCase();
+      return ['info', 'contact', 'hello', 'mail'].includes(prefix);
+    });
+
+    return preferred || valid[0] || null;
+  } catch {
+    return null;
+  }
+}
+
+// Process in batches with concurrency limit
+async function enrichLeadsWithEmails(leads: any[], concurrency = 3): Promise<void> {
+  const needsEmail = leads.filter(l => l.website_url && !l.email);
+  console.log(`Enriching ${needsEmail.length} leads with email extraction`);
+
+  for (let i = 0; i < needsEmail.length; i += concurrency) {
+    const batch = needsEmail.slice(i, i + concurrency);
+    const results = await Promise.allSettled(
+      batch.map(async (lead) => {
+        const email = await extractEmailFromWebsite(lead.website_url);
+        if (email) {
+          lead.email = email;
+          console.log(`Found email for ${lead.business_name}: ${email}`);
+        }
+      })
+    );
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -84,6 +163,12 @@ serve(async (req) => {
       rating: place.totalScore || null,
       google_maps_url: place.url || null,
     }));
+
+    // Enrich leads that have websites but no emails
+    await enrichLeadsWithEmails(leads);
+
+    const emailCount = leads.filter(l => l.email).length;
+    console.log(`${emailCount}/${leads.length} leads have email addresses after enrichment`);
 
     return new Response(
       JSON.stringify({ success: true, data: leads }),
