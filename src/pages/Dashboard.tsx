@@ -12,6 +12,7 @@ import { StatsCards } from '@/components/dashboard/StatsCards';
 import { EmailReadinessCard } from '@/components/email/EmailReadinessCard';
 import { FollowUpReminders } from '@/components/dashboard/FollowUpReminders';
 import { SendEmailDialog } from '@/components/email/SendEmailDialog';
+import { WelcomeWizard } from '@/components/dashboard/WelcomeWizard';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,6 +46,7 @@ export default function Dashboard() {
   const [previews, setPreviews] = useState<ClientPreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [emailTarget, setEmailTarget] = useState<{ previewId: string; slug: string; clientName: string; primaryColor: string } | null>(null);
 
   useEffect(() => {
@@ -66,6 +68,10 @@ export default function Dashboard() {
       });
     } else {
       setPreviews(data || []);
+      // Show welcome wizard for new users (no pitches, not dismissed before)
+      if ((data || []).length === 0 && !localStorage.getItem('pitch_onboarding_done')) {
+        setShowWelcome(true);
+      }
     }
     setLoading(false);
   };
@@ -315,6 +321,15 @@ export default function Dashboard() {
         primaryColor={emailTarget.primaryColor}
       />
     )}
+
+    <WelcomeWizard
+      open={showWelcome}
+      onOpenChange={(open) => {
+        setShowWelcome(open);
+        if (!open) localStorage.setItem('pitch_onboarding_done', '1');
+      }}
+      userName={user?.user_metadata?.full_name}
+    />
     </>
   );
 }
