@@ -263,10 +263,10 @@ export function EmailConnectionsSection() {
 
         <div className="text-xs text-muted-foreground space-y-1">
           <p>
-            <strong>Note:</strong> Your email credentials are securely stored and only used to send emails on your behalf.
+            <strong>Note:</strong> Your email credentials are securely stored and only used to send emails and manage warmup on your behalf.
           </p>
           <p>
-            We request minimal permissions (send-only) and never read your inbox.
+            Full mailbox access is required for the warmup service to improve your sender reputation. Your data is never shared with third parties.
           </p>
         </div>
       </CardContent>
