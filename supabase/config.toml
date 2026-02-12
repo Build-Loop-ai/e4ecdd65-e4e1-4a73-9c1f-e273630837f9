@@ -40,3 +40,6 @@ verify_jwt = false
 
 [functions.score-pitch]
 verify_jwt = false
+
+[functions.regenerate-image]
+verify_jwt = false

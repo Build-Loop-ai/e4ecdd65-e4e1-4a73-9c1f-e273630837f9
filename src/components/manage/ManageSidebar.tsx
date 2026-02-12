@@ -45,6 +45,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { Tables } from '@/integrations/supabase/types';
 import PitchScoreCard from '@/components/manage/PitchScoreCard';
+import ImageRegenerator from '@/components/manage/ImageRegenerator';
 
 type ClientPreview = Tables<'client_previews'>;
 type Viewport = 'desktop' | 'tablet' | 'mobile';
@@ -58,6 +59,7 @@ interface ManageSidebarProps {
   onOpenFeedback: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onPreviewUpdate?: (updatedPreview: Partial<ClientPreview>) => void;
   feedbackCount: number;
 }
 
@@ -84,6 +86,7 @@ export default function ManageSidebar({
   onOpenFeedback,
   onEdit,
   onDelete,
+  onPreviewUpdate,
   feedbackCount,
 }: ManageSidebarProps) {
   const navigate = useNavigate();
@@ -278,6 +281,16 @@ export default function ManageSidebar({
 
         {/* AI Score */}
         <PitchScoreCard previewId={preview.id} />
+
+        <Separator />
+
+        {/* Image Regeneration */}
+        <ImageRegenerator
+          preview={preview}
+          onImageRegenerated={(updatedSchema) => {
+            onPreviewUpdate?.({ processed_schema: updatedSchema });
+          }}
+        />
 
         <Separator />
 
