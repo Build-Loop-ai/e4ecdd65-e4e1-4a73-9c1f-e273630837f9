@@ -135,7 +135,7 @@ export default function Previews() {
             </p>
           </div>
           <Button asChild>
-            <Link to="/new-preview">
+            <Link to="/dashboard/new">
               <Plus className="h-4 w-4 mr-2" />
               New Pitch
             </Link>
@@ -181,7 +181,7 @@ export default function Previews() {
             </p>
             {!search && (
               <Button asChild>
-                <Link to="/new-preview">
+                <Link to="/dashboard/new">
                   <Plus className="h-4 w-4 mr-2" />
                   New Pitch
                 </Link>
