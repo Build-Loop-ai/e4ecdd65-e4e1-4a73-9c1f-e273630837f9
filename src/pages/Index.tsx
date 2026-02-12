@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Play, Zap, Globe, Palette, Layout, BarChart3, Mail, MessageSquare, Share2, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Play, Zap, Globe, Palette, Layout, BarChart3, Mail, MessageSquare, Share2, Sparkles, Crown, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -320,7 +320,93 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Pricing */}
+      <section className="relative py-24 md:py-32 px-6 bg-background">
+        <div className="container mx-auto max-w-5xl">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} viewport={{ once: true }} className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">Simple, transparent pricing</h2>
+            <p className="text-lg text-muted-foreground">Start free. Upgrade when you're ready to scale.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Free',
+                price: 0,
+                description: 'Get started with the basics',
+                icon: Zap,
+                features: ['3 pitches per month', '10 emails per month', 'Basic templates', 'View tracking'],
+              },
+              {
+                name: 'Pro',
+                price: 29,
+                description: 'For serious freelancers',
+                icon: Crown,
+                popular: true,
+                features: ['Unlimited pitches', '100 emails per month', 'All premium templates', 'Advanced analytics', 'Email warmup', 'Priority support'],
+              },
+              {
+                name: 'Agency',
+                price: 79,
+                description: 'For teams and agencies',
+                icon: Building2,
+                features: ['Everything in Pro', 'Unlimited emails', 'White-label pitches', 'Team collaboration', 'Custom branding', 'Dedicated support'],
+              },
+            ].map((tier, index) => (
+              <motion.div
+                key={tier.name}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="relative"
+              >
+                {'popular' in tier && tier.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full z-10">
+                    Most Popular
+                  </div>
+                )}
+                <div className={`rounded-2xl border p-6 sm:p-8 h-full flex flex-col transition-all ${
+                  tier.popular ? 'border-primary/40 bg-primary/5 ring-1 ring-primary/20 shadow-xl shadow-primary/10' : 'border-border bg-card'
+                }`}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tier.popular ? 'bg-primary text-primary-foreground' : 'bg-primary/10'}`}>
+                      <tier.icon className={`h-5 w-5 ${tier.popular ? 'text-primary-foreground' : 'text-primary'}`} />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">{tier.name}</h3>
+                  </div>
+
+                  <div className="mb-2">
+                    <span className="text-4xl font-bold text-foreground">${tier.price}</span>
+                    <span className="text-muted-foreground">/mo</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
+
+                  <ul className="space-y-3 mb-8 flex-1">
+                    {tier.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm">
+                        <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        <span className="text-foreground">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    asChild
+                    variant={tier.popular ? 'default' : 'outline'}
+                    className={`w-full rounded-xl ${tier.popular ? 'shadow-md shadow-primary/20' : ''}`}
+                  >
+                    <Link to="/auth">
+                      {tier.price === 0 ? 'Get Started Free' : `Start with ${tier.name}`}
+                    </Link>
+                  </Button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="relative py-24 md:py-32 px-6 bg-background">
         <div className="container mx-auto max-w-3xl text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}>
