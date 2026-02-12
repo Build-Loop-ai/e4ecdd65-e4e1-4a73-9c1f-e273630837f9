@@ -70,8 +70,14 @@ async function sendViaGmail(accessToken: string, to: string, subject: string, bo
     bodyHtml,
   ].join("\r\n");
 
-  // Base64url encode
-  const encodedEmail = btoa(email)
+  // Base64url encode (UTF-8 safe — btoa alone fails on non-Latin1 chars)
+  const encoder = new TextEncoder();
+  const uint8 = encoder.encode(email);
+  let binary = "";
+  for (let i = 0; i < uint8.length; i++) {
+    binary += String.fromCharCode(uint8[i]);
+  }
+  const encodedEmail = btoa(binary)
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/, "");
