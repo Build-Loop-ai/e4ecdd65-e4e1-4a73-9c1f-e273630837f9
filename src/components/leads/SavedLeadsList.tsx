@@ -17,6 +17,7 @@ import {
   Users,
   Send
 } from 'lucide-react';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -247,7 +248,7 @@ export function SavedLeadsList() {
       {savedLeads.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <div className="mx-auto mb-4 w-fit"><GlowIcon icon={Users} variant="muted" size="lg" /></div>
             <h3 className="text-lg font-medium mb-2">No saved leads yet</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
               Search for businesses in the Search tab and save them to build your lead list.

@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from 'date-fns';
 import { Globe, Monitor, Smartphone, Tablet } from 'lucide-react';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -51,7 +52,7 @@ export function RecentVisitors({ visits, loading }: RecentVisitorsProps) {
       <div className="p-6 rounded-xl border border-border bg-card">
         <h3 className="text-sm font-medium text-foreground mb-6">Recent visitors</h3>
         <div className="py-12 text-center">
-          <Globe className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+          <div className="mx-auto mb-3 w-fit"><GlowIcon icon={Globe} variant="muted" size="lg" /></div>
           <p className="text-muted-foreground text-sm">No visitors yet</p>
           <p className="text-muted-foreground/60 text-xs mt-1">
             Share your preview links to start tracking
@@ -76,7 +77,7 @@ export function RecentVisitors({ visits, loading }: RecentVisitorsProps) {
               className="flex items-center gap-4 p-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors"
             >
               {/* Device icon */}
-              <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-muted-foreground/15 to-muted-foreground/5 flex items-center justify-center flex-shrink-0 shadow-sm">
                 <DeviceIcon className="h-4 w-4 text-muted-foreground" />
               </div>
               

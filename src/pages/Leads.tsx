@@ -21,6 +21,7 @@ import {
   Bookmark,
   Users
 } from 'lucide-react';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 
 // Animation variants
 const containerVariants = {
@@ -348,7 +349,7 @@ export default function Leads() {
             {!isSearching && hasSearched && results.length === 0 && (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <div className="mx-auto mb-4 w-fit"><GlowIcon icon={Building2} variant="muted" size="lg" /></div>
                   <h3 className="text-lg font-medium mb-2">No businesses found</h3>
                   <p className="text-muted-foreground">
                     Try searching with different keywords or location
@@ -424,7 +425,7 @@ export default function Leads() {
             {!hasSearched && (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <div className="mx-auto mb-4 w-fit"><GlowIcon icon={Search} variant="info" size="lg" /></div>
                   <h3 className="text-lg font-medium mb-2">Start searching for leads</h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
                     Enter a search query above to find local businesses. 
