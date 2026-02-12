@@ -349,7 +349,7 @@ export default function Leads() {
             {!isSearching && hasSearched && results.length === 0 && (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <div className="mx-auto mb-4 w-fit"><GlowIcon icon={Building2} variant="muted" size="lg" /></div>
+                  <div className="mx-auto mb-4 w-fit"><GlowIcon icon={Building2} size="lg" /></div>
                   <h3 className="text-lg font-medium mb-2">No businesses found</h3>
                   <p className="text-muted-foreground">
                     Try searching with different keywords or location
@@ -425,7 +425,7 @@ export default function Leads() {
             {!hasSearched && (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <div className="mx-auto mb-4 w-fit"><GlowIcon icon={Search} variant="info" size="lg" /></div>
+                  <div className="mx-auto mb-4 w-fit"><GlowIcon icon={Search} size="lg" /></div>
                   <h3 className="text-lg font-medium mb-2">Start searching for leads</h3>
                   <p className="text-muted-foreground max-w-md mx-auto">
                     Enter a search query above to find local businesses. 

@@ -433,7 +433,7 @@ export function NewPitchFlow({ isOpen, onClose, onComplete }: NewPitchFlowProps)
                             <div className="flex items-center gap-2">
                               <span className="font-medium text-foreground">{t.name}</span>
                               {isRecommended(t.id) && (
-                                <Badge className="bg-green-500 hover:bg-green-600 text-white text-[10px] px-1.5 py-0 flex items-center gap-0.5">
+                                <Badge className="bg-primary hover:bg-primary/90 text-primary-foreground text-[10px] px-1.5 py-0 flex items-center gap-0.5">
                                   <Star className="w-3 h-3" /> AI Pick
                                 </Badge>
                               )}
@@ -467,7 +467,7 @@ export function NewPitchFlow({ isOpen, onClose, onComplete }: NewPitchFlowProps)
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: 'spring', damping: 10, stiffness: 200 }}
-                      className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center mb-6"
+                      className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-6"
                     >
                       <CheckCircle2 className="h-10 w-10 text-white" />
                     </motion.div>

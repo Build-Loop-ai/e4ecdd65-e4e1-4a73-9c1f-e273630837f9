@@ -74,7 +74,7 @@ const templates = [
 const statusConfig = {
   draft: { label: 'Draft', color: 'bg-muted text-muted-foreground' },
   sent: { label: 'Sent', color: 'bg-primary/10 text-primary' },
-  feedback_received: { label: 'Feedback Received', color: 'bg-green-500/10 text-green-600' },
+  feedback_received: { label: 'Feedback Received', color: 'bg-primary/10 text-primary' },
 };
 
 export default function ManageSidebar({

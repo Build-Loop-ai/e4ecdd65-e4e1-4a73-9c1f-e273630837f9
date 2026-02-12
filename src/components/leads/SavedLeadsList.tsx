@@ -36,9 +36,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 
 const statusColors: Record<string, string> = {
-  new: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  pitched: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  converted: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+  new: 'bg-primary/10 text-primary',
+  pitched: 'bg-primary/20 text-primary',
+  converted: 'bg-primary/30 text-primary font-semibold',
 };
 
 export function SavedLeadsList() {
@@ -248,7 +248,7 @@ export function SavedLeadsList() {
       {savedLeads.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center">
-            <div className="mx-auto mb-4 w-fit"><GlowIcon icon={Users} variant="muted" size="lg" /></div>
+            <div className="mx-auto mb-4 w-fit"><GlowIcon icon={Users} size="lg" /></div>
             <h3 className="text-lg font-medium mb-2">No saved leads yet</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
               Search for businesses in the Search tab and save them to build your lead list.
@@ -279,7 +279,7 @@ export function SavedLeadsList() {
                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                       {lead.rating && (
                         <span className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                          <Star className="h-3 w-3 fill-primary text-primary" />
                           {Number(lead.rating).toFixed(1)}
                         </span>
                       )}

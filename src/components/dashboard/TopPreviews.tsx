@@ -40,7 +40,7 @@ export function TopPreviews({ previews, loading }: TopPreviewsProps) {
       <div className="p-6 rounded-xl border border-border bg-card">
         <h3 className="text-sm font-medium text-foreground mb-6">Top previews</h3>
         <div className="py-12 text-center">
-          <div className="mx-auto mb-3 w-fit"><GlowIcon icon={TrendingUp} variant="muted" size="lg" /></div>
+          <div className="mx-auto mb-3 w-fit"><GlowIcon icon={TrendingUp} size="lg" /></div>
           <p className="text-muted-foreground text-sm">No views yet</p>
         </div>
       </div>

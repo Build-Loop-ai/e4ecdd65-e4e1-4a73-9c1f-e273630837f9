@@ -52,7 +52,7 @@ export function RecentVisitors({ visits, loading }: RecentVisitorsProps) {
       <div className="p-6 rounded-xl border border-border bg-card">
         <h3 className="text-sm font-medium text-foreground mb-6">Recent visitors</h3>
         <div className="py-12 text-center">
-          <div className="mx-auto mb-3 w-fit"><GlowIcon icon={Globe} variant="muted" size="lg" /></div>
+          <div className="mx-auto mb-3 w-fit"><GlowIcon icon={Globe} size="lg" /></div>
           <p className="text-muted-foreground text-sm">No visitors yet</p>
           <p className="text-muted-foreground/60 text-xs mt-1">
             Share your preview links to start tracking

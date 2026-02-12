@@ -63,27 +63,27 @@ export function EmailReadinessCard() {
     if (primaryConnection?.warmy_state === 'paused') {
       return { 
         label: 'Paused', 
-        color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20',
+        color: 'bg-muted text-muted-foreground border-border',
         icon: Pause 
       };
     }
     if (temperature >= 85 && (deliverabilityScore === null || deliverabilityScore >= 70)) {
       return { 
         label: 'Ready to Send', 
-        color: 'bg-green-500/10 text-green-600 border-green-500/20',
+        color: 'bg-primary/10 text-primary border-primary/20',
         icon: CheckCircle2 
       };
     }
     if (temperature >= 60) {
       return { 
         label: 'Almost Ready', 
-        color: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+        color: 'bg-primary/15 text-primary border-primary/20',
         icon: Zap 
       };
     }
     return { 
       label: 'Warming Up', 
-      color: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
+      color: 'bg-primary/10 text-primary/70 border-primary/15',
       icon: Clock 
     };
   };
@@ -107,7 +107,7 @@ export function EmailReadinessCard() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2.5 text-base">
-            <GlowIcon icon={Thermometer} variant="danger" size="sm" />
+            <GlowIcon icon={Thermometer} size="sm" />
             Email Readiness
           </CardTitle>
           <Badge variant="secondary" className={cn('text-xs', status.color)}>
@@ -141,10 +141,10 @@ export function EmailReadinessCard() {
               className={cn(
                 'text-xs',
                 deliverabilityScore >= 80 
-                  ? 'bg-green-500/10 text-green-600' 
+                  ? 'bg-primary/10 text-primary' 
                   : deliverabilityScore >= 60 
-                    ? 'bg-yellow-500/10 text-yellow-600'
-                    : 'bg-red-500/10 text-red-600'
+                    ? 'bg-primary/15 text-primary/80'
+                    : 'bg-destructive/10 text-destructive'
               )}
             >
               {deliverabilityScore}%
@@ -153,7 +153,7 @@ export function EmailReadinessCard() {
         )}
 
         {connectionsNeedingAttention.length > 0 && (
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10 text-orange-600">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 text-destructive">
             <AlertTriangle className="h-4 w-4 flex-shrink-0" />
             <span className="text-xs">
               {connectionsNeedingAttention.length} mailbox{connectionsNeedingAttention.length !== 1 ? 'es' : ''} need{connectionsNeedingAttention.length === 1 ? 's' : ''} attention

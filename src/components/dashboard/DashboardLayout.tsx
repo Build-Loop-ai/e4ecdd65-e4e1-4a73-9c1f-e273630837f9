@@ -12,14 +12,12 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-type GlowVariant = 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'muted';
-
 const navItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Overview', variant: 'primary' as GlowVariant },
-  { to: '/dashboard/leads', icon: Search, label: 'Find Leads', variant: 'info' as GlowVariant },
-  { to: '/dashboard/previews', icon: FileText, label: 'My Pitches', variant: 'success' as GlowVariant },
-  { to: '/dashboard/analytics', icon: BarChart3, label: 'Analytics', variant: 'warning' as GlowVariant },
-  { to: '/dashboard/settings', icon: Settings, label: 'Settings', variant: 'muted' as GlowVariant },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
+  { to: '/dashboard/leads', icon: Search, label: 'Find Leads' },
+  { to: '/dashboard/previews', icon: FileText, label: 'My Pitches' },
+  { to: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
+  { to: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -29,7 +27,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const allNavItems = isAdmin
-    ? [...navItems, { to: '/dashboard/admin', icon: ShieldCheck, label: 'Admin', variant: 'danger' as GlowVariant }]
+    ? [...navItems, { to: '/dashboard/admin', icon: ShieldCheck, label: 'Admin' }]
     : navItems;
 
   const handleSignOut = async () => {
@@ -94,7 +92,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               {({ isActive }) => (
                 <>
                   {isActive ? (
-                    <GlowIcon icon={item.icon} variant={item.variant} size="xs" />
+                    <GlowIcon icon={item.icon} size="xs" />
                   ) : (
                     <item.icon className="h-4 w-4" />
                   )}

@@ -81,7 +81,7 @@ export function OutreachSettings() {
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <GlowIcon icon={Zap} variant="warning" />
+            <GlowIcon icon={Zap} />
             <div>
               <h3 className="text-sm font-semibold text-foreground">Auto-Pitch & Send</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -96,7 +96,7 @@ export function OutreachSettings() {
       {/* Daily Cap */}
       <div className="rounded-xl border border-border bg-card p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <GlowIcon icon={Shield} variant="success" />
+          <GlowIcon icon={Shield} />
           <div>
             <h3 className="text-sm font-semibold text-foreground">Daily Send Cap</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -138,7 +138,7 @@ export function OutreachSettings() {
       {/* Sending Window */}
       <div className="rounded-xl border border-border bg-card p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <GlowIcon icon={Clock} variant="info" />
+          <GlowIcon icon={Clock} />
           <div>
             <h3 className="text-sm font-semibold text-foreground">Sending Window</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -176,7 +176,7 @@ export function OutreachSettings() {
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <GlowIcon icon={MessageSquare} variant="primary" />
+            <GlowIcon icon={MessageSquare} />
             <div>
               <h3 className="text-sm font-semibold text-foreground">Follow-Up Reminders</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
