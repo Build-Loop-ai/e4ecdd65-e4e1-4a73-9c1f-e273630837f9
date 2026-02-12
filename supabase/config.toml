@@ -31,3 +31,6 @@ verify_jwt = false
 
 [functions.warmy-actions]
 verify_jwt = false
+
+[functions.check-send-readiness]
+verify_jwt = false
