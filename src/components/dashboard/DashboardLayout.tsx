@@ -105,7 +105,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* User section */}
         <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+          <button
+            onClick={() => { navigate('/dashboard/settings'); setSidebarOpen(false); }}
+            className="flex items-center gap-3 px-3 py-2 mb-2 w-full rounded-lg transition-colors hover:bg-sidebar-accent text-left"
+          >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-sm font-medium text-primary shadow-sm shadow-primary/10">
               {user?.email?.charAt(0).toUpperCase()}
             </div>
@@ -117,7 +120,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 {user?.email}
               </p>
             </div>
-          </div>
+          </button>
           <Button
             variant="ghost"
             size="sm"
