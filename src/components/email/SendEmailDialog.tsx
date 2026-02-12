@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -18,7 +17,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Send, Mail, AlertCircle, Settings, Shield } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, Send, Mail, AlertCircle, Settings, Eye, PenLine } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEmailConnections } from '@/hooks/useEmailConnections';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,11 +51,11 @@ export function SendEmailDialog({
   previewId,
   previewUrl,
   leadId,
-  primaryColor = '#3b82f6',
+  primaryColor = '#4F46E5',
 }: SendEmailDialogProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { connections, getActiveConnection, isLoading: connectionsLoading } = useEmailConnections();
+  const { connections, isLoading: connectionsLoading } = useEmailConnections();
 
   const [to, setTo] = useState(recipientEmail);
   const [toName, setToName] = useState(recipientName);
@@ -65,7 +65,6 @@ export function SendEmailDialog({
   const [senderProfile, setSenderProfile] = useState<{ full_name: string; business_name: string } | null>(null);
   const [selectedConnectionId, setSelectedConnectionId] = useState<string>('');
 
-  // Reset form when dialog opens with new data
   useEffect(() => {
     if (open) {
       setTo(recipientEmail);
@@ -74,7 +73,6 @@ export function SendEmailDialog({
     }
   }, [open, recipientEmail, recipientName]);
 
-  // Fetch sender profile
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
@@ -83,15 +81,11 @@ export function SendEmailDialog({
         .select('full_name, business_name')
         .eq('user_id', user.id)
         .maybeSingle();
-      
-      if (data) {
-        setSenderProfile(data as any);
-      }
+      if (data) setSenderProfile(data as any);
     };
     fetchProfile();
   }, [user]);
 
-  // Set default connection
   useEffect(() => {
     if (connections.length > 0 && !selectedConnectionId) {
       const active = connections.find(c => c.is_active);
@@ -152,39 +146,48 @@ export function SendEmailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Send className="h-5 w-5" />
-            Send Pitch Email
-          </DialogTitle>
-          <DialogDescription>
-            Send a professional pitch email with a link to the preview
-          </DialogDescription>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+        {/* Header */}
+        <DialogHeader className="px-6 pt-6 pb-0">
+          <DialogTitle className="text-lg font-semibold">Send Pitch</DialogTitle>
         </DialogHeader>
 
         {connectionsLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : !hasConnections ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="p-3 rounded-full bg-muted mb-4">
-              <AlertCircle className="h-8 w-8 text-muted-foreground" />
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+            <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+              <AlertCircle className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h3 className="font-medium text-lg mb-2">No Email Connected</h3>
-            <p className="text-muted-foreground mb-4 max-w-sm">
-              Connect your Gmail or Outlook account in Settings to start sending pitch emails directly from the platform.
+            <h3 className="font-medium mb-1">No email connected</h3>
+            <p className="text-sm text-muted-foreground mb-4 max-w-xs">
+              Connect your Gmail account in Settings to send pitch emails.
             </p>
-            <Button onClick={() => navigate('/dashboard/settings')}>
+            <Button size="sm" onClick={() => navigate('/dashboard/settings')}>
               <Settings className="h-4 w-4 mr-2" />
               Go to Settings
             </Button>
           </div>
         ) : (
-        <>
-            <div className="space-y-4">
-              {/* Send Health Check */}
+          <Tabs defaultValue="compose" className="flex flex-col">
+            <div className="px-6">
+              <TabsList className="w-full grid grid-cols-2 h-9">
+                <TabsTrigger value="compose" className="text-xs gap-1.5">
+                  <PenLine className="h-3.5 w-3.5" />
+                  Compose
+                </TabsTrigger>
+                <TabsTrigger value="preview" className="text-xs gap-1.5">
+                  <Eye className="h-3.5 w-3.5" />
+                  Preview
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Compose Tab */}
+            <TabsContent value="compose" className="px-6 pb-2 mt-4 space-y-4">
+              {/* Health Check */}
               {selectedConnection?.warmy_mailbox_id && (
                 <SendHealthCheck 
                   connectionId={selectedConnectionId}
@@ -193,95 +196,111 @@ export function SendEmailDialog({
                 />
               )}
 
-              {/* From Selector */}
-              <div className="space-y-2">
-                <Label>From</Label>
+              {/* From */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">From</Label>
                 <Select value={selectedConnectionId} onValueChange={setSelectedConnectionId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select email account" />
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Select account" />
                   </SelectTrigger>
                   <SelectContent>
                     {connections.map(conn => (
                       <SelectItem key={conn.id} value={conn.id}>
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4" />
+                        <span className="flex items-center gap-2">
+                          <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                           {conn.email_address}
-                          <Badge variant="secondary" className="text-xs">
-                            {conn.provider === 'gmail' ? 'Gmail' : 'Outlook'}
-                          </Badge>
-                        </div>
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* To Email */}
-              <div className="space-y-2">
-                <Label htmlFor="to-email">To *</Label>
-                <Input
-                  id="to-email"
-                  type="email"
-                  placeholder="recipient@example.com"
-                  value={to}
-                  onChange={e => setTo(e.target.value)}
-                />
-              </div>
-
-              {/* Recipient Name */}
-              <div className="space-y-2">
-                <Label htmlFor="to-name">Recipient Name</Label>
-                <Input
-                  id="to-name"
-                  placeholder="John's Bakery"
-                  value={toName}
-                  onChange={e => {
-                    setToName(e.target.value);
-                    setSubject(renderSubject(DEFAULT_PITCH_SUBJECT, e.target.value || 'there'));
-                  }}
-                />
-              </div>
-
-              {/* Subject */}
-              <div className="space-y-2">
-                <Label htmlFor="subject">Subject *</Label>
-                <Input
-                  id="subject"
-                  placeholder="Your new website preview is ready!"
-                  value={subject}
-                  onChange={e => setSubject(e.target.value)}
-                />
-              </div>
-
-              {/* Email Preview */}
-              <div className="space-y-2">
-                <Label>Preview</Label>
-                <div className="border rounded-lg overflow-hidden bg-white">
-                  <div 
-                    className="p-4 text-sm max-h-[200px] overflow-y-auto"
-                    dangerouslySetInnerHTML={{ __html: emailPreviewHtml }}
+              {/* To + Name side by side */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">To</Label>
+                  <Input
+                    type="email"
+                    placeholder="email@example.com"
+                    value={to}
+                    onChange={e => setTo(e.target.value)}
+                    className="h-9"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</Label>
+                  <Input
+                    placeholder="Recipient name"
+                    value={toName}
+                    onChange={e => {
+                      setToName(e.target.value);
+                      setSubject(renderSubject(DEFAULT_PITCH_SUBJECT, e.target.value || 'there'));
+                    }}
+                    className="h-9"
                   />
                 </div>
               </div>
-            </div>
 
-            <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSend} 
-                disabled={isSending || !to || !subject || (!canSend && !!selectedConnection?.warmy_mailbox_id)}
-              >
-                {isSending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4 mr-2" />
-                )}
-                Send Email
-              </Button>
+              {/* Subject */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Subject</Label>
+                <Input
+                  placeholder="Your new website preview is ready!"
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                  className="h-9"
+                />
+              </div>
+            </TabsContent>
+
+            {/* Preview Tab */}
+            <TabsContent value="preview" className="px-6 pb-2 mt-4">
+              <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+                {/* Fake email header */}
+                <div className="border-b bg-muted/30 px-4 py-2.5 space-y-1">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-muted-foreground font-medium w-12">From</span>
+                    <span className="text-foreground">{selectedConnection?.email_address || '—'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-muted-foreground font-medium w-12">To</span>
+                    <span className="text-foreground">{to || '—'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-muted-foreground font-medium w-12">Subject</span>
+                    <span className="text-foreground font-medium">{subject || '—'}</span>
+                  </div>
+                </div>
+                {/* Email body */}
+                <div 
+                  className="p-4 text-sm max-h-[300px] overflow-y-auto"
+                  dangerouslySetInnerHTML={{ __html: emailPreviewHtml }}
+                />
+              </div>
+            </TabsContent>
+
+            {/* Footer */}
+            <DialogFooter className="px-6 py-4 border-t bg-muted/20">
+              <div className="flex items-center justify-between w-full">
+                <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={handleSend} 
+                  disabled={isSending || !to || !subject || (!canSend && !!selectedConnection?.warmy_mailbox_id)}
+                >
+                  {isSending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4 mr-2" />
+                  )}
+                  Send
+                </Button>
+              </div>
             </DialogFooter>
-          </>
+          </Tabs>
         )}
       </DialogContent>
     </Dialog>

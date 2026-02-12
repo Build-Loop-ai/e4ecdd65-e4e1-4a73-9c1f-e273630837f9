@@ -6,7 +6,7 @@ export interface EmailTemplateVariables {
   primaryColor?: string;
 }
 
-export const DEFAULT_PITCH_SUBJECT = "Your new website preview is ready, {{recipient_name}}!";
+export const DEFAULT_PITCH_SUBJECT = "I built something for {{recipient_name}} — take a look";
 
 export const DEFAULT_PITCH_TEMPLATE = `
 <!DOCTYPE html>
@@ -17,82 +17,78 @@ export const DEFAULT_PITCH_TEMPLATE = `
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
+      line-height: 1.7;
+      color: #1a1a1a;
+      background: #ffffff;
+      margin: 0;
+      padding: 0;
     }
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
+    .wrapper {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    .greeting {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 15px;
+      color: #374151;
+      margin: 0 0 16px 0;
+    }
+    .cta-wrapper {
+      margin: 32px 0;
     }
     .cta-button {
       display: inline-block;
       background: {{primary_color}};
-      color: white !important;
-      padding: 16px 32px;
+      color: #ffffff !important;
+      padding: 14px 28px;
       border-radius: 8px;
       text-decoration: none;
       font-weight: 600;
-      font-size: 16px;
-      margin: 20px 0;
+      font-size: 15px;
+      letter-spacing: -0.01em;
     }
-    .cta-button:hover {
-      opacity: 0.9;
-    }
-    .cta-wrapper {
-      text-align: center;
+    .divider {
+      border: none;
+      border-top: 1px solid #f0f0f0;
       margin: 32px 0;
     }
-    .footer {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
+    .signature {
       font-size: 14px;
-      color: #666;
+      color: #6b7280;
+      line-height: 1.6;
     }
-    .preview-box {
-      background: #f8f9fa;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px 0;
-      text-align: center;
-    }
-    .preview-box img {
-      max-width: 100%;
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    .signature strong {
+      color: #1a1a1a;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1 style="color: {{primary_color}}; margin-bottom: 0;">Hi {{recipient_name}},</h1>
-  </div>
-  
-  <p>I've created a modern website preview specifically designed for your business. I'd love for you to take a look and share your thoughts!</p>
-  
-  <div class="cta-wrapper">
-    <a href="{{preview_url}}" class="cta-button" style="background: {{primary_color}};">
-      👀 View Your Preview
-    </a>
-  </div>
-  
-  <p>This preview showcases:</p>
-  <ul>
-    <li>A fresh, modern design tailored to your brand</li>
-    <li>Mobile-responsive layout</li>
-    <li>Clear calls-to-action for your customers</li>
-    <li>Professional imagery and content structure</li>
-  </ul>
-  
-  <p>If you have any questions or would like to discuss changes, simply reply to this email. I'm here to help!</p>
-  
-  <div class="footer">
-    <p>Best regards,<br>
-    <strong>{{sender_name}}</strong><br>
-    {{sender_business}}</p>
+  <div class="wrapper">
+    <div class="greeting">Hi {{recipient_name}},</div>
+    
+    <p>I put together a website concept for your business — no commitment, just wanted to show you what's possible.</p>
+    
+    <div class="cta-wrapper">
+      <a href="{{preview_url}}" class="cta-button" style="background: {{primary_color}}; color: #ffffff !important;">
+        View your preview →
+      </a>
+    </div>
+    
+    <p>It's fully responsive and built around your existing brand. If anything catches your eye, just reply to this email — happy to walk you through it.</p>
+    
+    <hr class="divider">
+    
+    <div class="signature">
+      <strong>{{sender_name}}</strong><br>
+      {{sender_business}}
+    </div>
   </div>
 </body>
 </html>
@@ -107,7 +103,7 @@ export function renderEmailTemplate(
     .replace(/\{\{preview_url\}\}/g, variables.previewUrl)
     .replace(/\{\{sender_name\}\}/g, variables.senderName)
     .replace(/\{\{sender_business\}\}/g, variables.senderBusiness || '')
-    .replace(/\{\{primary_color\}\}/g, variables.primaryColor || '#3b82f6');
+    .replace(/\{\{primary_color\}\}/g, variables.primaryColor || '#4F46E5');
 }
 
 export function renderSubject(subject: string, recipientName: string): string {
