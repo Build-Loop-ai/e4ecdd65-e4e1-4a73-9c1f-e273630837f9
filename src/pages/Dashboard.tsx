@@ -211,8 +211,8 @@ export default function Dashboard() {
                         </div>
                       )}
                       {/* Hover overlay */}
-                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-center justify-center">
-                        <Eye className="h-8 w-8 text-background opacity-0 group-hover:opacity-70 transition-opacity drop-shadow-lg" />
+                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-all duration-500 ease-out flex items-center justify-center backdrop-blur-0 group-hover:backdrop-blur-[2px]">
+                        <Eye className="h-8 w-8 text-background opacity-0 group-hover:opacity-90 transition-all duration-300 drop-shadow-lg scale-75 group-hover:scale-100" />
                       </div>
                     </div>
                     
