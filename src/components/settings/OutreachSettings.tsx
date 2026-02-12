@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 import { Loader2, Save, Zap, Clock, Shield, MessageSquare, Sparkles } from 'lucide-react';
 import { useOutreachSettings } from '@/hooks/useOutreachSettings';
 import { useEmailConnections } from '@/hooks/useEmailConnections';
@@ -13,16 +14,12 @@ export function OutreachSettings() {
   const { settings, isLoading, upsert, isSaving } = useOutreachSettings();
   const { connections } = useEmailConnections();
 
-  // Calculate suggested daily cap from warmy data
   const activeConnection = connections?.find(c => c.is_active);
   const warmyTemp = activeConnection?.warmy_temperature;
   const warmyLimit = activeConnection?.daily_send_limit;
-  const deliverabilityScore = activeConnection?.deliverability_score;
 
   const getSuggestedCap = () => {
-    // If warmy provides a daily_send_limit, use that as the base
     if (warmyLimit && warmyLimit > 0) return warmyLimit;
-    // Otherwise derive from temperature
     if (warmyTemp == null) return null;
     if (warmyTemp >= 90) return 50;
     if (warmyTemp >= 70) return 30;
@@ -84,9 +81,7 @@ export function OutreachSettings() {
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Zap className="h-4 w-4 text-primary" />
-            </div>
+            <GlowIcon icon={Zap} variant="warning" />
             <div>
               <h3 className="text-sm font-semibold text-foreground">Auto-Pitch & Send</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -101,9 +96,7 @@ export function OutreachSettings() {
       {/* Daily Cap */}
       <div className="rounded-xl border border-border bg-card p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Shield className="h-4 w-4 text-primary" />
-          </div>
+          <GlowIcon icon={Shield} variant="success" />
           <div>
             <h3 className="text-sm font-semibold text-foreground">Daily Send Cap</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -112,7 +105,6 @@ export function OutreachSettings() {
           </div>
         </div>
 
-        {/* Suggested cap from warmy */}
         {suggestedCap !== null && (
           <div className="ml-12 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
             <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -146,9 +138,7 @@ export function OutreachSettings() {
       {/* Sending Window */}
       <div className="rounded-xl border border-border bg-card p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Clock className="h-4 w-4 text-primary" />
-          </div>
+          <GlowIcon icon={Clock} variant="info" />
           <div>
             <h3 className="text-sm font-semibold text-foreground">Sending Window</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -186,9 +176,7 @@ export function OutreachSettings() {
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <MessageSquare className="h-4 w-4 text-primary" />
-            </div>
+            <GlowIcon icon={MessageSquare} variant="primary" />
             <div>
               <h3 className="text-sm font-semibold text-foreground">Follow-Up Reminders</h3>
               <p className="text-xs text-muted-foreground mt-0.5">

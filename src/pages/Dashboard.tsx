@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, ExternalLink, Copy, Trash2, MoreHorizontal, Eye, FileText, Send } from 'lucide-react';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatsCards } from '@/components/dashboard/StatsCards';
@@ -163,8 +164,8 @@ export default function Dashboard() {
             </div>
           ) : previews.length === 0 ? (
             <div className="p-12 rounded-xl border border-dashed border-border bg-card text-center">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <FileText className="h-6 w-6 text-primary" />
+              <div className="mx-auto mb-4 w-fit">
+                <GlowIcon icon={FileText} variant="primary" size="lg" />
               </div>
               <h3 className="text-lg font-medium text-foreground mb-2">Your first pitch is waiting</h3>
               <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">

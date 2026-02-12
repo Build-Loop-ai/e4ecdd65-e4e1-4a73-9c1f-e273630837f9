@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 import { 
   Thermometer, 
   ChevronRight, 
@@ -34,7 +35,6 @@ export function EmailReadinessCard() {
   
   const [isRunningTest, setIsRunningTest] = useState(false);
 
-  // Get the primary connection (first active one)
   const primaryConnection = warmyConnections.find(c => c.warmy_state === 'active') || warmyConnections[0];
 
   if (isLoading) {
@@ -50,7 +50,6 @@ export function EmailReadinessCard() {
     );
   }
 
-  // Don't show if no Warmy connections
   if (warmyConnections.length === 0) {
     return null;
   }
@@ -93,7 +92,7 @@ export function EmailReadinessCard() {
   const StatusIcon = status.icon;
 
   const estimatedDaysRemaining = temperature < 85 
-    ? Math.ceil((85 - temperature) / 3) // Roughly 3% per day
+    ? Math.ceil((85 - temperature) / 3)
     : 0;
 
   const handleRunTest = async () => {
@@ -107,8 +106,8 @@ export function EmailReadinessCard() {
     <Card className="overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Thermometer className="h-4 w-4 text-primary" />
+          <CardTitle className="flex items-center gap-2.5 text-base">
+            <GlowIcon icon={Thermometer} variant="danger" size="sm" />
             Email Readiness
           </CardTitle>
           <Badge variant="secondary" className={cn('text-xs', status.color)}>
@@ -119,17 +118,14 @@ export function EmailReadinessCard() {
       </CardHeader>
       
       <CardContent className="space-y-4">
-        {/* Temperature Gauge */}
         <TemperatureGauge temperature={temperature} size="sm" />
 
-        {/* Estimated time remaining */}
         {estimatedDaysRemaining > 0 && (
           <p className="text-xs text-muted-foreground text-center">
             ~{estimatedDaysRemaining} days until full warmup
           </p>
         )}
 
-        {/* Sending Capacity */}
         <SendingCapacityBar 
           sent={sentToday} 
           limit={dailyLimit} 
@@ -137,7 +133,6 @@ export function EmailReadinessCard() {
           showWarning={true}
         />
 
-        {/* Health Score */}
         {deliverabilityScore !== null && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Deliverability</span>
@@ -157,7 +152,6 @@ export function EmailReadinessCard() {
           </div>
         )}
 
-        {/* Attention Alert */}
         {connectionsNeedingAttention.length > 0 && (
           <div className="flex items-center gap-2 p-2 rounded-lg bg-orange-500/10 text-orange-600">
             <AlertTriangle className="h-4 w-4 flex-shrink-0" />
@@ -167,7 +161,6 @@ export function EmailReadinessCard() {
           </div>
         )}
 
-        {/* Actions */}
         <div className="flex items-center gap-2 pt-1">
           <Button 
             variant="outline" 
@@ -194,7 +187,6 @@ export function EmailReadinessCard() {
           </Button>
         </div>
 
-        {/* Multiple mailboxes indicator */}
         {warmyConnections.length > 1 && (
           <p className="text-[10px] text-center text-muted-foreground">
             +{warmyConnections.length - 1} more mailbox{warmyConnections.length > 2 ? 'es' : ''} warming

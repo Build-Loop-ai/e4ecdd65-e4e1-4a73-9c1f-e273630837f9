@@ -1,23 +1,27 @@
 import { Eye, FileText, MessageSquare, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { GlowIcon } from '@/components/ui/GlowIcon';
 import { useDashboardStats } from '@/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
+
+type GlowVariant = 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'muted';
 
 interface StatCardProps {
   title: string;
   value: number | string;
   icon: React.ElementType;
+  iconVariant?: GlowVariant;
   trend?: number;
   loading?: boolean;
   description?: string;
 }
 
-function StatCard({ title, value, icon: Icon, trend, loading, description }: StatCardProps) {
+function StatCard({ title, value, icon, iconVariant = 'primary', trend, loading, description }: StatCardProps) {
   if (loading) {
     return (
       <div className="p-6 rounded-xl border border-border bg-card">
         <div className="flex items-start justify-between mb-4">
-          <Skeleton className="h-10 w-10 rounded-lg" />
+          <Skeleton className="h-10 w-10 rounded-xl" />
           <Skeleton className="h-5 w-12" />
         </div>
         <Skeleton className="h-8 w-24 mb-1" />
@@ -29,9 +33,7 @@ function StatCard({ title, value, icon: Icon, trend, loading, description }: Sta
   return (
     <div className="p-6 rounded-xl border border-border bg-card hover:shadow-card transition-shadow">
       <div className="flex items-start justify-between mb-4">
-        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Icon className="h-5 w-5 text-primary" />
-        </div>
+        <GlowIcon icon={icon} variant={iconVariant} size="md" />
         {trend !== undefined && (
           <div className={cn(
             "flex items-center gap-0.5 text-xs font-medium px-2 py-1 rounded-full",
@@ -66,6 +68,7 @@ export function StatsCards() {
         title="Total Views"
         value={totalViews.toLocaleString()}
         icon={Eye}
+        iconVariant="info"
         loading={isLoading}
         description="All time"
       />
@@ -73,6 +76,7 @@ export function StatsCards() {
         title="This Week"
         value={weekViews.toLocaleString()}
         icon={TrendingUp}
+        iconVariant="success"
         loading={isLoading}
         description="Last 7 days"
       />
@@ -80,6 +84,7 @@ export function StatsCards() {
         title="Active Previews"
         value={`${activePreviews} / ${totalPreviews}`}
         icon={FileText}
+        iconVariant="primary"
         loading={isLoading}
         description="Sent to clients"
       />
@@ -87,6 +92,7 @@ export function StatsCards() {
         title="Unread Feedback"
         value={unreadFeedback}
         icon={MessageSquare}
+        iconVariant="warning"
         loading={isLoading}
         description="Awaiting review"
       />
