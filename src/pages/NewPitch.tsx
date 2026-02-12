@@ -272,7 +272,7 @@ export default function NewPitch() {
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to dashboard
           </Button>
-          <h1 className="text-2xl font-bold text-foreground">Create New Pitch</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Create New Pitch</h1>
           <p className="text-muted-foreground mt-1">
             {step === 'input' && 'Enter your prospect\'s website to get started'}
             {step === 'scanning' && 'Analyzing website...'}

@@ -247,17 +247,17 @@ export default function Leads() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Find Leads</h1>
-          <p className="text-muted-foreground mt-1">
-            Search for local businesses and create pitches for them
+          <p className="text-muted-foreground text-sm mt-1">
+            Search for local businesses and create pitches for them.
           </p>
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="search" className="space-y-6">
+        <Tabs defaultValue="search" className="space-y-8">
           <TabsList>
             <TabsTrigger value="search" className="flex items-center gap-2">
               <Search className="h-4 w-4" />
@@ -275,7 +275,7 @@ export default function Leads() {
           </TabsList>
 
           {/* Search Tab */}
-          <TabsContent value="search" className="space-y-6">
+          <TabsContent value="search" className="space-y-8">
             {/* Search Form */}
             <Card>
               <CardHeader>
