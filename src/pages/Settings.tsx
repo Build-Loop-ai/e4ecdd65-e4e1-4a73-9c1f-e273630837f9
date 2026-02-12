@@ -15,6 +15,7 @@ import {
   Loader2, User, Globe, Linkedin, Twitter, Instagram, Mail, Save, 
   Camera, X, Flame, Settings as SettingsIcon, Zap, CreditCard
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { EmailConnectionsSection } from '@/components/email/EmailConnectionCard';
 import { WarmySection } from '@/components/email/WarmySection';
 import { OutreachSettings } from '@/components/settings/OutreachSettings';
@@ -208,8 +209,28 @@ export default function Settings() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <div className="max-w-3xl space-y-8">
+          <div>
+            <Skeleton className="h-7 w-28 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-10 w-full max-w-md" />
+          <div className="rounded-xl border border-border bg-card p-6 space-y-4">
+            <div className="flex gap-6">
+              <Skeleton className="h-20 w-20 rounded-full flex-shrink-0" />
+              <div className="flex-1 space-y-3">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+            <Skeleton className="h-20 w-full" />
+          </div>
+          <div className="rounded-xl border border-border bg-card p-6 space-y-4">
+            <Skeleton className="h-4 w-32" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          </div>
         </div>
       </DashboardLayout>
     );
