@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { useSubscription, PLAN_LIMITS } from '@/hooks/useSubscription';
+import { UpgradeBanner } from '@/components/ui/UpgradeBanner';
 import { generatePitchSlug } from '@/lib/slugUtils';
 import { 
   Globe, 
@@ -56,6 +58,7 @@ export default function NewPitch() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { subscription, canCreatePitch, incrementPitchUsage } = useSubscription();
   
   const locationState = location.state as LocationState | null;
   const autoStartRef = useRef(false);
@@ -203,6 +206,16 @@ export default function NewPitch() {
 
   const handleSave = async () => {
     if (!user) return;
+
+    if (!canCreatePitch()) {
+      toast({
+        title: 'Pitch limit reached',
+        description: `You've used all ${PLAN_LIMITS[subscription.plan].pitches} pitches this month. Upgrade your plan for more.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -221,6 +234,8 @@ export default function NewPitch() {
       }).select().single();
 
       if (error) throw error;
+
+      await incrementPitchUsage();
 
       if (leadId && newPreview) {
         await supabase

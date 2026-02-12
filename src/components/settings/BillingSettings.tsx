@@ -54,7 +54,7 @@ const TIERS = [
 ];
 
 export function BillingSettings() {
-  const { subscription, isLoading, startCheckout, openPortal } = useSubscription();
+  const { subscription, isLoading, startCheckout, openPortal, limits } = useSubscription();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
 
@@ -149,6 +149,23 @@ export function BillingSettings() {
               </div>
 
               <p className="text-sm text-muted-foreground mb-4">{tier.description}</p>
+
+              {isCurrent && (
+                <div className="mb-3 p-3 rounded-lg bg-muted/50 space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Pitches</span>
+                    <span className="font-medium text-foreground">
+                      {limits.pitches === -1 ? `${subscription.pitches_used} / ∞` : `${subscription.pitches_used} / ${limits.pitches}`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Emails</span>
+                    <span className="font-medium text-foreground">
+                      {limits.emails === -1 ? `${subscription.emails_used} / ∞` : `${subscription.emails_used} / ${limits.emails}`}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <ul className="space-y-2 mb-5">
                 {tier.features.map((feature) => (

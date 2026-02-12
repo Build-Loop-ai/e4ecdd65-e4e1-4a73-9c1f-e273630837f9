@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription, PLAN_LIMITS } from '@/hooks/useSubscription';
+import { UpgradeBanner } from '@/components/ui/UpgradeBanner';
 import { generatePitchSlug } from '@/lib/slugUtils';
 import { 
   Globe, 
@@ -44,6 +46,7 @@ export function NewPitchFlow({ isOpen, onClose, onComplete }: NewPitchFlowProps)
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { subscription, canCreatePitch, incrementPitchUsage } = useSubscription();
   
   const [step, setStep] = useState<Step>('input');
   const [url, setUrl] = useState('');
@@ -145,10 +148,19 @@ export function NewPitchFlow({ isOpen, onClose, onComplete }: NewPitchFlowProps)
 
   const handleSave = async () => {
     if (!user) return;
+
+    if (!canCreatePitch()) {
+      toast({
+        title: 'Pitch limit reached',
+        description: `You've used all ${PLAN_LIMITS[subscription.plan].pitches} pitches this month. Upgrade your plan for more.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Generate slug with user prefix and client name
       const slug = generatePitchSlug(clientName, userProfile?.full_name, user.email);
 
       const { data: insertedPreview, error } = await supabase.from('client_previews').insert({
@@ -165,13 +177,13 @@ export function NewPitchFlow({ isOpen, onClose, onComplete }: NewPitchFlowProps)
 
       if (error) throw error;
 
+      await incrementPitchUsage();
+
       setStep('complete');
       
-      // Navigate to the preview after a brief success animation
       setTimeout(() => {
         onComplete();
         onClose();
-        // Navigate to the manage/preview page
         if (insertedPreview?.id) {
           navigate(`/manage/${insertedPreview.id}`);
         }

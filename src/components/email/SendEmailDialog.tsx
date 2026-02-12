@@ -30,6 +30,8 @@ import {
   wrapPlainTextEmail,
 } from '@/lib/emailTemplates';
 import { SendHealthCheck } from './SendHealthCheck';
+import { useSubscription, PLAN_LIMITS } from '@/hooks/useSubscription';
+import { UpgradeBanner } from '@/components/ui/UpgradeBanner';
 
 interface SendEmailDialogProps {
   open: boolean;
@@ -55,6 +57,7 @@ export function SendEmailDialog({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { connections, isLoading: connectionsLoading } = useEmailConnections();
+  const { subscription, canSendEmail, incrementEmailUsage } = useSubscription();
 
   const [to, setTo] = useState(recipientEmail);
   const [toName, setToName] = useState(recipientName);
@@ -195,6 +198,11 @@ export function SendEmailDialog({
       return;
     }
 
+    if (!canSendEmail()) {
+      toast.error(`Monthly email limit reached (${PLAN_LIMITS[subscription.plan].emails}). Upgrade your plan.`);
+      return;
+    }
+
     setIsSending(true);
 
     try {
@@ -215,6 +223,7 @@ export function SendEmailDialog({
         throw new Error(response.error.message);
       }
 
+      await incrementEmailUsage();
       toast.success(`Email sent to ${to}!`);
       onOpenChange(false);
     } catch (error: any) {

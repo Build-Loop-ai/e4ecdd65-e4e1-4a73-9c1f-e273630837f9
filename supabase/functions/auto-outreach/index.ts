@@ -90,13 +90,36 @@ serve(async (req: Request) => {
       .eq("user_id", user.id)
       .gte("sent_at", todayStart.toISOString());
 
-    const remaining = Math.max(0, dailyCap - (sentToday || 0));
-    if (remaining === 0) {
+    const dailyRemaining = Math.max(0, dailyCap - (sentToday || 0));
+    if (dailyRemaining === 0) {
       return new Response(
         JSON.stringify({ error: "Daily send cap reached. Try again tomorrow." }),
         { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Check monthly email quota from subscription
+    const PLAN_LIMITS: Record<string, number> = { free: 10, pro: 100, agency: -1 };
+    const { data: subData } = await adminClient
+      .from("subscriptions")
+      .select("plan, emails_used")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const plan = subData?.plan || "free";
+    const emailsUsed = subData?.emails_used || 0;
+    const monthlyLimit = PLAN_LIMITS[plan] ?? 10;
+    const monthlyRemaining = monthlyLimit === -1 ? Infinity : Math.max(0, monthlyLimit - emailsUsed);
+
+    if (monthlyRemaining === 0) {
+      return new Response(
+        JSON.stringify({ error: "Monthly email limit reached. Upgrade your plan." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const remaining = Math.min(dailyRemaining, monthlyRemaining === Infinity ? dailyRemaining : monthlyRemaining);
+
 
     // Determine which leads to process
     let leadsToProcess: any[];
@@ -232,6 +255,12 @@ serve(async (req: Request) => {
         }
 
         results.push({ leadId: lead.id, success: true });
+
+        // Increment monthly email usage
+        await adminClient
+          .from("subscriptions")
+          .update({ emails_used: emailsUsed + results.filter(r => r.success).length })
+          .eq("user_id", user.id);
 
         // Small delay between sends to protect deliverability
         if (leadsToProcess.indexOf(lead) < leadsToProcess.length - 1) {
