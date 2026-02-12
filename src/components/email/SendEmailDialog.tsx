@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -16,19 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Send, Mail, AlertCircle, Settings, Eye, PenLine } from 'lucide-react';
+import { Loader2, Send, Mail, AlertCircle, Settings, Eye, PenLine, Sparkles, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEmailConnections } from '@/hooks/useEmailConnections';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
-  DEFAULT_PITCH_SUBJECT,
   DEFAULT_PITCH_TEMPLATE,
   renderEmailTemplate,
-  renderSubject,
+  wrapPlainTextEmail,
 } from '@/lib/emailTemplates';
 import { SendHealthCheck } from './SendHealthCheck';
 
@@ -60,19 +59,15 @@ export function SendEmailDialog({
   const [to, setTo] = useState(recipientEmail);
   const [toName, setToName] = useState(recipientName);
   const [subject, setSubject] = useState('');
+  const [bodyText, setBodyText] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [canSend, setCanSend] = useState(true);
   const [senderProfile, setSenderProfile] = useState<{ full_name: string; business_name: string } | null>(null);
   const [selectedConnectionId, setSelectedConnectionId] = useState<string>('');
+  const [pitchData, setPitchData] = useState<any>(null);
 
-  useEffect(() => {
-    if (open) {
-      setTo(recipientEmail);
-      setToName(recipientName);
-      setSubject(renderSubject(DEFAULT_PITCH_SUBJECT, recipientName || 'there'));
-    }
-  }, [open, recipientEmail, recipientName]);
-
+  // Fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) return;
@@ -86,6 +81,7 @@ export function SendEmailDialog({
     fetchProfile();
   }, [user]);
 
+  // Auto-select connection
   useEffect(() => {
     if (connections.length > 0 && !selectedConnectionId) {
       const active = connections.find(c => c.is_active);
@@ -98,18 +94,103 @@ export function SendEmailDialog({
     return connections.find(c => c.id === selectedConnectionId);
   }, [connections, selectedConnectionId]);
 
-  const emailPreviewHtml = useMemo(() => {
-    return renderEmailTemplate(DEFAULT_PITCH_TEMPLATE, {
+  // Fetch pitch data when dialog opens
+  useEffect(() => {
+    if (!open || !previewId) return;
+    const fetchPitch = async () => {
+      const { data } = await supabase
+        .from('client_previews')
+        .select('processed_schema, client_name, scraped_content')
+        .eq('id', previewId)
+        .maybeSingle();
+      if (data) setPitchData(data);
+    };
+    fetchPitch();
+  }, [open, previewId]);
+
+  // Generate AI copy when dialog opens
+  const generateCopy = useCallback(async () => {
+    if (!pitchData || !senderProfile) return;
+
+    setIsGenerating(true);
+    try {
+      const schema = pitchData.processed_schema as any;
+      const bi = schema?.businessIntelligence;
+
+      // Detect language from existing content
+      const heroHeadline = schema?.hero?.headline || '';
+      const heroSub = schema?.hero?.subheadline || '';
+      const services = schema?.services?.items?.map((s: any) => s.title)?.filter(Boolean) || [];
+
+      const { data, error } = await supabase.functions.invoke('generate-email-copy', {
+        body: {
+          recipientName: toName || pitchData.client_name || 'there',
+          businessName: pitchData.client_name || '',
+          businessType: bi?.businessType || '',
+          industry: bi?.industry || '',
+          previewUrl,
+          senderName: senderProfile.full_name || '',
+          senderBusiness: senderProfile.business_name || '',
+          language: schema?.language || '',
+          services,
+          heroHeadline,
+          heroSubheadline: heroSub,
+          targetAudience: bi?.targetAudience || '',
+        },
+      });
+
+      if (error) {
+        console.error('Generate copy error:', error);
+        // Fall back to default template
+        setFallbackCopy();
+        return;
+      }
+
+      if (data?.subject) setSubject(data.subject);
+      if (data?.body) setBodyText(data.body);
+    } catch (err) {
+      console.error('Generate copy failed:', err);
+      setFallbackCopy();
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [pitchData, senderProfile, toName, previewUrl]);
+
+  const setFallbackCopy = () => {
+    const fallback = renderEmailTemplate(DEFAULT_PITCH_TEMPLATE, {
       recipientName: toName || 'there',
       previewUrl,
-      senderName: senderProfile?.full_name || 'Your Name',
+      senderName: senderProfile?.full_name || '',
       senderBusiness: senderProfile?.business_name || '',
-      primaryColor,
     });
-  }, [toName, previewUrl, senderProfile, primaryColor]);
+    setSubject(`Quick idea for ${toName || pitchData?.client_name || 'your business'}`);
+    setBodyText(fallback);
+  };
+
+  // Reset and generate when dialog opens
+  useEffect(() => {
+    if (open) {
+      setTo(recipientEmail);
+      setToName(recipientName);
+      setSubject('');
+      setBodyText('');
+    }
+  }, [open, recipientEmail, recipientName]);
+
+  // Trigger AI generation once we have both pitch data and profile
+  useEffect(() => {
+    if (open && pitchData && senderProfile && !bodyText && !isGenerating) {
+      generateCopy();
+    }
+  }, [open, pitchData, senderProfile, bodyText, isGenerating, generateCopy]);
+
+  // Build preview HTML from plain text body
+  const emailPreviewHtml = useMemo(() => {
+    return bodyText ? wrapPlainTextEmail(bodyText) : '';
+  }, [bodyText]);
 
   const handleSend = async () => {
-    if (!to || !subject || !selectedConnection) {
+    if (!to || !subject || !selectedConnection || !bodyText) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -117,12 +198,14 @@ export function SendEmailDialog({
     setIsSending(true);
 
     try {
+      const htmlToSend = wrapPlainTextEmail(bodyText);
+
       const response = await supabase.functions.invoke('send-email', {
         body: {
           to,
           toName,
           subject,
-          bodyHtml: emailPreviewHtml,
+          bodyHtml: htmlToSend,
           previewId,
           leadId,
         },
@@ -147,7 +230,6 @@ export function SendEmailDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
-        {/* Header */}
         <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle className="text-lg font-semibold">Send Pitch</DialogTitle>
         </DialogHeader>
@@ -216,7 +298,7 @@ export function SendEmailDialog({
                 </Select>
               </div>
 
-              {/* To + Name side by side */}
+              {/* To + Name */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">To</Label>
@@ -233,10 +315,7 @@ export function SendEmailDialog({
                   <Input
                     placeholder="Recipient name"
                     value={toName}
-                    onChange={e => {
-                      setToName(e.target.value);
-                      setSubject(renderSubject(DEFAULT_PITCH_SUBJECT, e.target.value || 'there'));
-                    }}
+                    onChange={e => setToName(e.target.value)}
                     className="h-9"
                   />
                 </div>
@@ -246,11 +325,47 @@ export function SendEmailDialog({
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Subject</Label>
                 <Input
-                  placeholder="Your new website preview is ready!"
+                  placeholder={isGenerating ? "Generating..." : "Subject line"}
                   value={subject}
                   onChange={e => setSubject(e.target.value)}
                   className="h-9"
+                  disabled={isGenerating}
                 />
+              </div>
+
+              {/* Body */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Message</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs gap-1.5"
+                    onClick={generateCopy}
+                    disabled={isGenerating || !pitchData}
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3 w-3" />
+                    )}
+                    {isGenerating ? 'Writing...' : 'Regenerate'}
+                  </Button>
+                </div>
+
+                {isGenerating ? (
+                  <div className="flex flex-col items-center justify-center py-8 border rounded-md bg-muted/30">
+                    <Sparkles className="h-5 w-5 text-primary mb-2 animate-pulse" />
+                    <p className="text-xs text-muted-foreground">Writing personalized email...</p>
+                  </div>
+                ) : (
+                  <Textarea
+                    placeholder="Your email message..."
+                    value={bodyText}
+                    onChange={e => setBodyText(e.target.value)}
+                    className="min-h-[160px] text-sm leading-relaxed resize-none"
+                  />
+                )}
               </div>
             </TabsContent>
 
@@ -289,7 +404,7 @@ export function SendEmailDialog({
                 <Button 
                   size="sm"
                   onClick={handleSend} 
-                  disabled={isSending || !to || !subject || (!canSend && !!selectedConnection?.warmy_mailbox_id)}
+                  disabled={isSending || isGenerating || !to || !subject || !bodyText || (!canSend && !!selectedConnection?.warmy_mailbox_id)}
                 >
                   {isSending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
