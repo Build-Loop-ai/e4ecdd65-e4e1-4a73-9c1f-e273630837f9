@@ -130,14 +130,8 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <StatsCards />
-          </div>
-          <div className="lg:col-span-1">
-            <EmailReadinessCard />
-          </div>
-        </div>
+        <StatsCards />
+        <EmailReadinessCard />
 
         {/* Follow-Up Reminders */}
         <FollowUpReminders />
