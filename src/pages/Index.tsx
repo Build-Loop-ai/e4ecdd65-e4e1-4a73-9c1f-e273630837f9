@@ -349,7 +349,7 @@ const Index = () => {
         {/* Horizontal scroll strip */}
         <div 
           ref={featuresScrollRef}
-          className="flex gap-4 overflow-x-auto pb-6 px-6 snap-x snap-mandatory scrollbar-hide"
+          className="flex gap-4 overflow-x-auto pt-4 pb-6 px-6 snap-x snap-mandatory scrollbar-hide"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           <style>{`.scrollbar-hide::-webkit-scrollbar { display: none; }`}</style>
