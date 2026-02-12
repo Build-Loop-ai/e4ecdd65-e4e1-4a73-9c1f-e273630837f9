@@ -1,74 +1,99 @@
 
 
-# Admin Dashboard
+# AI Image Quality Guard -- Auto-detect and replace ugly images
 
-## Overview
-Build a secure admin page at `/dashboard/admin` that gives you (the business owner) a bird's-eye view of the entire platform: all users, all pitches, all activity, and key business metrics.
+## Problem
+Currently, the system only checks if images are *missing*. But scraped images from websites are often:
+- Low resolution / blurry
+- Have text overlays, watermarks, or heavy compression artifacts
+- Are broken URLs (404s)
+- Are tiny icons that slipped through filters
+- Are screenshots or stock-placeholder-quality imagery
 
-## What You'll See
+These ugly images make it through to the final pitch, hurting the professional look.
 
-### 1. Platform KPIs (top row of cards)
-- Total registered users
-- Total pitches created (and breakdown by status: draft / sent / feedback received)
-- Total page views (all time + last 7 days)
-- Total leads saved
-- Total outreach emails sent
-- Total feedback submissions
+## Solution: Two-Layer Image Quality System
 
-### 2. Users Table
-- List of every user: email, sign-up date, number of pitches, number of leads, last active
-- Ability to view details about each user's activity
+### Layer 1: Post-Processing Quality Audit (Automatic)
+After `process-content` returns the schema, run a new **`audit-images`** edge function that:
 
-### 3. Pitches Table
-- All pitches across all users: client name, owner email, status, views count, created date
-- Sortable columns
+1. **Checks each image URL is reachable** (HEAD request, check status + content-type + content-length)
+2. **Sends reachable images to AI vision** for quality scoring (using Gemini flash with image input)
+3. Returns a quality verdict per image: `pass` / `fail` with reason
+4. Any `fail` image gets flagged for auto-replacement
 
-### 4. Recent Activity Feed
-- Latest visits, feedback submissions, and emails sent across the platform
-- Chronological timeline view
+The AI vision prompt scores on:
+- Resolution adequacy (not tiny/pixelated)
+- Text/watermark contamination
+- Professional quality (composition, lighting)
+- Relevance to business type
 
-### 5. Email Health Overview
-- All connected email accounts, their Warmy status, deliverability scores, and warmup temperature
+### Layer 2: Auto-Replace Pipeline
+Images that fail the audit are automatically regenerated using the existing `generate-images` or `regenerate-image` infrastructure, with prompts driven by business context (location, industry, services).
 
-## Security Approach
+## Implementation Plan
 
-**Role-based access using a `user_roles` table** (not stored on profiles -- follows security best practices):
+### 1. New Edge Function: `supabase/functions/audit-images/index.ts`
+- Accepts: `{ images: string[], businessType: string, industry: string }`
+- For each image URL:
+  - HEAD request to check accessibility (timeout 5s)
+  - If accessible, send to Gemini flash vision with a quality-check prompt
+  - Return `{ url, status: 'pass'|'fail'|'unreachable', reason, score }[]`
+- Uses `LOVABLE_API_KEY` (already available)
+- Rate-limit aware: processes images in batches of 3-4
 
-1. Create a `user_roles` table with an `app_role` enum (`admin`, `user`)
-2. Create a `has_role()` security definer function to check roles without RLS recursion
-3. Add RLS policies so only admins can read all data across tables
-4. Assign your account (`luuk@alleman.nl`) as admin via a seed migration
-5. Frontend checks role before rendering the admin page; non-admins get redirected
+### 2. New Client Utility: `src/lib/imageQualityAudit.ts`
+- `auditAndFixImages(schema, previewId)` function
+- Collects all image URLs from hero, gallery, and services
+- Calls `audit-images` edge function
+- For any failed/unreachable images, calls `regenerate-image` to replace them
+- Returns the updated schema with bad images swapped out
 
-## Technical Steps
+### 3. Integrate into Pitch Creation Flow
+- In `src/pages/NewPreview.tsx`: after `process-content` and before saving, run the audit
+- Add a new scanning animation step: "Checking Image Quality" between processing and generating
+- Only regenerate images that fail the audit (not all missing ones)
 
-### Database Migration
-- Create `app_role` enum with values `admin` and `user`
-- Create `user_roles` table (user_id, role) with RLS enabled
-- Create `has_role()` security definer function
-- Add RLS policy: users can read their own roles; admins can read all
-- Insert admin role for your user ID (`95a6d010-4297-4599-a3ef-6ad4eb7470b2`)
+### 4. Integrate into Manage Page
+- In `src/components/manage/ImageRegenerator.tsx`: add a "Check Quality" button
+- Shows which images passed/failed with visual indicators (green check / red X)
+- One-click "Fix All" to regenerate all failed images at once
 
-### New Files
-- `src/pages/Admin.tsx` -- the admin dashboard page with tabs: Overview, Users, Pitches, Activity, Email
-- `src/hooks/useAdminData.ts` -- hook that fetches cross-user data using service-level edge function
-- `src/hooks/useUserRole.ts` -- hook to check if current user has admin role
-- `src/components/admin/AdminGuard.tsx` -- wrapper that redirects non-admins
-- `supabase/functions/admin-data/index.ts` -- edge function that uses the service role key to query all data across users (bypasses RLS safely on the server)
+### 5. Update `supabase/config.toml`
+- Add `[functions.audit-images]` with `verify_jwt = false`
 
-### Route Addition
-- Add `/dashboard/admin` route in `App.tsx` wrapped with `ProtectedRoute` and `AdminGuard`
-- Add "Admin" nav item in `DashboardLayout.tsx` sidebar, only visible to admin users
+## Technical Details
 
-### Edge Function (`admin-data`)
-The admin page needs to read data across all users, but RLS restricts each user to their own data. The edge function uses the service role key server-side to safely aggregate:
-- User count and list from `auth.users` (via admin API)
-- All pitches, visits, leads, feedback, emails, and email connections
+### AI Vision Quality Prompt (used in audit-images)
+```
+Analyze this image for use on a professional {businessType} website.
+Score from 1-10 on: resolution, professionalism, relevance, text-free.
+If any score is below 5, verdict is FAIL.
+Return JSON: { score: number, verdict: "pass"|"fail", reason: string }
+```
 
-### UI Design
-- Clean, minimal design matching the existing dashboard aesthetic
-- Tabbed layout (Overview / Users / Pitches / Activity / Email Health)
-- Stat cards at the top with platform-wide KPIs
-- Data tables with sorting for Users and Pitches tabs
-- Uses existing components: `DashboardLayout`, `Tabs`, `Table`, `Card`, `Badge`, `Skeleton`
+### New Pitch Flow Steps
+```text
+URL Input -> Scraping -> Processing Content -> Auditing Images -> Generating Replacements -> Template Selection -> Done
+```
+
+### Image Audit Response Shape
+```typescript
+interface ImageAuditResult {
+  url: string;
+  status: 'pass' | 'fail' | 'unreachable';
+  score: number;       // 1-10
+  reason: string;      // e.g. "Low resolution", "Contains text overlay"
+  replacement?: string; // If auto-replaced, the new URL
+}
+```
+
+## Files to Create
+- `supabase/functions/audit-images/index.ts` -- Edge function for AI-powered image quality check
+- `src/lib/imageQualityAudit.ts` -- Client-side orchestrator
+
+## Files to Modify
+- `src/pages/NewPreview.tsx` -- Add audit step to pitch creation pipeline
+- `src/components/manage/ImageRegenerator.tsx` -- Add quality check UI + "Fix All" button
+- `supabase/config.toml` -- Register new edge function
 
