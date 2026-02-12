@@ -1,82 +1,74 @@
 
 
-# Production Readiness Audit -- Issues Found and Fixes
+# Admin Dashboard
 
-After a thorough investigation of the codebase, database, and edge functions, here are the issues that need to be fixed to make the system production-ready.
+## Overview
+Build a secure admin page at `/dashboard/admin` that gives you (the business owner) a bird's-eye view of the entire platform: all users, all pitches, all activity, and key business metrics.
 
----
+## What You'll See
 
-## Issue 1: Demo/Mock Warmy Data Causes Crashes (CRITICAL)
+### 1. Platform KPIs (top row of cards)
+- Total registered users
+- Total pitches created (and breakdown by status: draft / sent / feedback received)
+- Total page views (all time + last 7 days)
+- Total leads saved
+- Total outreach emails sent
+- Total feedback submissions
 
-**Problem:** The `useWarmyStatus` hook (line 306) injects a fake `demoConnection` with `id: 'demo-warmy-1'` and `warmy_mailbox_id: 99999` when the user has no real Warmy connections. This demo card renders fully interactive buttons (Pause, Resume, Test, Disconnect, View Details, Sync Scores, Run Test) that all call real edge functions with the fake ID `demo-warmy-1`.
+### 2. Users Table
+- List of every user: email, sign-up date, number of pitches, number of leads, last active
+- Ability to view details about each user's activity
 
-When a user clicks **any** of these buttons:
-- `pauseWarmup('demo-warmy-1')` calls `warmy-actions` which queries `email_connections` for a row with `id = 'demo-warmy-1'` -- returns nothing, throws a 404 error toast.
-- `syncScores()` calls `warmy-sync` which tries to sync real connections -- if none exist, it may error or silently succeed doing nothing.
-- `runDeliverabilityTest('demo-warmy-1')` -- same 404 crash.
-- The `EmailReadinessCard` on the dashboard also uses this demo data and has a "Run Test" button that will fail.
+### 3. Pitches Table
+- All pitches across all users: client name, owner email, status, views count, created date
+- Sortable columns
 
-**Also:** The `connectionsNeedingAttention` array includes the demo connection (deliverability 72 < 70 threshold), showing a false "needs attention" alert banner.
+### 4. Recent Activity Feed
+- Latest visits, feedback submissions, and emails sent across the platform
+- Chronological timeline view
 
-**Fix:** Remove the demo data fallback entirely. The warmup section should show a proper empty state when no real Warmy connections exist, which it already does in the `WarmySection` component (the "No warmup active" message). The demo data bypasses this empty state.
+### 5. Email Health Overview
+- All connected email accounts, their Warmy status, deliverability scores, and warmup temperature
 
----
+## Security Approach
 
-## Issue 2: `check-send-readiness` Edge Function Missing from Config (MODERATE)
+**Role-based access using a `user_roles` table** (not stored on profiles -- follows security best practices):
 
-**Problem:** The `check-send-readiness` edge function exists in `supabase/functions/check-send-readiness/index.ts` and is called by the `SendHealthCheck` component, but it is **not listed** in `supabase/config.toml`. Without `verify_jwt = false`, the default JWT verification (which doesn't work with signing-keys) will reject all requests.
+1. Create a `user_roles` table with an `app_role` enum (`admin`, `user`)
+2. Create a `has_role()` security definer function to check roles without RLS recursion
+3. Add RLS policies so only admins can read all data across tables
+4. Assign your account (`luuk@alleman.nl`) as admin via a seed migration
+5. Frontend checks role before rendering the admin page; non-admins get redirected
 
-This means the Send Health Check panel in the Send Email Dialog silently fails or shows an error for any user with a Warmy-connected mailbox.
+## Technical Steps
 
-**Fix:** Add `[functions.check-send-readiness]` with `verify_jwt = false` to `supabase/config.toml`.
+### Database Migration
+- Create `app_role` enum with values `admin` and `user`
+- Create `user_roles` table (user_id, role) with RLS enabled
+- Create `has_role()` security definer function
+- Add RLS policy: users can read their own roles; admins can read all
+- Insert admin role for your user ID (`95a6d010-4297-4599-a3ef-6ad4eb7470b2`)
 
----
+### New Files
+- `src/pages/Admin.tsx` -- the admin dashboard page with tabs: Overview, Users, Pitches, Activity, Email
+- `src/hooks/useAdminData.ts` -- hook that fetches cross-user data using service-level edge function
+- `src/hooks/useUserRole.ts` -- hook to check if current user has admin role
+- `src/components/admin/AdminGuard.tsx` -- wrapper that redirects non-admins
+- `supabase/functions/admin-data/index.ts` -- edge function that uses the service role key to query all data across users (bypasses RLS safely on the server)
 
-## Issue 3: EmailConnectionCard Claims "We Never Read Your Inbox" (MINOR/MISLEADING)
+### Route Addition
+- Add `/dashboard/admin` route in `App.tsx` wrapped with `ProtectedRoute` and `AdminGuard`
+- Add "Admin" nav item in `DashboardLayout.tsx` sidebar, only visible to admin users
 
-**Problem:** The `EmailConnectionCard` component (line 269) says: *"We request minimal permissions (send-only) and never read your inbox."* But the actual OAuth scope is `https://mail.google.com/` (full mailbox access), which is intentionally required for Warmy warmup. This is misleading to users.
+### Edge Function (`admin-data`)
+The admin page needs to read data across all users, but RLS restricts each user to their own data. The edge function uses the service role key server-side to safely aggregate:
+- User count and list from `auth.users` (via admin API)
+- All pitches, visits, leads, feedback, emails, and email connections
 
-**Fix:** Update the disclaimer text to accurately reflect the permissions: explain that full access is needed for the warmup service to work, and that their credentials are used securely.
+### UI Design
+- Clean, minimal design matching the existing dashboard aesthetic
+- Tabbed layout (Overview / Users / Pitches / Activity / Email Health)
+- Stat cards at the top with platform-wide KPIs
+- Data tables with sorting for Users and Pitches tabs
+- Uses existing components: `DashboardLayout`, `Tabs`, `Table`, `Card`, `Badge`, `Skeleton`
 
----
-
-## Issue 4: Dashboard Layout Removed Important Widgets (MODERATE)
-
-**Problem:** A previous edit removed `EmailHealthWidget` and the sidebar layout from the Dashboard. The dashboard now only shows `StatsCards` and `EmailReadinessCard` stacked in a single column. The `EmailHealthWidget` component still exists but is no longer imported or rendered.
-
-However, `EmailReadinessCard` serves a similar purpose and is present, so this is more of a layout/UX concern. The single-column layout with no sidebar wastes horizontal space on desktop.
-
-**Fix:** Restore a proper grid layout so the dashboard uses available horizontal space better (e.g., stats cards spanning full width, readiness card in a sidebar or secondary column).
-
----
-
-## Summary of Changes
-
-| # | Issue | Severity | File(s) |
-|---|-------|----------|---------|
-| 1 | Remove demo Warmy data that causes action button crashes | Critical | `src/hooks/useWarmyStatus.ts` |
-| 2 | Add `check-send-readiness` to config.toml | Moderate | `supabase/config.toml` |
-| 3 | Fix misleading "send-only" permissions text | Minor | `src/components/email/EmailConnectionCard.tsx` |
-| 4 | Restore dashboard grid layout | Moderate | `src/pages/Dashboard.tsx` |
-
----
-
-## Technical Details
-
-### Change 1: `src/hooks/useWarmyStatus.ts`
-- Remove the `demoConnection` object (lines 288-304)
-- Change line 306 from `const warmyConnections = realWarmyConnections.length > 0 ? realWarmyConnections : [demoConnection];` to simply `const warmyConnections = realWarmyConnections;`
-- This restores the proper empty state behavior
-
-### Change 2: `supabase/config.toml`
-- Add:
-```text
-[functions.check-send-readiness]
-verify_jwt = false
-```
-
-### Change 3: `src/components/email/EmailConnectionCard.tsx`
-- Update the disclaimer text at the bottom to say something like: "Your email credentials are securely stored. Full mailbox access is required for the warmup service to function properly."
-
-### Change 4: `src/pages/Dashboard.tsx`
-- Restore a 2-column grid layout on large screens: stats cards in the main column, readiness card in a sidebar column
