@@ -22,6 +22,7 @@ import ManagePreview from "./pages/ManagePreview";
 import Settings from "./pages/Settings";
 import Leads from "./pages/Leads";
 import Admin from "./pages/Admin";
+import NotFound from "./pages/NotFound";
 import { AdminGuard } from "@/components/admin/AdminGuard";
 
 const queryClient = new QueryClient();
@@ -136,6 +137,7 @@ const App = () => (
             <Route path="/:userPrefix/:clientSlug" element={<Preview />} />
             {/* Legacy support for old slugs */}
             <Route path="/preview/:slug" element={<Preview />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
