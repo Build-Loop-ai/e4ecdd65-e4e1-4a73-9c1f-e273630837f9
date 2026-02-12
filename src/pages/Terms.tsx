@@ -20,7 +20,7 @@ export default function Terms() {
       <main className="container mx-auto max-w-3xl px-6 py-12 space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Terms of Service</h1>
-          <p className="text-sm text-muted-foreground">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+          <p className="text-sm text-muted-foreground">Last updated: February 12, 2026</p>
         </div>
 
         <div className="prose prose-sm max-w-none text-foreground space-y-6">
