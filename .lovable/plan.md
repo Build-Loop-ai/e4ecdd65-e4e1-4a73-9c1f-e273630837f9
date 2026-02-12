@@ -1,80 +1,89 @@
 
-# Billing Enforcement -- Making Monetization Production-Ready
+# Audit Report: All Implemented Features
 
-## Problem
+## Overall Verdict: Solid -- a few bugs and improvements to address
 
-The billing infrastructure (Stripe checkout, subscription check, billing UI) exists, but **nothing actually enforces limits**. A free-tier user can create unlimited pitches and send unlimited emails because no code checks the subscription plan before allowing those actions.
+---
 
-Additionally, there are two bugs in the current `check-subscription` function:
-- It returns `"subscribed": true` with `"plan": "free"` when a user has a Stripe customer but no matching price ID -- this is contradictory
-- The `subscription_end` is sometimes `null` even for active subscriptions due to date parsing issues
+## 1. Password Reset Flow (ResetPassword.tsx) -- 1 minor bug
 
-## What Needs to Be Built
+**Bug**: The `Link` wrapping the "Request New Link" button (line 108-113) will render incorrectly -- `Link` wraps a `Button` but the `Button` has `className="mt-4"` for spacing. Because `Link` is an inline element wrapping a block, this can cause layout quirks. Should use `Button asChild` pattern or just use `navigate`.
 
-### 1. Pitch creation gating (Free = 3/month)
+**Otherwise good**: The auth listener, fallback timeout, cleanup, and state machine (`checking -> hasSession / invalid`) are all correct.
 
-Before saving a new pitch in both `NewPitch.tsx` and `NewPitchFlow.tsx`:
-- Query `subscriptions` table for current `pitches_used` count
-- Compare against `PLAN_LIMITS[plan].pitches` (-1 = unlimited)
-- If limit reached, show an upgrade prompt instead of proceeding
-- After successful pitch creation, increment `pitches_used` in the `subscriptions` table
+---
 
-### 2. Email sending gating (Free = 10/month, Pro = 100/month)
+## 2. Terms of Service & Privacy Policy -- 1 bug
 
-Before sending in `SendEmailDialog.tsx` and `auto-outreach` edge function:
-- Check `emails_used` against `PLAN_LIMITS[plan].emails`
-- Block send and show upgrade prompt if limit reached
-- After successful send, increment `emails_used`
+**Bug**: The "Last updated" date uses `new Date().toLocaleDateString(...)` which means it shows **today's date** every time the page loads. It should be a hardcoded date string (e.g. `"February 12, 2026"`) so it reflects when the terms were actually last updated -- not the current visit date.
 
-### 3. Monthly usage reset
+---
 
-Add a `current_period_start` field check. When a new billing period starts (or monthly for free users), reset `pitches_used` and `emails_used` to 0. This will be handled in the `check-subscription` edge function -- when it detects a period change, it resets the counters.
+## 3. Welcome Wizard (WelcomeWizard.tsx) -- Clean, no bugs
 
-### 4. Fix `check-subscription` plan detection
+- Step navigation, progress bar, animations all work correctly
+- `localStorage` persistence is correct
+- The trigger logic in Dashboard.tsx properly checks `data.length === 0` and the localStorage flag
+- No issues found
 
-The function currently returns `subscribed: true, plan: "free"` when a user has a Stripe customer with an active subscription but the price ID doesn't match the hardcoded values. Fix the plan detection logic to properly handle unknown price IDs and return consistent `subscribed` status.
+---
 
-### 5. Usage display in the UI
+## 4. 404 Page (NotFound.tsx) -- Clean, no bugs
 
-Add a small usage indicator on the Dashboard showing "2/3 pitches used" and "5/10 emails used" so users can see where they stand before hitting the wall.
+- Properly branded with PitchLogo
+- Shows attempted path
+- "Go back" and "Dashboard" buttons work correctly
+- Catch-all route is correctly placed last in App.tsx
+
+---
+
+## 5. Auth Page (Auth.tsx) -- 1 potential issue
+
+**Issue**: After signup (line 68-76), the toast says "Your account has been created" and immediately navigates to `/dashboard`. But if email confirmation is required (which it should be by default), the user won't have a session yet and will be bounced back to `/auth` by `ProtectedRoute`. The signup success message should tell users to check their email for verification instead of navigating to dashboard.
+
+---
+
+## 6. Loading/Empty States -- Clean, no bugs
+
+- ProtectedRoute: Branded with PitchLogo + spinner -- correct
+- Settings: Skeleton layout mimicking the real form -- correct
+- Analytics MetricCards: Now pass `isLoading` prop -- correct
+- Dashboard pitch cards: Already had good loading skeletons and empty state -- correct
+
+---
+
+## 7. Responsive Polish (Index.tsx, Dashboard.tsx) -- Clean
+
+- Font scaling, flex-wrap on action buttons -- all correct
+
+---
+
+## Fixes to Implement
+
+### Fix 1: Hardcode "Last updated" dates in Terms and Privacy
+Replace `new Date().toLocaleDateString(...)` with a static string like `"February 12, 2026"` in both pages.
+
+### Fix 2: Fix signup flow messaging
+When email confirmation is enabled, the signup handler should show a "Check your email to verify your account" message instead of navigating to `/dashboard` (which will just bounce them back).
+
+### Fix 3: Fix Link/Button pattern in ResetPassword
+Use the `asChild` pattern on the Button inside the Link for the "Request New Link" action, consistent with how it's done elsewhere (e.g., NotFound.tsx line 34-38).
 
 ---
 
 ## Technical Details
 
-### Files to create
-- None (all changes go in existing files)
+### Files to modify:
+- `src/pages/Terms.tsx` (line 23) -- hardcode date
+- `src/pages/Privacy.tsx` (line 23) -- hardcode date
+- `src/pages/Auth.tsx` (lines 68-76) -- fix post-signup behavior
+- `src/pages/ResetPassword.tsx` (lines 108-113) -- fix Link/Button pattern
 
-### Files to modify
-
-| File | Change |
-|------|--------|
-| `src/hooks/useSubscription.ts` | Add `pitchesUsed`, `emailsUsed` fields; add `incrementPitchUsage()` and `incrementEmailUsage()` helpers that update the `subscriptions` table |
-| `src/pages/NewPitch.tsx` | Import `useSubscription`, check pitch limit before `handleSave`, show upgrade dialog if exceeded |
-| `src/components/dashboard/NewPitchFlow.tsx` | Same pitch limit check before `handleSave` |
-| `src/components/email/SendEmailDialog.tsx` | Import `useSubscription`, check email limit before `handleSend`, show upgrade prompt if exceeded |
-| `supabase/functions/auto-outreach/index.ts` | Query `subscriptions` table for plan limits before sending; increment `emails_used` after each send |
-| `supabase/functions/check-subscription/index.ts` | Fix plan detection; add usage reset logic when billing period rolls over; fix `subscribed` flag consistency |
-| `src/components/dashboard/StatsCards.tsx` | Add pitch/email usage indicators |
-| `src/components/settings/BillingSettings.tsx` | Show current usage on each plan card (e.g., "2/3 pitches used") |
-
-### Edge function changes
-
-In `check-subscription`:
-- When `plan !== "free"` and subscription is active, check if `current_period_start` has changed. If so, reset `pitches_used` and `emails_used` to 0.
-- For free users, reset counters on the 1st of each month.
-- Return `pitches_used` and `emails_used` in the response so the frontend can display them.
-- Fix: if active subscription exists but price ID doesn't match any known plan, default to returning `subscribed: true` with the product info but a sensible plan fallback.
-
-In `auto-outreach`:
-- Before the send loop, query the user's subscription to check remaining email quota.
-- Cap the number of sends to `Math.min(remaining_daily_cap, remaining_monthly_quota)`.
-- After each successful send, increment `emails_used`.
-
-### Upgrade prompt component
-
-Create a reusable `UpgradeBanner` component that:
-- Shows when a limit is reached
-- Displays which limit was hit (pitches or emails)
-- Has a CTA button linking to Settings > Billing tab
-- Can be used inline in NewPitch, SendEmailDialog, and Dashboard
+### No changes needed:
+- `src/components/dashboard/WelcomeWizard.tsx`
+- `src/pages/NotFound.tsx`
+- `src/components/ProtectedRoute.tsx`
+- `src/pages/Analytics.tsx`
+- `src/pages/Settings.tsx`
+- `src/pages/Dashboard.tsx`
+- `src/pages/Index.tsx`
