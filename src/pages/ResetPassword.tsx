@@ -15,20 +15,37 @@ export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [hasSession, setHasSession] = useState(false);
+  const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user arrived via a password reset link (they'll have a session)
-    supabase.auth.onAuthStateChange((event) => {
+    // Listen for PASSWORD_RECOVERY event (fires when Supabase processes the hash)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setHasSession(true);
+        setChecking(false);
+      } else if (event === 'SIGNED_IN' && session) {
+        // Recovery token can also trigger SIGNED_IN
+        setHasSession(true);
+        setChecking(false);
       }
     });
-    // Also check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setHasSession(true);
-    });
+
+    // Fallback: if hash was already processed, check current session
+    // Use a short delay to give onAuthStateChange time to fire first
+    const timeout = setTimeout(async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setHasSession(true);
+      }
+      setChecking(false);
+    }, 1500);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleReset = async (e: React.FormEvent) => {
@@ -66,7 +83,12 @@ export default function ResetPassword() {
           <PitchLogo size="lg" />
         </div>
 
-        {isSuccess ? (
+        {checking ? (
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Verifying reset link...</p>
+          </div>
+        ) : isSuccess ? (
           <div className="text-center space-y-4">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-8 h-8 text-primary" />
@@ -83,10 +105,10 @@ export default function ResetPassword() {
             <p className="text-muted-foreground">
               This password reset link is no longer valid. Please request a new one.
             </p>
-            <Link to="/auth">
+            <Link to="/forgot-password">
               <Button variant="outline" className="mt-4">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Sign In
+                Request New Link
               </Button>
             </Link>
           </div>
