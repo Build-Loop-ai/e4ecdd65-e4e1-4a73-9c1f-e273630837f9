@@ -87,25 +87,26 @@ export function HeroSection({
   const getSuitableImage = (): string | null => {
     if (!backgroundImages?.length) return null;
     
-    // STRICT MODE: Require classification data
-    if (!classifiedImages?.length) {
-      // No classification = no image (forces pattern fallback instead of showing text-heavy images)
-      console.log('No classified images available, using pattern fallback');
-      return null;
-    }
-    
-    // Find first image that is explicitly classified as 'hero' with no text
+    // Check each background image
     for (const imgUrl of backgroundImages) {
-      const classification = classifiedImages.find(c => c.url === imgUrl);
-      // Must be explicitly classified as hero AND hasText must be explicitly false
-      if (classification?.classification === 'hero' && classification.hasText === false) {
-        console.log('Found suitable hero image:', imgUrl);
+      // Trust AI-regenerated images from our storage bucket
+      if (imgUrl.includes('/generated-images/')) {
+        console.log('Using regenerated hero image:', imgUrl);
         return imgUrl;
+      }
+      
+      // For scraped images, require strict classification
+      if (classifiedImages?.length) {
+        const classification = classifiedImages.find(c => c.url === imgUrl);
+        if (classification?.classification === 'hero' && classification.hasText === false) {
+          console.log('Found suitable hero image:', imgUrl);
+          return imgUrl;
+        }
       }
     }
     
-    // No suitable classified image found - use pattern fallback
-    console.log('No suitable hero images found (all have text or wrong classification), using pattern fallback');
+    // No suitable image found - use pattern fallback
+    console.log('No suitable hero images found, using pattern fallback');
     return null;
   };
 
