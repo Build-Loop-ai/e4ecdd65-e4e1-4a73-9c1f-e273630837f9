@@ -4,11 +4,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, ExternalLink, Copy, Trash2, MoreHorizontal, Eye, FileText } from 'lucide-react';
+import { Plus, ExternalLink, Copy, Trash2, MoreHorizontal, Eye, FileText, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { EmailReadinessCard } from '@/components/email/EmailReadinessCard';
+import { SendEmailDialog } from '@/components/email/SendEmailDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +42,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [previews, setPreviews] = useState<ClientPreview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailTarget, setEmailTarget] = useState<{ previewId: string; slug: string; clientName: string; primaryColor: string } | null>(null);
 
   useEffect(() => {
     fetchPreviews();
@@ -114,6 +117,7 @@ export default function Dashboard() {
   };
 
   return (
+    <>
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
@@ -243,10 +247,28 @@ export default function Dashboard() {
                           variant="ghost"
                           size="sm"
                           className="h-7 px-2 text-xs"
-                          onClick={(e) => copyPreviewLink(preview.slug, e)}
+                          onClick={(e) => { e.stopPropagation(); copyPreviewLink(preview.slug, e); }}
                         >
                           <Copy className="h-3 w-3 mr-1" />
                           Copy
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEmailTarget({
+                              previewId: preview.id,
+                              slug: preview.slug,
+                              clientName: data.companyName,
+                              primaryColor: data.primaryColor,
+                            });
+                            setEmailDialogOpen(true);
+                          }}
+                        >
+                          <Send className="h-3 w-3 mr-1" />
+                          Send
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -283,5 +305,17 @@ export default function Dashboard() {
         </div>
       </div>
     </DashboardLayout>
+
+    {emailTarget && (
+      <SendEmailDialog
+        open={emailDialogOpen}
+        onOpenChange={setEmailDialogOpen}
+        previewId={emailTarget.previewId}
+        previewUrl={`${window.location.origin}/preview/${emailTarget.slug}`}
+        recipientName={emailTarget.clientName}
+        primaryColor={emailTarget.primaryColor}
+      />
+    )}
+    </>
   );
 }
