@@ -246,9 +246,9 @@ export default function Auth() {
                     <Label htmlFor="signin-password" className="text-sm font-medium">
                       Password
                     </Label>
-                    <button type="button" className="text-sm text-primary hover:underline">
+                    <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                       Forgot password?
-                    </button>
+                    </Link>
                   </div>
                   <Input
                     id="signin-password"
