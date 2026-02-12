@@ -348,9 +348,9 @@ export default function Auth() {
           {/* Terms */}
           <p className="text-center text-xs text-muted-foreground mt-8">
             By continuing, you agree to our{' '}
-            <button type="button" className="text-primary hover:underline">Terms of Service</button>
+            <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link>
             {' '}and{' '}
-            <button type="button" className="text-primary hover:underline">Privacy Policy</button>
+            <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
           </p>
         </div>
       </div>
