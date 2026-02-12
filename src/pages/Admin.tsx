@@ -1,12 +1,14 @@
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { useAdminData } from '@/hooks/useAdminData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Users, FileText, Eye, Search, Mail, MessageSquare, Activity, Thermometer } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, FileText, Eye, Search, Mail, MessageSquare, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
+import { Link } from 'react-router-dom';
+import { PitchLogo } from '@/components/ui/PitchLogo';
 
 const statusColor: Record<string, string> = {
   draft: 'bg-muted text-muted-foreground',
@@ -24,10 +26,29 @@ export default function Admin() {
   const { data, isLoading } = useAdminData();
 
   return (
-    <DashboardLayout>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between max-w-6xl">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground">
+              <Link to="/dashboard">
+                <ArrowLeft className="h-4 w-4 mr-1.5" />
+                Dashboard
+              </Link>
+            </Button>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            <span className="font-medium">Admin</span>
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Admin Dashboard</h1>
           <p className="text-muted-foreground text-sm mt-1">Platform-wide metrics and management</p>
         </div>
 
@@ -221,7 +242,8 @@ export default function Admin() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+      </main>
+    </div>
   );
 }
 
