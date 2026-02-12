@@ -10,7 +10,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Previews from "./pages/Previews";
 import Analytics from "./pages/Analytics";
-import NewPreview from "./pages/NewPreview";
+
 import NewPitch from "./pages/NewPitch";
 import Preview from "./pages/Preview";
 import Feedback from "./pages/Feedback";
@@ -83,14 +83,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/new-preview"
-              element={
-                <ProtectedRoute>
-                  <NewPreview />
-                </ProtectedRoute>
-              }
-            />
+            {/* Legacy redirect */}
+            <Route path="/new-preview" element={<Navigate to="/dashboard/new" replace />} />
             <Route
               path="/feedback/:previewId"
               element={

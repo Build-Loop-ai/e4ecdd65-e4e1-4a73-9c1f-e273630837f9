@@ -172,7 +172,7 @@ export default function Dashboard() {
                 Enter a prospect's website URL and create a stunning preview that wins clients.
               </p>
               <Button asChild>
-                <Link to="/new-preview">
+                <Link to="/dashboard/new">
                   <Plus className="h-4 w-4 mr-2" />
                   New Pitch
                 </Link>
