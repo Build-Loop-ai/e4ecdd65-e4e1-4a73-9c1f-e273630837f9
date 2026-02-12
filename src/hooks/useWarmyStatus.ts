@@ -109,7 +109,17 @@ export function useWarmyStatus() {
       });
 
       if (response.error) {
-        throw new Error(response.error.message || 'Failed to register with Warmy');
+        // Extract detailed error from response body
+        const detailedMsg = getFunctionInvokeErrorMessage(response.error);
+        const rawMsg = detailedMsg || response.error.message || 'Failed to register with Warmy';
+        
+        // Check for plan upgrade error
+        if (rawMsg.toLowerCase().includes('upgrade') || rawMsg.toLowerCase().includes('tariff')) {
+          toast.error('Your Warmy.io plan doesn\'t support additional mailboxes. Please upgrade your Warmy plan first.', { duration: 6000 });
+          return false;
+        }
+        
+        throw new Error(rawMsg);
       }
 
       toast.success('Email warmup enabled!');
