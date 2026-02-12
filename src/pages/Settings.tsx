@@ -216,11 +216,11 @@ export default function Settings() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-8">
+      <div className="max-w-3xl space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Settings</h1>
+            <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
             <p className="text-muted-foreground text-sm mt-1">
               Manage your profile, email, warmup, and outreach preferences
             </p>
