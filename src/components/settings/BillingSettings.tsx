@@ -126,17 +126,15 @@ export function BillingSettings() {
                 !isCurrent && !tier.popular && 'border-border'
               )}
             >
-              {tier.popular && (
-                <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] px-2.5">
-                  Most Popular
-                </Badge>
-              )}
-
-              {isCurrent && (
+              {isCurrent ? (
                 <Badge variant="outline" className="absolute -top-2.5 left-1/2 -translate-x-1/2 border-primary text-primary text-[10px] px-2.5">
                   Current Plan
                 </Badge>
-              )}
+              ) : tier.popular ? (
+                <Badge className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] px-2.5">
+                  Most Popular
+                </Badge>
+              ) : null}
 
               <div className="flex items-center gap-2 mb-3 mt-1">
                 <tier.icon className="h-5 w-5 text-primary" />
