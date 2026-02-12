@@ -17,8 +17,9 @@ import { ScanningProgress } from '@/components/preview/ScanningProgress';
 import { INDUSTRY_DISPLAY_NAMES, type IndustryType } from '@/lib/templateStyles';
 import { generatePitchSlug } from '@/lib/slugUtils';
 import { detectImageGaps, needsImageGeneration, generateImages, mergeGeneratedImages } from '@/lib/imageGeneration';
+import { collectImageUrls, auditImages } from '@/lib/imageQualityAudit';
 
-type Step = 'url' | 'connecting' | 'extracting' | 'processing' | 'generating' | 'template' | 'complete';
+type Step = 'url' | 'connecting' | 'extracting' | 'processing' | 'auditing' | 'generating' | 'template' | 'complete';
 
 // Helper to truncate text
 const truncate = (text: string, maxLength: number) => {
@@ -113,14 +114,72 @@ export default function NewPreview() {
 
       let schema = processedResult.schema;
       setProcessedSchema(schema);
-      setProgress(70);
+      setProgress(65);
 
-      // Step 3: Generate missing images if needed
+      // Step 3: Audit existing image quality
+      const existingImages = collectImageUrls(schema);
+      const existingUrls = existingImages.map(i => i.url);
+      
+      if (existingUrls.length > 0) {
+        setStep('auditing');
+        setProgress(70);
+        console.log('Auditing', existingUrls.length, 'images for quality...');
+        
+        const businessTypeForAudit = schema?.businessIntelligence?.businessType || 'business';
+        const auditReport = await auditImages(existingUrls, businessTypeForAudit);
+        console.log('Audit results:', auditReport.passCount, 'pass,', auditReport.failCount, 'fail');
+
+        // Remove failed/unreachable images from schema so they get regenerated
+        if (auditReport.failCount > 0) {
+          const failedUrls = new Set(
+            auditReport.results.filter(r => r.status !== 'pass').map(r => r.url)
+          );
+          
+          // Remove failed hero images
+          if (schema.hero?.backgroundImages) {
+            schema.hero.backgroundImages = schema.hero.backgroundImages.filter(
+              (url: string) => !failedUrls.has(url)
+            );
+          }
+          // Remove failed heroImages (classification array)
+          if (schema.heroImages) {
+            schema.heroImages = schema.heroImages.filter(
+              (img: any) => !failedUrls.has(img.url || img)
+            );
+          }
+          // Remove failed gallery images
+          if (schema.gallery?.images) {
+            schema.gallery.images = schema.gallery.images.filter((img: any) => {
+              const url = typeof img === 'string' ? img : img?.url;
+              return !failedUrls.has(url);
+            });
+          }
+          if (schema.galleryImages) {
+            schema.galleryImages = schema.galleryImages.filter(
+              (img: any) => !failedUrls.has(img.url || img)
+            );
+          }
+          // Clear failed service images
+          if (schema.services) {
+            schema.services = schema.services.map((svc: any) => {
+              if (svc.image && failedUrls.has(svc.image)) {
+                return { ...svc, image: undefined };
+              }
+              return svc;
+            });
+          }
+          setProcessedSchema({ ...schema });
+        }
+      }
+
+      setProgress(75);
+
+      // Step 4: Generate missing images (includes ones removed by audit)
       const imageGaps = detectImageGaps(schema);
       
       if (needsImageGeneration(imageGaps)) {
         setStep('generating');
-        setProgress(75);
+        setProgress(80);
         
         console.log('Generating images for gaps:', imageGaps);
         
@@ -230,7 +289,7 @@ export default function NewPreview() {
   const businessType = businessIntelligence?.businessType;
   const industryDisplayName = industry ? INDUSTRY_DISPLAY_NAMES[industry] || industry : null;
 
-  const isScanning = step === 'connecting' || step === 'extracting' || step === 'processing' || step === 'generating';
+  const isScanning = step === 'connecting' || step === 'extracting' || step === 'processing' || step === 'auditing' || step === 'generating';
 
   // Helper to check if template is recommended
   const isRecommended = (templateId: string) => templateId === recommendedTemplate;
@@ -321,7 +380,7 @@ export default function NewPreview() {
         {/* Immersive Scanning Step */}
         {isScanning && (
           <ScanningProgress
-            phase={step as 'connecting' | 'extracting' | 'processing' | 'generating'}
+            phase={step as 'connecting' | 'extracting' | 'processing' | 'auditing' | 'generating'}
             url={url}
             scrapedData={scrapedData}
             processedSchema={processedSchema}
