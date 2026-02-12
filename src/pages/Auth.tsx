@@ -67,10 +67,9 @@ export default function Auth() {
       });
     } else {
       toast({
-        title: 'Welcome to Pitch!',
-        description: 'Your account has been created.',
+        title: 'Check your email',
+        description: 'We sent you a verification link. Please confirm your email to sign in.',
       });
-      navigate('/dashboard');
     }
     
     setIsLoading(false);

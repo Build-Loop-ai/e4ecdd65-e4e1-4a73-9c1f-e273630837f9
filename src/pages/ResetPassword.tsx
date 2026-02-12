@@ -105,12 +105,12 @@ export default function ResetPassword() {
             <p className="text-muted-foreground">
               This password reset link is no longer valid. Please request a new one.
             </p>
-            <Link to="/forgot-password">
-              <Button variant="outline" className="mt-4">
+            <Button asChild variant="outline" className="mt-4">
+              <Link to="/forgot-password">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Request New Link
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         ) : (
           <>
