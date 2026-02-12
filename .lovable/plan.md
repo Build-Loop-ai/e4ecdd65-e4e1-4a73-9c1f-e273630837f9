@@ -1,57 +1,82 @@
 
 
-# Fix: Email Address Collection for Leads
+# Intelligent Outreach Automation
 
-## The Problem
+This adds a new **"Outreach"** tab to Settings and powerful automation features that turn your lead pipeline into a hands-off outreach machine.
 
-Right now, leads almost never have email addresses. There are two potential sources, and neither works well:
+## What gets built
 
-1. **Google Maps (Apify)**: The current scraper actor (`compass~crawler-google-places`) rarely returns emails because Google Maps listings don't typically expose them directly.
+### 1. Auto-Pitch & Auto-Send for New Leads
+A toggle in Settings that, when enabled, automatically:
+- Creates a pitch for every newly saved lead that has a website
+- Generates a personalized AI email and sends it once the pitch is ready
+- Runs in the background -- you search for leads, save them, and the system handles the rest
 
-2. **Website scraping (Firecrawl + AI processing)**: When a pitch is created, the AI *does* extract `contact.email` from the scraped website content. However, this email is stored inside the pitch data (`processed_schema.contact.email`) and is **never written back to the lead record** in the database.
+This works by adding a new `outreach_settings` table to store preferences, and a new backend function (`auto-outreach`) that orchestrates the pitch creation and email sending pipeline.
 
-## The Fix (Two Parts)
+### 2. Bulk "Send to All" Button
+A one-click button on the My Leads page that:
+- Finds all leads that have an email + a pitch but haven't been emailed yet
+- Generates personalized AI copy for each one
+- Sends them in sequence with a short delay between each (to protect deliverability)
+- Shows a progress indicator ("Sending 3 of 12...")
 
-### Part 1: Backfill lead email from scraped website content
+### 3. Smart Follow-Up Reminders
+The system tracks which emails were sent and when. If a pitch email was sent but:
+- No visit was recorded on the pitch page within 3 days, it surfaces a "nudge" suggestion
+- A visit happened but no feedback was left, it suggests a different follow-up
 
-When a pitch is created from a lead, and the AI extracts an email from the website, automatically update the lead's `email` field in the database.
+These show up as action cards on the Dashboard.
 
-**Where**: `src/pages/NewPreview.tsx` -- after `process-content` returns the schema and before/after saving the pitch, check if a `leadId` was passed and if `processedSchema.contact.email` exists. If the lead currently has no email, update it.
-
-**Also**: `src/pages/NewPreview.tsx` already receives lead context (client name, URL). Need to also pass the `leadId` through the flow so we can update it.
-
-### Part 2: Extract emails during lead discovery (Apify enrichment)
-
-Enhance the `apify-google-maps` edge function to also extract emails from website content when a lead has a website but no email. This uses a lightweight approach:
-
-- After getting results from Apify, for each lead that has a `website` but no `email`, do a quick fetch of the website HTML and use a regex to find email addresses on the page.
-- This runs server-side in the edge function, so it doesn't slow down the client.
-- Batch process with a concurrency limit (3 at a time) to avoid timeouts.
-
-**Where**: `supabase/functions/apify-google-maps/index.ts` -- add email extraction step after receiving Apify results.
-
-### Part 3: Show email status in lead cards
-
-Update the lead card UI to clearly show when an email is available vs missing, making it obvious which leads are ready for outreach.
-
-**Where**: `src/components/leads/LeadCard.tsx` -- add visual indicator for email availability.
+### 4. Outreach Settings Tab
+A new tab in Settings (replacing or alongside the current Warmup tab) with:
+- **Auto-send toggle**: Enable/disable automatic outreach for new leads
+- **Daily send cap**: Maximum emails per day (respects warmup limits too)
+- **Sending window**: Preferred hours to send (e.g., 9am-5pm in their timezone)
+- **Follow-up enabled**: Toggle for automatic follow-up suggestions
+- **Default tone**: Casual / Professional / Bold -- passed to the AI copy generator
 
 ## Technical Details
 
-### Email extraction regex (for Part 2)
-```typescript
-const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-```
-Filter out common false positives like `noreply@`, `admin@`, `info@wix.com`, `support@wordpress.com`, etc.
+### New database table: `outreach_settings`
+| Column | Type | Default |
+|---|---|---|
+| id | uuid | gen_random_uuid() |
+| user_id | uuid (unique) | - |
+| auto_send_enabled | boolean | false |
+| daily_cap | integer | 20 |
+| send_window_start | integer | 9 (hour) |
+| send_window_end | integer | 17 (hour) |
+| followup_enabled | boolean | true |
+| tone | text | 'professional' |
+| created_at | timestamptz | now() |
+| updated_at | timestamptz | now() |
+
+RLS: Users can only read/update their own row.
+
+### New backend function: `auto-outreach`
+- Triggered after a lead is saved (called from the client after save)
+- Checks if auto-send is enabled for the user
+- If yes: creates pitch via existing `process-content` flow, then generates email copy and sends
+- Respects daily cap and warmup limits
+- Logs activity to `outreach_emails` table
+
+### Files to create
+- `supabase/functions/auto-outreach/index.ts` -- orchestration function
+- `src/components/settings/OutreachSettings.tsx` -- settings UI component
 
 ### Files to modify
-- `supabase/functions/apify-google-maps/index.ts` -- Add website email scraping after Apify results
-- `src/pages/NewPreview.tsx` -- Write extracted email back to lead record after pitch processing
-- `src/components/leads/LeadCard.tsx` -- Visual email status indicator
+- `src/pages/Settings.tsx` -- add Outreach tab with the new component
+- `src/hooks/useLeads.ts` -- trigger auto-outreach after saving leads
+- `src/components/leads/SavedLeadsList.tsx` -- add "Send to All Unsent" bulk action
+- `src/pages/Dashboard.tsx` -- add follow-up reminder cards
+- `src/components/leads/BulkActionsBar.tsx` -- add bulk send button
 
-### Edge cases handled
-- Don't overwrite existing emails
-- Timeout per website fetch (5 seconds)
-- Filter out generic/platform emails (wix, wordpress, squarespace domains)
-- Gracefully handle failed fetches (lead still saved, just without email)
+### Sequencing
+1. Create `outreach_settings` table with migration
+2. Build the Outreach Settings UI tab
+3. Build the `auto-outreach` edge function
+4. Wire up auto-outreach trigger in lead saving flow
+5. Add "Send to All" bulk action on My Leads
+6. Add follow-up reminder cards to Dashboard
 
