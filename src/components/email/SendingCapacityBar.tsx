@@ -23,8 +23,7 @@ export function SendingCapacityBar({
   const isAtLimit = percentage >= 100;
 
   const getBarColor = () => {
-    if (isAtLimit) return 'bg-red-500';
-    if (isNearLimit) return 'bg-yellow-500';
+    if (isAtLimit) return 'bg-destructive';
     return 'bg-primary';
   };
 
@@ -57,10 +56,10 @@ export function SendingCapacityBar({
             {sent}/{limit} sent
           </span>
           {showWarning && isNearLimit && !isAtLimit && (
-            <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />
+            <AlertTriangle className="h-3.5 w-3.5 text-primary/70" />
           )}
           {showWarning && isAtLimit && (
-            <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
+            <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
           )}
         </div>
       </div>
@@ -75,7 +74,7 @@ export function SendingCapacityBar({
       </div>
 
       {isAtLimit && showWarning && (
-        <p className="text-xs text-red-500">
+        <p className="text-xs text-destructive">
           Daily limit reached. Sending will resume tomorrow.
         </p>
       )}

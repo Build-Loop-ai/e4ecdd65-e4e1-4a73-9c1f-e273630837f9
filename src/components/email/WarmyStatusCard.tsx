@@ -49,8 +49,6 @@ export function WarmyStatusCard({
 }: WarmyStatusCardProps) {
   const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
 
-  // Warmy may reject pause/resume when warmup hasn't started yet.
-  // We treat "warmup_started_at" as a signal that the mailbox is actually warming.
   const warmupStarted = Boolean(connection.warmup_started_at);
   const canPause = warmupStarted && connection.warmy_state !== 'paused';
   const canResume = warmupStarted && connection.warmy_state === 'paused';
@@ -85,7 +83,7 @@ export function WarmyStatusCard({
     
     if (connection.warmy_state === 'paused') {
       return (
-        <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+        <Badge variant="secondary" className="bg-muted text-muted-foreground border-border">
           <Pause className="h-3 w-3 mr-1" />
           Paused
         </Badge>
@@ -94,7 +92,7 @@ export function WarmyStatusCard({
     
     if (temp >= 90 && score >= 80) {
       return (
-        <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
           <CheckCircle2 className="h-3 w-3 mr-1" />
           Ready
         </Badge>
@@ -103,7 +101,7 @@ export function WarmyStatusCard({
     
     if (score < 70) {
       return (
-        <Badge variant="secondary" className="bg-orange-500/10 text-orange-600 border-orange-500/20">
+        <Badge variant="secondary" className="bg-destructive/10 text-destructive border-destructive/20">
           <AlertTriangle className="h-3 w-3 mr-1" />
           Needs Attention
         </Badge>
@@ -111,7 +109,7 @@ export function WarmyStatusCard({
     }
     
     return (
-      <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20">
+      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
         <Flame className="h-3 w-3 mr-1 animate-pulse" />
         Warming
       </Badge>
@@ -120,9 +118,9 @@ export function WarmyStatusCard({
 
   const getScoreColor = (score: number | null) => {
     if (score === null) return 'text-muted-foreground';
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 80) return 'text-primary';
+    if (score >= 60) return 'text-primary/70';
+    return 'text-destructive';
   };
 
   const temperature = connection.warmy_temperature || 0;
@@ -149,15 +147,8 @@ export function WarmyStatusCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Temperature Gauge */}
         <TemperatureGauge temperature={temperature} size="sm" />
-
-        {/* Daily Capacity */}
-        <SendingCapacityBar 
-          sent={sentToday} 
-          limit={dailyLimit} 
-          size="sm" 
-        />
+        <SendingCapacityBar sent={sentToday} limit={dailyLimit} size="sm" />
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center p-2 rounded-lg bg-muted/50">
             <p className={cn("text-lg font-bold", getScoreColor(connection.deliverability_score))}>
@@ -179,14 +170,12 @@ export function WarmyStatusCard({
           </div>
         </div>
 
-        {/* Last Sync */}
         {connection.last_warmy_sync && (
           <p className="text-xs text-muted-foreground text-center">
             Last synced: {new Date(connection.last_warmy_sync).toLocaleString()}
           </p>
         )}
 
-        {/* Actions */}
         <div className="flex items-center gap-2 pt-2">
           {connection.warmy_state === 'paused' ? (
             <Button 

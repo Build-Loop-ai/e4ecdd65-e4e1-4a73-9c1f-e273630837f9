@@ -90,7 +90,7 @@ export function FollowUpReminders() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <GlowIcon icon={Bell} variant="warning" size="sm" />
+        <GlowIcon icon={Bell} size="sm" />
         <h2 className="text-lg font-medium text-foreground">Follow-Up Suggestions</h2>
       </div>
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -100,7 +100,6 @@ export function FollowUpReminders() {
               <div className="flex items-start gap-3">
                 <GlowIcon
                   icon={r.type === 'no_visit' ? Eye : MessageSquare}
-                  variant={r.type === 'no_visit' ? 'danger' : 'primary'}
                   size="sm"
                 />
                 <div className="flex-1 min-w-0">

@@ -16,21 +16,18 @@ const dateRanges: { value: DateRange; label: string }[] = [
   { value: '30d', label: '30 days' },
 ];
 
-type GlowVariant = 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'muted';
-
 interface MetricCardProps {
   icon: React.ElementType;
-  iconVariant?: GlowVariant;
   label: string;
   value: string | number;
   subtext?: string;
 }
 
-function MetricCard({ icon, iconVariant = 'primary', label, value }: MetricCardProps) {
+function MetricCard({ icon, label, value }: MetricCardProps) {
   return (
     <div className="p-5 rounded-xl border border-border bg-card">
       <div className="flex items-center gap-3">
-        <GlowIcon icon={icon} variant={iconVariant} size="md" />
+        <GlowIcon icon={icon} size="md" />
         <div>
           <p className="text-xl font-semibold text-foreground">{value}</p>
           <p className="text-xs text-muted-foreground">{label}</p>
@@ -96,19 +93,16 @@ export default function Analytics() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <MetricCard
             icon={Eye}
-            iconVariant="info"
             label={`Views · Last ${dateRange === '7d' ? '7' : dateRange === '14d' ? '14' : '30'} days`}
             value={totalViews.toLocaleString()}
           />
           <MetricCard
             icon={Users}
-            iconVariant="success"
             label="Total visits"
             value={uniqueVisitors.toLocaleString()}
           />
           <MetricCard
             icon={Clock}
-            iconVariant="warning"
             label="Avg. session"
             value={formatDuration(avgSessionDuration)}
           />

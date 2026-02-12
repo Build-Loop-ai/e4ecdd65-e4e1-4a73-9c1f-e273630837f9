@@ -4,19 +4,16 @@ import { GlowIcon } from '@/components/ui/GlowIcon';
 import { useDashboardStats } from '@/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
 
-type GlowVariant = 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'muted';
-
 interface StatCardProps {
   title: string;
   value: number | string;
   icon: React.ElementType;
-  iconVariant?: GlowVariant;
   trend?: number;
   loading?: boolean;
   description?: string;
 }
 
-function StatCard({ title, value, icon, iconVariant = 'primary', trend, loading, description }: StatCardProps) {
+function StatCard({ title, value, icon, trend, loading, description }: StatCardProps) {
   if (loading) {
     return (
       <div className="p-6 rounded-xl border border-border bg-card">
@@ -33,13 +30,13 @@ function StatCard({ title, value, icon, iconVariant = 'primary', trend, loading,
   return (
     <div className="p-6 rounded-xl border border-border bg-card hover:shadow-card transition-shadow">
       <div className="flex items-start justify-between mb-4">
-        <GlowIcon icon={icon} variant={iconVariant} size="md" />
+        <GlowIcon icon={icon} size="md" />
         {trend !== undefined && (
           <div className={cn(
             "flex items-center gap-0.5 text-xs font-medium px-2 py-1 rounded-full",
             trend >= 0 
-              ? "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950" 
-              : "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950"
+              ? "text-primary bg-primary/10" 
+              : "text-muted-foreground bg-muted"
           )}>
             {trend >= 0 ? (
               <ArrowUpRight className="h-3 w-3" />
@@ -68,7 +65,6 @@ export function StatsCards() {
         title="Total Views"
         value={totalViews.toLocaleString()}
         icon={Eye}
-        iconVariant="info"
         loading={isLoading}
         description="All time"
       />
@@ -76,7 +72,6 @@ export function StatsCards() {
         title="This Week"
         value={weekViews.toLocaleString()}
         icon={TrendingUp}
-        iconVariant="success"
         loading={isLoading}
         description="Last 7 days"
       />
@@ -84,7 +79,6 @@ export function StatsCards() {
         title="Active Previews"
         value={`${activePreviews} / ${totalPreviews}`}
         icon={FileText}
-        iconVariant="primary"
         loading={isLoading}
         description="Sent to clients"
       />
@@ -92,7 +86,6 @@ export function StatsCards() {
         title="Unread Feedback"
         value={unreadFeedback}
         icon={MessageSquare}
-        iconVariant="warning"
         loading={isLoading}
         description="Awaiting review"
       />

@@ -20,13 +20,13 @@ export function WarmyAlertBanner({ connections, onDismiss }: WarmyAlertBannerPro
   const connection = lowScoreConnections[0];
 
   return (
-    <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4 flex items-start gap-3">
-      <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 flex items-start gap-3">
+      <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-orange-900 dark:text-orange-100">
+        <p className="font-medium text-foreground">
           Low Deliverability Alert
         </p>
-        <p className="text-sm text-orange-800 dark:text-orange-200 mt-0.5">
+        <p className="text-sm text-muted-foreground mt-0.5">
           {connection.email_address} has a deliverability score of {connection.deliverability_score}%.
           {(connection.deliverability_score || 0) < 50 && (
             <span className="font-medium"> Outreach campaigns from this mailbox are auto-paused.</span>
@@ -35,7 +35,7 @@ export function WarmyAlertBanner({ connections, onDismiss }: WarmyAlertBannerPro
         <Button 
           variant="link" 
           size="sm" 
-          className="text-orange-700 dark:text-orange-300 p-0 h-auto mt-1"
+          className="text-primary p-0 h-auto mt-1"
           onClick={() => navigate('/dashboard/settings')}
         >
           View in Settings →
@@ -45,7 +45,7 @@ export function WarmyAlertBanner({ connections, onDismiss }: WarmyAlertBannerPro
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-6 w-6 text-orange-600"
+          className="h-6 w-6 text-muted-foreground"
           onClick={onDismiss}
         >
           <X className="h-4 w-4" />
