@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Globe, Loader2, CheckCircle2, Sparkles, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ScanningProgress } from '@/components/preview/ScanningProgress';
 import { INDUSTRY_DISPLAY_NAMES, type IndustryType } from '@/lib/templateStyles';
 import { generatePitchSlug } from '@/lib/slugUtils';
@@ -30,11 +30,16 @@ const truncate = (text: string, maxLength: number) => {
 export default function NewPreview() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   
+  // Get lead context from navigation state (when creating pitch from a lead)
+  const navState = location.state as { prefilledUrl?: string; leadId?: string; clientName?: string } | null;
+  
   const [step, setStep] = useState<Step>('url');
-  const [url, setUrl] = useState('');
-  const [clientName, setClientName] = useState('');
+  const [url, setUrl] = useState(navState?.prefilledUrl || '');
+  const [clientName, setClientName] = useState(navState?.clientName || '');
+  const [leadId] = useState<string | undefined>(navState?.leadId);
   const [progress, setProgress] = useState(0);
   const [template, setTemplate] = useState('corporate-classic');
   const [scrapedData, setScrapedData] = useState<any>(null);
@@ -236,7 +241,7 @@ export default function NewPreview() {
       // Generate slug with user prefix and client name
       const slug = generatePitchSlug(clientName, userProfile?.full_name, user.email);
 
-      const { error } = await supabase.from('client_previews').insert({
+      const { data: savedPitch, error } = await supabase.from('client_previews').insert({
         user_id: user.id,
         slug,
         client_name: clientName,
@@ -246,9 +251,36 @@ export default function NewPreview() {
         processed_schema: processedSchema,
         brand_colors: scrapedData?.branding || null,
         status: 'draft',
-      });
+      }).select('id').single();
 
       if (error) throw error;
+
+      // Backfill lead email from scraped content if we came from a lead
+      if (leadId && processedSchema?.contact?.email) {
+        const extractedEmail = processedSchema.contact.email;
+        // Only update if lead currently has no email
+        const { data: lead } = await supabase
+          .from('leads')
+          .select('email')
+          .eq('id', leadId)
+          .maybeSingle();
+        
+        if (lead && !lead.email) {
+          await supabase
+            .from('leads')
+            .update({ email: extractedEmail })
+            .eq('id', leadId);
+          console.log(`Backfilled email "${extractedEmail}" to lead ${leadId}`);
+        }
+
+        // Also link pitch to lead
+        if (savedPitch?.id) {
+          await supabase
+            .from('leads')
+            .update({ preview_id: savedPitch.id })
+            .eq('id', leadId);
+        }
+      }
 
       setStep('complete');
       
