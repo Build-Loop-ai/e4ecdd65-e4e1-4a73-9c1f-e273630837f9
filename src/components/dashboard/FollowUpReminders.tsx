@@ -95,7 +95,7 @@ export function FollowUpReminders() {
       </div>
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {reminders.map((r, i) => (
-          <Card key={i} className="border-border hover:shadow-sm transition-shadow">
+          <Card key={i} className="border-border hover:shadow-elevated hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300">
             <CardContent className="p-4 space-y-3">
               <div className="flex items-start gap-3">
                 <GlowIcon

@@ -260,7 +260,7 @@ export function SavedLeadsList() {
       {/* Lead List */}
       <div className="space-y-2">
         {savedLeads.map((lead) => (
-          <Card key={lead.id} className="hover:shadow-sm transition-shadow">
+          <Card key={lead.id} className="hover:shadow-elevated hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300">
             <CardContent className="p-4">
               <div className="flex items-center gap-4">
                 {/* Checkbox */}

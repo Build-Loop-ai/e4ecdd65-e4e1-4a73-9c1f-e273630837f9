@@ -41,7 +41,7 @@ export function LeadCard({
   isCreatingPitch = false,
 }: LeadCardProps) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-elevated hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300">
       <CardContent className="p-4">
         <div className="space-y-3">
           {/* Header with optional checkbox and saved badge */}

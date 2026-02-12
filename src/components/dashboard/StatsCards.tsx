@@ -28,7 +28,7 @@ function StatCard({ title, value, icon, trend, loading, description }: StatCardP
   }
 
   return (
-    <div className="p-6 rounded-xl border border-border bg-card hover:shadow-card transition-shadow">
+    <div className="p-6 rounded-xl border border-border bg-card hover:shadow-elevated hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300">
       <div className="flex items-start justify-between mb-4">
         <GlowIcon icon={icon} size="md" />
         {trend !== undefined && (
