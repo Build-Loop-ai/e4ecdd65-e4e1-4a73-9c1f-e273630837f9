@@ -1,8 +1,10 @@
-import { Eye, FileText, MessageSquare, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Eye, FileText, MessageSquare, TrendingUp, ArrowUpRight, ArrowDownRight, Zap, Mail } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GlowIcon } from '@/components/ui/GlowIcon';
 import { useDashboardStats } from '@/hooks/useAnalytics';
+import { useSubscription, PLAN_LIMITS } from '@/hooks/useSubscription';
 import { cn } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
 
 interface StatCardProps {
   title: string;
@@ -56,39 +58,77 @@ function StatCard({ title, value, icon, trend, loading, description }: StatCardP
   );
 }
 
+function UsageBar({ used, limit, label }: { used: number; limit: number; label: string }) {
+  const pct = limit === -1 ? 0 : Math.min(100, (used / limit) * 100);
+  const display = limit === -1 ? `${used} / ∞` : `${used} / ${limit}`;
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className={cn("font-medium", pct >= 90 ? "text-destructive" : "text-foreground")}>{display}</span>
+      </div>
+      {limit !== -1 && <Progress value={pct} className="h-1.5" />}
+    </div>
+  );
+}
+
 export function StatsCards() {
   const { totalPreviews, activePreviews, totalViews, weekViews, unreadFeedback, isLoading } = useDashboardStats();
+  const { subscription, isLoading: subLoading } = useSubscription();
+  const limits = PLAN_LIMITS[subscription.plan];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard
-        title="Total Views"
-        value={totalViews.toLocaleString()}
-        icon={Eye}
-        loading={isLoading}
-        description="All time"
-      />
-      <StatCard
-        title="This Week"
-        value={weekViews.toLocaleString()}
-        icon={TrendingUp}
-        loading={isLoading}
-        description="Last 7 days"
-      />
-      <StatCard
-        title="Active Previews"
-        value={`${activePreviews} / ${totalPreviews}`}
-        icon={FileText}
-        loading={isLoading}
-        description="Sent to clients"
-      />
-      <StatCard
-        title="Unread Feedback"
-        value={unreadFeedback}
-        icon={MessageSquare}
-        loading={isLoading}
-        description="Awaiting review"
-      />
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Views"
+          value={totalViews.toLocaleString()}
+          icon={Eye}
+          loading={isLoading}
+          description="All time"
+        />
+        <StatCard
+          title="This Week"
+          value={weekViews.toLocaleString()}
+          icon={TrendingUp}
+          loading={isLoading}
+          description="Last 7 days"
+        />
+        <StatCard
+          title="Active Previews"
+          value={`${activePreviews} / ${totalPreviews}`}
+          icon={FileText}
+          loading={isLoading}
+          description="Sent to clients"
+        />
+        <StatCard
+          title="Unread Feedback"
+          value={unreadFeedback}
+          icon={MessageSquare}
+          loading={isLoading}
+          description="Awaiting review"
+        />
+      </div>
+
+      {/* Usage indicators */}
+      {!subLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl border border-border bg-card">
+            <div className="flex items-center gap-2 mb-3">
+              <GlowIcon icon={Zap} size="sm" />
+              <span className="text-sm font-medium text-foreground">Pitches Used</span>
+            </div>
+            <UsageBar used={subscription.pitches_used} limit={limits.pitches} label="This month" />
+          </div>
+          <div className="p-4 rounded-xl border border-border bg-card">
+            <div className="flex items-center gap-2 mb-3">
+              <GlowIcon icon={Mail} size="sm" />
+              <span className="text-sm font-medium text-foreground">Emails Sent</span>
+            </div>
+            <UsageBar used={subscription.emails_used} limit={limits.emails} label="This month" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
