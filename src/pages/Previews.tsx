@@ -215,14 +215,15 @@ export default function Previews() {
                         </span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/5 transition-colors flex items-center justify-center">
-                      <Eye className="h-8 w-8 text-background opacity-0 group-hover:opacity-70 transition-opacity drop-shadow-lg" />
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-all duration-500 ease-out flex items-center justify-center backdrop-blur-0 group-hover:backdrop-blur-[2px]">
+                      <Eye className="h-8 w-8 text-background opacity-0 group-hover:opacity-90 transition-all duration-300 drop-shadow-lg scale-75 group-hover:scale-100" />
                     </div>
                   </div>
                   
                   {/* Content */}
                   <div className="p-4">
-                    <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="min-w-0">
                         <h3 className="font-medium text-foreground truncate">
                           {data.companyName}
@@ -231,37 +232,17 @@ export default function Previews() {
                           {formatDate(preview.created_at)}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                      {/* Status dot */}
+                      <div className="flex items-center gap-1.5">
                         <div className={`w-2 h-2 rounded-full ${getStatusColor(preview.status)}`} />
                         <span className="text-[10px] text-muted-foreground capitalize">
                           {preview.status.replace('_', ' ')}
                         </span>
                       </div>
                     </div>
-
-                    {/* Meta tags */}
-                    {(data.serviceCount > 0 || data.galleryCount > 0) && (
-                      <div className="flex items-center gap-2 mt-2 mb-3">
-                        {data.serviceCount > 0 && (
-                          <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{data.serviceCount} services</span>
-                        )}
-                        {data.galleryCount > 0 && (
-                          <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{data.galleryCount} images</span>
-                        )}
-                      </div>
-                    )}
                       
                     {/* Actions */}
-                    <div className="flex items-center gap-1 pt-2 border-t border-border">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-xs"
-                        onClick={(e) => { e.stopPropagation(); setEmailDialogPreview(preview); }}
-                      >
-                        <Send className="h-3 w-3 mr-1" />
-                        Send
-                      </Button>
+                    <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -280,6 +261,15 @@ export default function Previews() {
                         <Copy className="h-3 w-3 mr-1" />
                         Copy
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs"
+                        onClick={(e) => { e.stopPropagation(); setEmailDialogPreview(preview); }}
+                      >
+                        <Send className="h-3 w-3 mr-1" />
+                        Send
+                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -294,10 +284,6 @@ export default function Previews() {
                         <DropdownMenuContent align="end" className="w-40">
                           <DropdownMenuItem onClick={() => navigate(`/manage/${preview.id}`)}>
                             Manage
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.open(`/preview/${preview.slug}`, '_blank'); }}>
-                            <ExternalLink className="h-3.5 w-3.5 mr-2" />
-                            Open preview
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
