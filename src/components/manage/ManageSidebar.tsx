@@ -44,6 +44,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type { Tables } from '@/integrations/supabase/types';
+import PitchScoreCard from '@/components/manage/PitchScoreCard';
 
 type ClientPreview = Tables<'client_previews'>;
 type Viewport = 'desktop' | 'tablet' | 'mobile';
@@ -272,6 +273,11 @@ export default function ManageSidebar({
             ))}
           </div>
         </div>
+
+        <Separator />
+
+        {/* AI Score */}
+        <PitchScoreCard previewId={preview.id} />
 
         <Separator />
 
