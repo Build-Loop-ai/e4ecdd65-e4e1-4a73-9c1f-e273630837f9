@@ -5,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { firecrawlApi } from '@/lib/api/firecrawl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +21,9 @@ import {
   Palette,
   Image,
   FileText,
-  Zap
+  Zap,
+  Building2,
+  Link2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { INDUSTRY_DISPLAY_NAMES, type IndustryType } from '@/lib/templateStyles';
@@ -36,10 +37,19 @@ interface LocationState {
   leadId?: string;
 }
 
-const truncate = (text: string, maxLength: number) => {
-  if (!text) return '';
-  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
-};
+const STEPS = [
+  { key: 'input', label: 'Details', icon: Building2 },
+  { key: 'scanning', label: 'Analyze', icon: Sparkles },
+  { key: 'template', label: 'Template', icon: Palette },
+  { key: 'complete', label: 'Done', icon: CheckCircle2 },
+] as const;
+
+const EXTRACT_FEATURES = [
+  { icon: Palette, label: 'Brand colors', desc: 'Primary & secondary palette' },
+  { icon: Image, label: 'Images & logo', desc: 'Visual assets & branding' },
+  { icon: FileText, label: 'Content & copy', desc: 'Headlines, services, about' },
+  { icon: Zap, label: 'Business type', desc: 'Industry classification' },
+];
 
 export default function NewPitch() {
   const { user } = useAuth();
@@ -47,7 +57,6 @@ export default function NewPitch() {
   const location = useLocation();
   const { toast } = useToast();
   
-  // Get prefilled data from navigation state (from leads page)
   const locationState = location.state as LocationState | null;
   const autoStartRef = useRef(false);
   
@@ -78,7 +87,6 @@ export default function NewPitch() {
   useEffect(() => {
     if (locationState?.prefilledUrl && locationState?.clientName && !autoStartRef.current) {
       autoStartRef.current = true;
-      // Small delay to let the UI render first
       setTimeout(() => {
         handleScrapeAuto(locationState.prefilledUrl!, locationState.clientName!);
       }, 500);
@@ -198,7 +206,6 @@ export default function NewPitch() {
     setIsLoading(true);
 
     try {
-      // Generate slug with user prefix and client name
       const slug = generatePitchSlug(clientName, userProfile?.full_name, user.email);
 
       const { data: newPreview, error } = await supabase.from('client_previews').insert({
@@ -215,7 +222,6 @@ export default function NewPitch() {
 
       if (error) throw error;
 
-      // If this pitch was created from a lead, link them
       if (leadId && newPreview) {
         await supabase
           .from('leads')
@@ -251,66 +257,81 @@ export default function NewPitch() {
   const isRecommended = (templateId: string) => templateId === recommendedTemplate;
 
   const templates = [
-    { id: 'corporate-classic', name: 'Corporate Classic', desc: 'Law, consulting, B2B' },
-    { id: 'modern-professional', name: 'Modern Professional', desc: 'Tech, SaaS, startups' },
-    { id: 'bold-starter', name: 'Bold Starter', desc: 'Agencies, creatives' },
-    { id: 'elegant-minimal', name: 'Elegant Minimal', desc: 'Luxury, fashion' },
-    { id: 'warm-friendly', name: 'Warm Friendly', desc: 'Healthcare, local biz' },
+    { id: 'corporate-classic', name: 'Corporate Classic', desc: 'Law, consulting, B2B', emoji: '🏛️' },
+    { id: 'modern-professional', name: 'Modern Professional', desc: 'Tech, SaaS, startups', emoji: '⚡' },
+    { id: 'bold-starter', name: 'Bold Starter', desc: 'Agencies, creatives', emoji: '🎯' },
+    { id: 'elegant-minimal', name: 'Elegant Minimal', desc: 'Luxury, fashion', emoji: '✨' },
+    { id: 'warm-friendly', name: 'Warm Friendly', desc: 'Healthcare, local biz', emoji: '🤝' },
   ];
+
+  const currentStepIndex = STEPS.findIndex(s => s.key === step);
 
   return (
     <DashboardLayout>
       <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/dashboard')}
-            className="mb-4 -ml-2 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to dashboard
-          </Button>
-          <h1 className="text-2xl font-semibold text-foreground">Create New Pitch</h1>
-          <p className="text-muted-foreground mt-1">
-            {step === 'input' && 'Enter your prospect\'s website to get started'}
-            {step === 'scanning' && 'Analyzing website...'}
-            {step === 'template' && 'Choose a template for your pitch'}
-            {step === 'complete' && 'Your pitch is ready!'}
-          </p>
-        </div>
+        {/* Back button */}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => navigate('/dashboard')}
+          className="mb-6 -ml-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Back
+        </Button>
 
-        {/* Progress indicator */}
-        {step !== 'complete' && (
-          <div className="flex items-center gap-2 mb-8">
-            {['input', 'scanning', 'template'].map((s, i) => {
-              const steps = ['input', 'scanning', 'template'];
-              const currentIndex = steps.indexOf(step);
-              const isComplete = i < currentIndex;
-              const isCurrent = i === currentIndex;
-              
-              return (
-                <div key={s} className="flex items-center gap-2">
-                  <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
-                    isComplete ? "bg-primary text-primary-foreground" : 
-                    isCurrent ? "bg-primary/20 text-primary border-2 border-primary" : 
-                    "bg-muted text-muted-foreground"
-                  )}>
-                    {isComplete ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
-                  </div>
-                  {i < steps.length - 1 && (
-                    <div className={cn(
-                      "w-12 h-0.5",
-                      i < currentIndex ? "bg-primary" : "bg-muted"
-                    )} />
-                  )}
-                </div>
-              );
-            })}
+        {/* Hero header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-10"
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI-Powered
           </div>
-        )}
+          <h1 className="text-3xl font-bold text-foreground tracking-tight">Create New Pitch</h1>
+          <p className="text-muted-foreground mt-2 text-base">
+            Enter a website URL and we'll build a stunning pitch in seconds.
+          </p>
+        </motion.div>
+
+        {/* Step indicator */}
+        <div className="flex items-center justify-center gap-1 mb-10">
+          {STEPS.map((s, i) => {
+            const isComplete = i < currentStepIndex;
+            const isCurrent = i === currentStepIndex;
+            const StepIcon = s.icon;
+            return (
+              <div key={s.key} className="flex items-center gap-1">
+                <motion.div
+                  animate={{
+                    scale: isCurrent ? 1 : 0.9,
+                  }}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                    isComplete ? "bg-primary text-primary-foreground" :
+                    isCurrent ? "bg-primary/15 text-primary ring-1 ring-primary/30" :
+                    "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {isComplete ? (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  ) : (
+                    <StepIcon className="h-3.5 w-3.5" />
+                  )}
+                  <span className="hidden sm:inline">{s.label}</span>
+                </motion.div>
+                {i < STEPS.length - 1 && (
+                  <div className={cn(
+                    "w-6 h-px mx-0.5",
+                    i < currentStepIndex ? "bg-primary" : "bg-border"
+                  )} />
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         {/* Content */}
         <AnimatePresence mode="wait">
@@ -318,63 +339,81 @@ export default function NewPitch() {
           {step === 'input' && (
             <motion.div
               key="input"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              <div className="bg-card border border-border rounded-xl p-6 space-y-6">
-                <div className="space-y-4">
+              {/* Main input card */}
+              <div className="relative bg-card border border-border rounded-2xl p-8 shadow-sm overflow-hidden">
+                {/* Subtle gradient accent */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+                
+                <div className="space-y-5">
                   <div className="space-y-2">
-                    <Label htmlFor="clientName" className="text-sm font-medium">Company Name</Label>
+                    <label htmlFor="clientName" className="text-sm font-medium text-foreground flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-primary" />
+                      Company Name
+                    </label>
                     <Input
                       id="clientName"
                       placeholder="Acme Corporation"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
-                      className="h-12"
+                      className="h-12 text-base border-border/80 focus:border-primary bg-background"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="url" className="text-sm font-medium">Website URL</Label>
+                    <label htmlFor="url" className="text-sm font-medium text-foreground flex items-center gap-2">
+                      <Link2 className="h-4 w-4 text-primary" />
+                      Website URL
+                    </label>
                     <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground" />
                       <Input
                         id="url"
                         type="url"
                         placeholder="https://example.com"
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
-                        className="h-12 pl-10"
+                        className="h-12 pl-11 text-base border-border/80 focus:border-primary bg-background"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && url && clientName) handleScrape();
+                        }}
                       />
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* What we'll extract */}
-                <div className="bg-muted/50 rounded-xl p-4 space-y-3">
-                  <p className="text-sm font-medium text-foreground">We'll extract:</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { icon: Palette, label: 'Brand colors' },
-                      { icon: Image, label: 'Images & logo' },
-                      { icon: FileText, label: 'Content & copy' },
-                      { icon: Zap, label: 'Business type' },
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <item.icon className="h-4 w-4 text-primary" />
-                        {item.label}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              {/* Extract features grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {EXTRACT_FEATURES.map((item, i) => (
+                  <motion.div 
+                    key={item.label}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + i * 0.05 }}
+                    className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-card hover:border-primary/20 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <item.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-foreground">{item.label}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
 
               <Button
                 onClick={handleScrape}
                 disabled={isLoading || !url || !clientName}
-                className="w-full h-12"
+                className="w-full h-12 text-base font-medium shadow-sm shadow-primary/20"
+                size="lg"
               >
                 {isLoading ? (
                   <>
@@ -385,6 +424,7 @@ export default function NewPitch() {
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
                     Analyze Website
+                    <ArrowRight className="h-4 w-4 ml-2" />
                   </>
                 )}
               </Button>
@@ -395,61 +435,97 @@ export default function NewPitch() {
           {step === 'scanning' && (
             <motion.div
               key="scanning"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-card border border-border rounded-xl p-8"
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.3 }}
+              className="bg-card border border-border rounded-2xl p-10 shadow-sm"
             >
-              <div className="flex flex-col items-center justify-center py-8">
-                <div className="relative mb-8">
-                  <div className="w-24 h-24 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                  </div>
+              <div className="flex flex-col items-center justify-center py-4">
+                {/* Animated scanner */}
+                <div className="relative mb-10">
+                  <motion.div 
+                    className="w-28 h-28 rounded-2xl bg-primary/10 flex items-center justify-center"
+                    animate={{ rotate: [0, 5, -5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Loader2 className="h-12 w-12 text-primary animate-spin" />
+                  </motion.div>
                   <motion.div
-                    className="absolute -inset-2 rounded-3xl border-2 border-primary/30"
-                    animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.2, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute -inset-3 rounded-3xl border-2 border-primary/20"
+                    animate={{ scale: [1, 1.08, 1], opacity: [0.4, 0.15, 0.4] }}
+                    transition={{ duration: 2.5, repeat: Infinity }}
+                  />
+                  <motion.div
+                    className="absolute -inset-6 rounded-[1.75rem] border border-primary/10"
+                    animate={{ scale: [1, 1.05, 1], opacity: [0.2, 0.05, 0.2] }}
+                    transition={{ duration: 3, repeat: Infinity, delay: 0.3 }}
                   />
                 </div>
 
-                <div className="text-center space-y-2 mb-8">
-                  <h3 className="text-lg font-semibold text-foreground">
+                <div className="text-center space-y-1.5 mb-10">
+                  <h3 className="text-xl font-semibold text-foreground">
                     {scanPhase === 'connecting' && 'Connecting to website...'}
                     {scanPhase === 'extracting' && 'Extracting content...'}
                     {scanPhase === 'processing' && 'AI is analyzing...'}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{url}</p>
+                  <p className="text-sm text-muted-foreground font-mono">{url}</p>
                 </div>
 
                 {/* Progress steps */}
-                <div className="w-full max-w-xs space-y-3">
-                  {['connecting', 'extracting', 'processing'].map((phase, index) => {
+                <div className="w-full max-w-sm space-y-2">
+                  {[
+                    { key: 'connecting', label: 'Connect to website' },
+                    { key: 'extracting', label: 'Extract content & assets' },
+                    { key: 'processing', label: 'AI content analysis' },
+                  ].map((phase, index) => {
                     const phases = ['connecting', 'extracting', 'processing'];
                     const currentIndex = phases.indexOf(scanPhase);
                     const isComplete = index < currentIndex;
                     const isCurrent = index === currentIndex;
                     
                     return (
-                      <div key={phase} className="flex items-center gap-3">
+                      <motion.div 
+                        key={phase.key} 
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-xl transition-colors",
+                          isCurrent ? "bg-primary/5" : "bg-transparent"
+                        )}
+                        animate={isCurrent ? { x: [0, 2, 0] } : {}}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      >
                         <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                          isComplete ? "bg-primary text-primary-foreground" : isCurrent ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                          "w-7 h-7 rounded-full flex items-center justify-center transition-all",
+                          isComplete ? "bg-primary text-primary-foreground" : 
+                          isCurrent ? "bg-primary/20 text-primary ring-2 ring-primary/30" : 
+                          "bg-muted text-muted-foreground"
                         )}>
                           {isComplete ? (
-                            <CheckCircle2 className="h-5 w-5" />
+                            <CheckCircle2 className="h-4 w-4" />
+                          ) : isCurrent ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
-                            <span className="text-sm font-medium">{index + 1}</span>
+                            <span className="text-xs font-medium">{index + 1}</span>
                           )}
                         </div>
                         <span className={cn(
-                          "text-sm",
-                          isComplete || isCurrent ? "text-foreground" : "text-muted-foreground"
+                          "text-sm font-medium",
+                          isComplete ? "text-foreground" : 
+                          isCurrent ? "text-foreground" : 
+                          "text-muted-foreground"
                         )}>
-                          {phase === 'connecting' && 'Connect to website'}
-                          {phase === 'extracting' && 'Extract content & assets'}
-                          {phase === 'processing' && 'AI content analysis'}
+                          {phase.label}
                         </span>
-                      </div>
+                        {isComplete && (
+                          <motion.span 
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="ml-auto text-xs text-primary font-medium"
+                          >
+                            Done
+                          </motion.span>
+                        )}
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -461,41 +537,45 @@ export default function NewPitch() {
           {step === 'template' && (
             <motion.div
               key="template"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.3 }}
               className="space-y-6"
             >
               {/* Extracted info summary */}
-              <div className="flex items-center gap-4 p-4 bg-card border border-border rounded-xl">
+              <div className="flex items-center gap-4 p-5 bg-card border border-border rounded-2xl shadow-sm">
                 {logo ? (
-                  <img src={logo} alt="Logo" className="h-12 w-12 object-contain rounded-lg bg-white p-1" />
+                  <img src={logo} alt="Logo" className="h-12 w-12 object-contain rounded-xl bg-background p-1.5 border border-border" />
                 ) : (
                   <div 
-                    className="h-12 w-12 rounded-lg flex items-center justify-center text-white font-bold"
+                    className="h-12 w-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm"
                     style={{ backgroundColor: primaryColor }}
                   >
                     {clientName.slice(0, 2).toUpperCase()}
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground truncate">{clientName}</p>
-                  {industryDisplayName && (
-                    <Badge variant="secondary" className="text-xs mt-1">
-                      {industryDisplayName}
-                    </Badge>
-                  )}
+                  <p className="font-semibold text-foreground truncate">{clientName}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    {industryDisplayName && (
+                      <Badge variant="secondary" className="text-xs">
+                        {industryDisplayName}
+                      </Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground">Analysis complete</span>
+                  </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   {scrapedData?.branding?.colors?.primary && (
                     <div 
-                      className="w-6 h-6 rounded-full border-2 border-white shadow"
+                      className="w-7 h-7 rounded-full border-2 border-background shadow-sm ring-1 ring-border"
                       style={{ backgroundColor: scrapedData.branding.colors.primary }}
                     />
                   )}
                   {scrapedData?.branding?.colors?.secondary && (
                     <div 
-                      className="w-6 h-6 rounded-full border-2 border-white shadow"
+                      className="w-7 h-7 rounded-full border-2 border-background shadow-sm ring-1 ring-border"
                       style={{ backgroundColor: scrapedData.branding.colors.secondary }}
                     />
                   )}
@@ -503,38 +583,65 @@ export default function NewPitch() {
               </div>
 
               {/* Template grid */}
-              <RadioGroup value={template} onValueChange={setTemplate} className="space-y-3">
-                {templates.map((t) => (
-                  <label
-                    key={t.id}
-                    htmlFor={t.id}
-                    className={cn(
-                      "flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all bg-card",
-                      template === t.id 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:border-primary/50"
-                    )}
-                  >
-                    <RadioGroupItem value={t.id} id={t.id} />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-foreground">{t.name}</span>
-                        {isRecommended(t.id) && (
-                          <Badge className="bg-green-500 hover:bg-green-600 text-white text-[10px] px-1.5 py-0 flex items-center gap-0.5">
-                            <Star className="w-3 h-3" /> AI Pick
-                          </Badge>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-3">Choose a template</p>
+                <RadioGroup value={template} onValueChange={setTemplate} className="space-y-2.5">
+                  {templates.map((t, i) => (
+                    <motion.label
+                      key={t.id}
+                      htmlFor={t.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                      className={cn(
+                        "flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all bg-card group",
+                        template === t.id 
+                          ? "border-primary shadow-sm shadow-primary/10" 
+                          : "border-border hover:border-primary/30 hover:shadow-sm"
+                      )}
+                    >
+                      <RadioGroupItem value={t.id} id={t.id} className="sr-only" />
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-transform group-hover:scale-105",
+                        template === t.id ? "bg-primary/10" : "bg-muted"
+                      )}>
+                        {t.emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-foreground">{t.name}</span>
+                          {isRecommended(t.id) && (
+                            <Badge className="bg-primary/15 text-primary hover:bg-primary/20 border-0 text-[10px] px-2 py-0.5 flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-primary" /> AI Pick
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{t.desc}</p>
+                      </div>
+                      <div className={cn(
+                        "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0",
+                        template === t.id 
+                          ? "border-primary bg-primary" 
+                          : "border-muted-foreground/30"
+                      )}>
+                        {template === t.id && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-2 h-2 rounded-full bg-primary-foreground"
+                          />
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{t.desc}</p>
-                    </div>
-                  </label>
-                ))}
-              </RadioGroup>
+                    </motion.label>
+                  ))}
+                </RadioGroup>
+              </div>
 
               <Button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="w-full h-12"
+                className="w-full h-12 text-base font-medium shadow-sm shadow-primary/20"
+                size="lg"
               >
                 {isLoading ? (
                   <>
@@ -557,21 +664,34 @@ export default function NewPitch() {
               key="complete"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-card border border-border rounded-xl p-8"
+              transition={{ duration: 0.4 }}
+              className="bg-card border border-border rounded-2xl p-10 shadow-sm"
             >
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', damping: 15, delay: 0.1 }}
-                  className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mb-6"
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', damping: 12, delay: 0.1 }}
+                  className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-6"
                 >
-                  <CheckCircle2 className="h-10 w-10 text-green-500" />
+                  <CheckCircle2 className="h-10 w-10 text-primary" />
                 </motion.div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">Pitch Created!</h3>
-                <p className="text-muted-foreground">
+                <motion.h3 
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="text-2xl font-bold text-foreground mb-2"
+                >
+                  Pitch Created!
+                </motion.h3>
+                <motion.p 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.35 }}
+                  className="text-muted-foreground"
+                >
                   Taking you to your pitches...
-                </p>
+                </motion.p>
               </div>
             </motion.div>
           )}
