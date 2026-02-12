@@ -13,6 +13,9 @@ export interface EmailConnection {
   created_at: string;
   updated_at: string;
   warmy_mailbox_id: number | null;
+  warmy_temperature: number | null;
+  daily_send_limit: number | null;
+  deliverability_score: number | null;
 }
 
 export function useEmailConnections() {
@@ -27,7 +30,7 @@ export function useEmailConnections() {
     try {
       const { data, error } = await supabase
         .from('email_connections')
-        .select('id, user_id, provider, email_address, is_active, created_at, updated_at, warmy_mailbox_id')
+        .select('id, user_id, provider, email_address, is_active, created_at, updated_at, warmy_mailbox_id, warmy_temperature, daily_send_limit, deliverability_score')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
