@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 import pitchLogoIcon from '@/assets/pitch-logo.png';
 
 interface PitchLogoProps {
@@ -17,7 +18,7 @@ export function PitchLogo({ className, size = 'md', showText = true }: PitchLogo
   const s = sizes[size];
 
   return (
-    <div className={cn('flex items-center gap-2', className)}>
+    <Link to="/dashboard" className={cn('flex items-center gap-2 hover:opacity-80 transition-opacity', className)}>
       <img 
         src={pitchLogoIcon} 
         alt="Pitch" 
@@ -28,6 +29,6 @@ export function PitchLogo({ className, size = 'md', showText = true }: PitchLogo
           Pitch
         </span>
       )}
-    </div>
+    </Link>
   );
 }
