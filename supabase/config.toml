@@ -43,3 +43,6 @@ verify_jwt = false
 
 [functions.regenerate-image]
 verify_jwt = false
+
+[functions.audit-images]
+verify_jwt = false

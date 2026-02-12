@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, Check, Palette, Image, FileText, Sparkles, Loader2, ImagePlus } from 'lucide-react';
+import { Globe, Check, Palette, Image, FileText, Sparkles, Loader2, ImagePlus, ShieldCheck } from 'lucide-react';
 
-type ScanPhase = 'connecting' | 'extracting' | 'processing' | 'generating';
+type ScanPhase = 'connecting' | 'extracting' | 'processing' | 'auditing' | 'generating';
 
 interface ScanningProgressProps {
   phase: ScanPhase;
@@ -362,7 +362,33 @@ export function ScanningProgress({ phase, url, scrapedData, processedSchema }: S
             </motion.div>
           )}
 
-          {/* Phase 4: Generating Images */}
+          {/* Phase 4: Auditing Image Quality */}
+          {phase === 'auditing' && (
+            <motion.div
+              key="auditing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center py-8"
+            >
+              <div className="relative w-24 h-24 mx-auto mb-6">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 rounded-full border-2 border-dashed border-primary/40"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-primary/10 rounded-full">
+                  <ShieldCheck className="w-10 h-10 text-primary" />
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Checking Image Quality</h3>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                AI is inspecting each image for resolution, professionalism, and text contamination...
+              </p>
+            </motion.div>
+          )}
+
+          {/* Phase 5: Generating Images */}
           {phase === 'generating' && (
             <motion.div
               key="generating"
