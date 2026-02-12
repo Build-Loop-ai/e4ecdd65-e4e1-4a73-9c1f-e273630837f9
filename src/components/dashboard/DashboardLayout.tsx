@@ -1,11 +1,10 @@
 import { ReactNode, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, BarChart3, LogOut, Menu, X, Plus, Settings, Search, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, FileText, BarChart3, LogOut, Menu, X, Plus, Settings, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GlowIcon } from '@/components/ui/GlowIcon';
 import { PitchLogo } from '@/components/ui/PitchLogo';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
 
 interface DashboardLayoutProps {
@@ -22,13 +21,10 @@ const navItems = [
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut } = useAuth();
-  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const allNavItems = isAdmin
-    ? [...navItems, { to: '/dashboard/admin', icon: ShieldCheck, label: 'Admin' }]
-    : navItems;
+  const allNavItems = navItems;
 
   const handleSignOut = async () => {
     await signOut();

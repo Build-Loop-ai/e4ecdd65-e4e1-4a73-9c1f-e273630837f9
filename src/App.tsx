@@ -116,7 +116,7 @@ const App = () => (
               }
             />
             <Route
-              path="/dashboard/admin"
+              path="/admin"
               element={
                 <ProtectedRoute>
                   <AdminGuard>
@@ -125,8 +125,9 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            {/* Legacy redirect: /settings → /dashboard/settings */}
+            {/* Legacy redirects */}
             <Route path="/settings" element={<LegacySettingsRedirect />} />
+            <Route path="/dashboard/admin" element={<Navigate to="/admin" replace />} />
              {/* Back-compat: users sometimes copy /preview/{userPrefix}/{clientSlug} */}
              <Route path="/preview/:userPrefix/:clientSlug" element={<LegacyPreviewRedirect />} />
             {/* New URL structure: /:userPrefix/:clientSlug */}
