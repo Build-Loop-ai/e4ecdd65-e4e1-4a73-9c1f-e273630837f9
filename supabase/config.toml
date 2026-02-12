@@ -46,3 +46,9 @@ verify_jwt = false
 
 [functions.audit-images]
 verify_jwt = false
+
+[functions.auto-outreach]
+verify_jwt = false
+
+[functions.generate-email-copy]
+verify_jwt = false

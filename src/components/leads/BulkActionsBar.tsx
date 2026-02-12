@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Trash2, Plus, Loader2 } from 'lucide-react';
+import { Trash2, Plus, Loader2, Send } from 'lucide-react';
 
 interface BulkActionsBarProps {
   selectedCount: number;
@@ -8,9 +8,12 @@ interface BulkActionsBarProps {
   onDeselectAll: () => void;
   onDelete: () => void;
   onCreatePitches: () => void;
+  onBulkSend?: () => void;
   isDeleting?: boolean;
   isCreating?: boolean;
+  isSending?: boolean;
   hasWebsites?: boolean;
+  unsentCount?: number;
 }
 
 export function BulkActionsBar({
@@ -20,9 +23,12 @@ export function BulkActionsBar({
   onDeselectAll,
   onDelete,
   onCreatePitches,
+  onBulkSend,
   isDeleting = false,
   isCreating = false,
+  isSending = false,
   hasWebsites = true,
+  unsentCount = 0,
 }: BulkActionsBarProps) {
   const allSelected = selectedCount === totalCount && totalCount > 0;
 
@@ -45,37 +51,57 @@ export function BulkActionsBar({
         </span>
       </div>
 
-      {selectedCount > 0 && (
-        <div className="flex items-center gap-2">
-          {hasWebsites && (
-            <Button
-              size="sm"
-              onClick={onCreatePitches}
-              disabled={isCreating}
-            >
-              {isCreating ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4 mr-2" />
-              )}
-              Create Pitch{selectedCount !== 1 ? 'es' : ''}
-            </Button>
-          )}
+      <div className="flex items-center gap-2">
+        {/* Bulk send to all unsent — always visible when there are unsent leads */}
+        {onBulkSend && unsentCount > 0 && (
           <Button
             size="sm"
-            variant="destructive"
-            onClick={onDelete}
-            disabled={isDeleting}
+            variant="outline"
+            onClick={onBulkSend}
+            disabled={isSending}
+            className="gap-2"
           >
-            {isDeleting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            {isSending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Send className="h-4 w-4" />
             )}
-            Delete
+            Send to All Unsent ({unsentCount})
           </Button>
-        </div>
-      )}
+        )}
+
+        {selectedCount > 0 && (
+          <>
+            {hasWebsites && (
+              <Button
+                size="sm"
+                onClick={onCreatePitches}
+                disabled={isCreating}
+              >
+                {isCreating ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                Create Pitch{selectedCount !== 1 ? 'es' : ''}
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={onDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Delete
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
