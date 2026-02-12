@@ -238,7 +238,7 @@ export default function Dashboard() {
                       </div>
                         
                       {/* Actions */}
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-wrap">
                         <Button
                           variant="ghost"
                           size="sm"
