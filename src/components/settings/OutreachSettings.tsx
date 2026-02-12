@@ -4,12 +4,34 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, Zap, Clock, Shield, MessageSquare } from 'lucide-react';
+import { Loader2, Save, Zap, Clock, Shield, MessageSquare, Sparkles } from 'lucide-react';
 import { useOutreachSettings } from '@/hooks/useOutreachSettings';
+import { useEmailConnections } from '@/hooks/useEmailConnections';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function OutreachSettings() {
   const { settings, isLoading, upsert, isSaving } = useOutreachSettings();
+  const { connections } = useEmailConnections();
+
+  // Calculate suggested daily cap from warmy data
+  const activeConnection = connections?.find(c => c.is_active);
+  const warmyTemp = activeConnection?.warmy_temperature;
+  const warmyLimit = activeConnection?.daily_send_limit;
+  const deliverabilityScore = activeConnection?.deliverability_score;
+
+  const getSuggestedCap = () => {
+    // If warmy provides a daily_send_limit, use that as the base
+    if (warmyLimit && warmyLimit > 0) return warmyLimit;
+    // Otherwise derive from temperature
+    if (warmyTemp == null) return null;
+    if (warmyTemp >= 90) return 50;
+    if (warmyTemp >= 70) return 30;
+    if (warmyTemp >= 50) return 20;
+    if (warmyTemp >= 30) return 10;
+    return 5;
+  };
+
+  const suggestedCap = getSuggestedCap();
 
   const [autoSend, setAutoSend] = useState(false);
   const [dailyCap, setDailyCap] = useState(20);
@@ -89,6 +111,23 @@ export function OutreachSettings() {
             </p>
           </div>
         </div>
+
+        {/* Suggested cap from warmy */}
+        {suggestedCap !== null && (
+          <div className="ml-12 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+            <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+            <p className="text-xs text-foreground">
+              Based on your warmup {warmyTemp != null ? `temperature (${warmyTemp}°)` : 'data'}, we suggest&nbsp;
+              <button
+                onClick={() => setDailyCap(suggestedCap)}
+                className="font-semibold text-primary hover:underline"
+              >
+                {suggestedCap} emails/day
+              </button>
+            </p>
+          </div>
+        )}
+
         <div className="space-y-3 pl-12">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Max per day</span>
