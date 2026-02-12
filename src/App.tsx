@@ -17,6 +17,8 @@ import Feedback from "./pages/Feedback";
 import ManagePreview from "./pages/ManagePreview";
 import Settings from "./pages/Settings";
 import Leads from "./pages/Leads";
+import Admin from "./pages/Admin";
+import { AdminGuard } from "@/components/admin/AdminGuard";
 
 const queryClient = new QueryClient();
 
@@ -110,6 +112,16 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminGuard>
+                    <Admin />
+                  </AdminGuard>
                 </ProtectedRoute>
               }
             />
