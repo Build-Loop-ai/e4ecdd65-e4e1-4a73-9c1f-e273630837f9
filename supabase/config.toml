@@ -52,3 +52,12 @@ verify_jwt = false
 
 [functions.generate-email-copy]
 verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.customer-portal]
+verify_jwt = false

@@ -13,11 +13,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
   Loader2, User, Globe, Linkedin, Twitter, Instagram, Mail, Save, 
-  Camera, X, Flame, Settings as SettingsIcon, Zap
+  Camera, X, Flame, Settings as SettingsIcon, Zap, CreditCard
 } from 'lucide-react';
 import { EmailConnectionsSection } from '@/components/email/EmailConnectionCard';
 import { WarmySection } from '@/components/email/WarmySection';
 import { OutreachSettings } from '@/components/settings/OutreachSettings';
+import { BillingSettings } from '@/components/settings/BillingSettings';
 import { getEmailOAuthRedirectUri } from '@/lib/oauthRedirect';
 
 interface CreatorProfile {
@@ -238,6 +239,10 @@ export default function Settings() {
               <User className="h-4 w-4" />
               Profile
             </TabsTrigger>
+            <TabsTrigger value="billing" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <CreditCard className="h-4 w-4" />
+              Billing
+            </TabsTrigger>
             <TabsTrigger value="email" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Mail className="h-4 w-4" />
               Email
@@ -385,6 +390,11 @@ export default function Settings() {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          {/* ── Billing Tab ── */}
+          <TabsContent value="billing" className="mt-0">
+            <BillingSettings />
           </TabsContent>
 
           {/* ── Email Tab ── */}
