@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Eye, Users, Clock } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { ViewsChart } from '@/components/dashboard/ViewsChart';
 import { DeviceBreakdown } from '@/components/dashboard/DeviceBreakdown';
@@ -21,9 +22,24 @@ interface MetricCardProps {
   label: string;
   value: string | number;
   subtext?: string;
+  loading?: boolean;
 }
 
-function MetricCard({ icon, label, value }: MetricCardProps) {
+function MetricCard({ icon, label, value, loading }: MetricCardProps) {
+  if (loading) {
+    return (
+      <div className="p-5 rounded-xl border border-border bg-card">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-10 w-10 rounded-xl" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-6 w-16" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-5 rounded-xl border border-border bg-card">
       <div className="flex items-center gap-3">
@@ -95,16 +111,19 @@ export default function Analytics() {
             icon={Eye}
             label={`Views · Last ${dateRange === '7d' ? '7' : dateRange === '14d' ? '14' : '30'} days`}
             value={totalViews.toLocaleString()}
+            loading={isLoading}
           />
           <MetricCard
             icon={Users}
             label="Total visits"
             value={uniqueVisitors.toLocaleString()}
+            loading={isLoading}
           />
           <MetricCard
             icon={Clock}
             label="Avg. session"
             value={formatDuration(avgSessionDuration)}
+            loading={isLoading}
           />
         </div>
 
