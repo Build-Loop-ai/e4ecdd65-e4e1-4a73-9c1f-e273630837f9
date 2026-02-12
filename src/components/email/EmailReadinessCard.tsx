@@ -103,7 +103,7 @@ export function EmailReadinessCard() {
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden hover:shadow-elevated hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2.5 text-base">
