@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { EmailReadinessCard } from '@/components/email/EmailReadinessCard';
+import { FollowUpReminders } from '@/components/dashboard/FollowUpReminders';
 import { SendEmailDialog } from '@/components/email/SendEmailDialog';
 import {
   DropdownMenu,
@@ -137,6 +138,9 @@ export default function Dashboard() {
             <EmailReadinessCard />
           </div>
         </div>
+
+        {/* Follow-Up Reminders */}
+        <FollowUpReminders />
 
         {/* Recent Pitches Section */}
         <div className="space-y-4">

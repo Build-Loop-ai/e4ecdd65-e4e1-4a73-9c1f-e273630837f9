@@ -13,10 +13,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
   Loader2, User, Globe, Linkedin, Twitter, Instagram, Mail, Save, 
-  Camera, X, Flame, Settings as SettingsIcon
+  Camera, X, Flame, Settings as SettingsIcon, Zap
 } from 'lucide-react';
 import { EmailConnectionsSection } from '@/components/email/EmailConnectionCard';
 import { WarmySection } from '@/components/email/WarmySection';
+import { OutreachSettings } from '@/components/settings/OutreachSettings';
 import { getEmailOAuthRedirectUri } from '@/lib/oauthRedirect';
 
 interface CreatorProfile {
@@ -221,7 +222,7 @@ export default function Settings() {
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">Settings</h1>
             <p className="text-muted-foreground text-sm mt-1">
-              Manage your profile, email, and warmup preferences
+              Manage your profile, email, warmup, and outreach preferences
             </p>
           </div>
           <Button onClick={handleSave} disabled={saving} size="sm" className="gap-2">
@@ -244,6 +245,10 @@ export default function Settings() {
             <TabsTrigger value="warmup" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Flame className="h-4 w-4" />
               Warmup
+            </TabsTrigger>
+            <TabsTrigger value="outreach" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Zap className="h-4 w-4" />
+              Outreach
             </TabsTrigger>
           </TabsList>
 
@@ -390,6 +395,11 @@ export default function Settings() {
           {/* ── Warmup Tab ── */}
           <TabsContent value="warmup" className="mt-0">
             <WarmySection />
+          </TabsContent>
+
+          {/* ── Outreach Tab ── */}
+          <TabsContent value="outreach" className="mt-0">
+            <OutreachSettings />
           </TabsContent>
         </Tabs>
       </div>

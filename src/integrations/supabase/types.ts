@@ -318,6 +318,45 @@ export type Database = {
           },
         ]
       }
+      outreach_settings: {
+        Row: {
+          auto_send_enabled: boolean
+          created_at: string
+          daily_cap: number
+          followup_enabled: boolean
+          id: string
+          send_window_end: number
+          send_window_start: number
+          tone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_send_enabled?: boolean
+          created_at?: string
+          daily_cap?: number
+          followup_enabled?: boolean
+          id?: string
+          send_window_end?: number
+          send_window_start?: number
+          tone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_send_enabled?: boolean
+          created_at?: string
+          daily_cap?: number
+          followup_enabled?: boolean
+          id?: string
+          send_window_end?: number
+          send_window_start?: number
+          tone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       preview_visits: {
         Row: {
           city: string | null

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
 
 const statusColors: Record<string, string> = {
   new: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -58,6 +59,25 @@ export function SavedLeadsList() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [creatingPitchId, setCreatingPitchId] = useState<string | null>(null);
   const [emailDialogLead, setEmailDialogLead] = useState<SavedLead | null>(null);
+  const [isBulkSending, setIsBulkSending] = useState(false);
+
+  // Get already-emailed lead IDs to calculate unsent count
+  const { data: emailedLeadIds = new Set<string>() } = useQuery({
+    queryKey: ['emailed-lead-ids', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return new Set<string>();
+      const { data } = await supabase
+        .from('outreach_emails')
+        .select('lead_id')
+        .eq('user_id', user.id);
+      return new Set((data || []).map((e: any) => e.lead_id).filter(Boolean) as string[]);
+    },
+    enabled: !!user?.id,
+  });
+
+  const unsentCount = useMemo(() => {
+    return savedLeads.filter(l => l.email && l.preview_id && !emailedLeadIds.has(l.id)).length;
+  }, [savedLeads, emailedLeadIds]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
@@ -137,6 +157,39 @@ export function SavedLeadsList() {
     }
   };
 
+  const handleBulkSend = async () => {
+    setIsBulkSending(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.access_token) {
+        toast({ title: 'Not authenticated', variant: 'destructive' });
+        return;
+      }
+
+      const response = await supabase.functions.invoke('auto-outreach', {
+        body: { mode: 'bulk' },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message || 'Bulk send failed');
+      }
+
+      const result = response.data;
+      if (result.error) {
+        toast({ title: 'Bulk send failed', description: result.error, variant: 'destructive' });
+      } else {
+        toast({ 
+          title: `Sent ${result.sent} email${result.sent !== 1 ? 's' : ''}`,
+          description: result.failed > 0 ? `${result.failed} failed` : undefined,
+        });
+      }
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsBulkSending(false);
+    }
+  };
+
   const selectedWithWebsites = savedLeads.filter(
     l => selectedIds.has(l.id) && l.website_url
   ).length;
@@ -176,7 +229,6 @@ export function SavedLeadsList() {
         onDeselectAll={deselectAll}
         onDelete={handleDelete}
         onCreatePitches={() => {
-          // For bulk create, just navigate with first selected that has website
           const firstWithWebsite = savedLeads.find(
             l => selectedIds.has(l.id) && l.website_url
           );
@@ -184,8 +236,11 @@ export function SavedLeadsList() {
             handleCreatePitch(firstWithWebsite);
           }
         }}
+        onBulkSend={handleBulkSend}
         isDeleting={isDeleting}
+        isSending={isBulkSending}
         hasWebsites={selectedWithWebsites > 0}
+        unsentCount={unsentCount}
       />
 
       {/* Empty State */}

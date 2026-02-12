@@ -118,10 +118,16 @@ export function useLeads() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['leads'] });
       queryClient.invalidateQueries({ queryKey: ['leads-filter-options'] });
       toast({ title: 'Lead saved!' });
+      // Trigger auto-outreach in background (fire and forget)
+      if (data?.id) {
+        supabase.functions.invoke('auto-outreach', {
+          body: { leadIds: [data.id], mode: 'auto' },
+        }).catch(() => {}); // silent — auto-outreach is best-effort
+      }
     },
     onError: (error) => {
       toast({ title: 'Failed to save lead', description: error.message, variant: 'destructive' });
