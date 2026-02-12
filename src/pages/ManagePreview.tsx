@@ -211,7 +211,7 @@ export default function ManagePreview() {
       />
 
       {/* Main Preview Area */}
-      <main className="flex-1 flex items-center justify-center p-6 lg:p-8 overflow-auto">
+      <main className="flex-1 flex items-start justify-center p-6 lg:p-8 overflow-auto">
         <PreviewFrame
           key={iframeKey}
           slug={preview.slug}
