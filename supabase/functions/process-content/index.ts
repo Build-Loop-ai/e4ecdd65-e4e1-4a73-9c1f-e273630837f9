@@ -20,7 +20,19 @@ Deno.serve(async (req) => {
 
     const systemPrompt = `You are an expert at analyzing scraped website content and organizing it into a structured schema for a premium, high-end website template.
 
-## BRAND COLOR ANALYSIS (CRITICAL - DO THIS FIRST)
+## LANGUAGE DETECTION (CRITICAL - DO THIS FIRST)
+
+Detect the language of the source website from its content (headings, paragraphs, metadata, navigation).
+ALL generated text (headlines, section titles, CTAs, descriptions, value propositions, stat labels)
+MUST be in the SAME language as the source website.
+- If the website is in English, ALL output text must be in English.
+- If the website is in Dutch, ALL output text must be in Dutch.
+- If the website is in German, ALL output text must be in German.
+- And so on for any other language.
+NEVER default to Dutch for a non-Dutch website. NEVER default to English for a non-English website.
+Include a "detectedLanguage" field in your response (e.g. "en", "nl", "de", "fr", "es").
+
+## BRAND COLOR ANALYSIS (CRITICAL)
 
 Analyze the brand colors provided from Firecrawl. This is ESSENTIAL for maintaining brand consistency.
 
@@ -257,35 +269,42 @@ Extract and organize ALL available content:
 
 ## ADAPTIVE SECTION TITLES
 
-Use industry-appropriate titles:
+Use industry-appropriate titles IN THE DETECTED LANGUAGE of the source website.
 
-| Business Type | Services Title | Gallery Title |
-|--------------|----------------|---------------|
-| Barber/Salon | Behandelingen | Ons Werk |
-| Restaurant/Cafe | Menu | Onze Gerechten |
-| Law Firm | Rechtsgebieden | Resultaten |
-| Creative Agency | Wat Wij Doen | Portfolio |
-| Healthcare | Behandelingen | Onze Praktijk |
-| Construction | Onze Diensten | Recente Projecten |
-| Tech/SaaS | Oplossingen | Hoe Het Werkt |
-| Retail | Collectie | Galerij |
-| Default | Onze Diensten | Galerij |
+Examples per language:
+- English: "Our Services", "Gallery", "About Us", "What Clients Say", "Contact"
+- Dutch: "Onze Diensten", "Galerij", "Over Ons", "Wat Klanten Zeggen", "Contact"
+- German: "Unsere Leistungen", "Galerie", "Über Uns", "Kundenstimmen", "Kontakt"
+
+Industry-specific examples (adapt to detected language):
+| Business Type | Services Title (EN) | Gallery Title (EN) |
+|--------------|---------------------|-------------------|
+| Barber/Salon | Treatments | Our Work |
+| Restaurant/Cafe | Menu | Our Dishes |
+| Law Firm | Practice Areas | Results |
+| Creative Agency | What We Do | Portfolio |
+| Healthcare | Treatments | Our Practice |
+| Construction | Our Services | Recent Projects |
+| Tech/SaaS | Solutions | How It Works |
+| Retail | Collection | Gallery |
+| Default | Our Services | Gallery |
 
 ## ADAPTIVE CTA TEXT
 
-Use industry-appropriate CTA text:
+Use industry-appropriate CTA text IN THE DETECTED LANGUAGE.
 
-| Business Type | CTA Text |
-|--------------|----------|
-| Barber/Salon | Maak een afspraak |
-| Restaurant | Reserveer nu |
-| Law Firm | Plan een consultatie |
-| Creative Agency | Start uw project |
-| Healthcare | Maak een afspraak |
-| Construction | Vraag een offerte aan |
-| Tech/SaaS | Probeer gratis |
-| Retail | Bekijk collectie |
-| Default | Neem contact op |
+Examples (adapt to detected language):
+| Business Type | CTA Text (EN) |
+|--------------|---------------|
+| Barber/Salon | Book an Appointment |
+| Restaurant | Reserve Now |
+| Law Firm | Schedule a Consultation |
+| Creative Agency | Start Your Project |
+| Healthcare | Book an Appointment |
+| Construction | Request a Quote |
+| Tech/SaaS | Try for Free |
+| Retail | View Collection |
+| Default | Get in Touch |
 
 Return a JSON object with this exact structure:
 {
@@ -310,9 +329,9 @@ Return a JSON object with this exact structure:
   "adaptedContent": {
     "servicesTitle": "string - industry-appropriate services title",
     "galleryTitle": "string - industry-appropriate gallery title",
-    "aboutTitle": "string - industry-appropriate about title (e.g., 'Over Ons', 'Wie We Zijn')",
-    "testimonialsTitle": "string - industry-appropriate (e.g., 'Wat Klanten Zeggen', 'Recensies')",
-    "contactTitle": "string - industry-appropriate (e.g., 'Contact', 'Neem Contact Op')"
+    "aboutTitle": "string - industry-appropriate about title IN DETECTED LANGUAGE",
+    "testimonialsTitle": "string - industry-appropriate IN DETECTED LANGUAGE",
+    "contactTitle": "string - industry-appropriate IN DETECTED LANGUAGE"
   },
   "classifiedImages": [
     {
@@ -336,7 +355,7 @@ Return a JSON object with this exact structure:
     "description": "string - detailed company description",
     "valueProps": ["string", "string", "string"],
     "stats": [
-      { "value": "25+", "label": "Jaren Ervaring" }
+      { "value": "25+", "label": "Years of Experience (use detected language)" }
     ],
     "image": "string url or null - first image classified as 'about' or 'team'"
   },
@@ -365,34 +384,8 @@ Return a JSON object with this exact structure:
   },
   "logo": "string url or null",
   "companyName": "string",
-  "tagline": "string - short brand tagline if available"
-}
-  "services": [
-    { "title": "string", "description": "string", "image": "string url or null" }
-  ],
-  "gallery": {
-    "images": ["array of ALL image URLs found on the site"],
-    "title": "string - industry-appropriate section title"
-  },
-  "instagram": {
-    "handle": "string - instagram username if found",
-    "posts": [
-      { "image": "string url", "caption": "string or null", "link": "string url" }
-    ]
-  },
-  "testimonials": [
-    { "quote": "string", "author": "string", "role": "string or null" }
-  ],
-  "contact": {
-    "email": "string or null",
-    "phone": "string or null",
-    "address": "string or null",
-    "instagram": "string url or null",
-    "facebook": "string url or null"
-  },
-  "logo": "string url or null",
-  "companyName": "string",
-  "tagline": "string - short brand tagline if available"
+  "tagline": "string - short brand tagline if available",
+  "detectedLanguage": "string - ISO 639-1 code (en, nl, de, fr, es, etc.)"
 }
 
 CRITICAL EXTRACTION RULES - READ CAREFULLY:
@@ -570,17 +563,17 @@ IMPORTANT:
     // Ensure adaptedContent exists
     if (!processedSchema.adaptedContent) {
       processedSchema.adaptedContent = {
-        servicesTitle: 'Onze Diensten',
-        galleryTitle: 'Galerij',
-        aboutTitle: 'Over Ons',
-        testimonialsTitle: 'Wat Klanten Zeggen',
+        servicesTitle: 'Our Services',
+        galleryTitle: 'Gallery',
+        aboutTitle: 'About Us',
+        testimonialsTitle: 'What Clients Say',
         contactTitle: 'Contact'
       };
     }
 
     // Ensure extracted images are included even if AI missed them
     if (!processedSchema.gallery) {
-      processedSchema.gallery = { images: [], title: processedSchema.adaptedContent?.galleryTitle || 'Galerij' };
+      processedSchema.gallery = { images: [], title: processedSchema.adaptedContent?.galleryTitle || 'Gallery' };
     }
     if (extractedImages.length > 0 && processedSchema.gallery.images.length === 0) {
       processedSchema.gallery.images = extractedImages;
