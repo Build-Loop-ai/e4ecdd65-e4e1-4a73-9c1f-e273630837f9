@@ -135,6 +135,7 @@ export function ContactSection({
 
   // ========== WARM FRIENDLY - Rounded card with warm shadows ==========
   if (effectiveTemplateId === 'warm-friendly') {
+    if (!hasContact && !hasSocial) return null;
     return (
       <section className="py-24 px-6 bg-white">
         <div className="container mx-auto max-w-4xl">
@@ -270,6 +271,7 @@ export function ContactSection({
 
   // ========== BOLD STARTER - Minimal with neon glow CTA ==========
   if (effectiveTemplateId === 'bold-starter') {
+    if (!hasContact && !hasSocial) return null;
     return (
       <section className="py-32 px-6 bg-[#0a0a0a] relative overflow-hidden">
         {/* Subtle glow */}
@@ -513,7 +515,9 @@ export function ContactSection({
     );
   }
 
-  // ========== CORPORATE CLASSIC - Two-column layout ==========
+  // Corporate Classic - guard against empty
+  if (!hasContact && !hasSocial) return null;
+
   return (
     <section className="py-32 px-6 bg-foreground text-background">
       <div className="container mx-auto max-w-6xl">
