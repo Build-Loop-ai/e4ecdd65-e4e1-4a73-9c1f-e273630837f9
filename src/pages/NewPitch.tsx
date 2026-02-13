@@ -219,7 +219,9 @@ export default function NewPitch() {
     setIsLoading(true);
 
     try {
-      const slug = generatePitchSlug(clientName, userProfile?.full_name, user.email);
+      const baseSlug = generatePitchSlug(clientName, userProfile?.full_name, user.email);
+      // Append short random suffix to avoid duplicate slug conflicts
+      const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 6)}`;
 
       const { data: newPreview, error } = await supabase.from('client_previews').insert({
         user_id: user.id,
