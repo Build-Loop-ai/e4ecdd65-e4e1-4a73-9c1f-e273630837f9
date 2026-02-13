@@ -11,6 +11,7 @@ import {
   Mail, 
   Star,
   Plus,
+  Eye,
   MoreHorizontal,
   Trash2,
   Loader2,
@@ -338,21 +339,32 @@ export function SavedLeadsList() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleCreatePitch(lead)}
-                        disabled={!lead.website_url || creatingPitchId === lead.id}
-                      >
-                        {creatingPitchId === lead.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Plus className="h-4 w-4 mr-1" />
-                            Pitch
-                          </>
-                        )}
-                      </Button>
+                      {lead.status === 'pitched' && lead.preview_id ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/dashboard/manage/${lead.preview_id}`)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View Pitch
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCreatePitch(lead)}
+                          disabled={!lead.website_url || creatingPitchId === lead.id}
+                        >
+                          {creatingPitchId === lead.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Plus className="h-4 w-4 mr-1" />
+                              Pitch
+                            </>
+                          )}
+                        </Button>
+                      )}
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
