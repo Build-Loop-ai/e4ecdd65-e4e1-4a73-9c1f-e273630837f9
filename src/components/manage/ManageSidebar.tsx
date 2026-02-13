@@ -32,6 +32,7 @@ import {
   MessageSquare,
   Pencil,
   Trash2,
+  Download,
   LayoutTemplate,
   Eye,
   Palette,
@@ -106,6 +107,107 @@ export default function ManageSidebar({
 
   const openExternal = () => {
     window.open(previewUrl, '_blank');
+  };
+
+  const exportCode = () => {
+    const brandColorsData = preview.brand_colors as any;
+    const exportData = {
+      meta: {
+        exportedAt: new Date().toISOString(),
+        clientName: preview.client_name,
+        originalUrl: preview.original_url,
+        templateId: preview.template_id,
+        previewUrl,
+      },
+      schema: schema || {},
+      brandColors: brandColorsData || {},
+    };
+
+    const name = schema?.companyName || preview.client_name;
+    const hero = schema?.hero || {};
+    const about = schema?.about || {};
+    const services = schema?.services || [];
+    const contact = schema?.contact || {};
+    const testimonials = schema?.testimonials || [];
+    const gallery = schema?.gallery || {};
+    const pColor = schema?.brandColors?.primary || brandColorsData?.colors?.primary || '#2563eb';
+
+    const svcHtml = services.map((s: any) => `
+      <div style="background:#f9fafb;padding:24px;border-radius:12px;">
+        <h3 style="margin:0 0 8px;font-size:18px;">${s.title || s.name || ''}</h3>
+        <p style="margin:0;color:#6b7280;">${s.description || ''}</p>
+      </div>`).join('\n');
+
+    const testHtml = testimonials.map((t: any) => `
+      <blockquote style="background:#f9fafb;padding:24px;border-radius:12px;border-left:4px solid ${pColor};margin:0;">
+        <p style="margin:0 0 8px;font-style:italic;">"${t.text || t.quote || ''}"</p>
+        <cite style="color:#6b7280;">— ${t.author || t.name || 'Client'}</cite>
+      </blockquote>`).join('\n');
+
+    const galHtml = (gallery?.images || []).map((img: any) => `
+      <img src="${typeof img === 'string' ? img : img?.url || ''}" alt="${typeof img === 'string' ? '' : img?.alt || ''}" style="width:100%;border-radius:12px;object-fit:cover;aspect-ratio:4/3;" />`).join('\n');
+
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${name} - Website Reference</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f2937; line-height: 1.6; }
+    .hero { background: linear-gradient(135deg, ${pColor}, ${pColor}dd); color: white; padding: 80px 24px; text-align: center; }
+    .hero h1 { font-size: 48px; font-weight: 800; margin-bottom: 16px; }
+    .hero p { font-size: 20px; opacity: 0.9; max-width: 600px; margin: 0 auto 32px; }
+    .hero a { display: inline-block; background: white; color: ${pColor}; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+    section { max-width: 960px; margin: 0 auto; padding: 64px 24px; }
+    section h2 { font-size: 32px; font-weight: 700; margin-bottom: 32px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .contact-item { margin-bottom: 12px; }
+    .contact-item strong { display: block; color: ${pColor}; }
+    footer { text-align: center; padding: 32px; color: #9ca3af; font-size: 14px; border-top: 1px solid #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>${hero.headline || name}</h1>
+    <p>${hero.subheadline || ''}</p>
+    ${hero.ctaText ? `<a href="#contact">${hero.ctaText}</a>` : ''}
+  </div>
+  <section>
+    <h2>About</h2>
+    <p>${about.description || ''}</p>
+  </section>
+  ${services.length > 0 ? `<section style="background:#f9fafb;"><div style="max-width:960px;margin:0 auto;"><h2>Services</h2><div class="grid-2">${svcHtml}</div></div></section>` : ''}
+  ${(gallery?.images || []).length > 0 ? `<section><h2>Gallery</h2><div class="grid-3">${galHtml}</div></section>` : ''}
+  ${testimonials.length > 0 ? `<section><h2>Testimonials</h2><div class="grid-2">${testHtml}</div></section>` : ''}
+  <section id="contact">
+    <h2>Contact</h2>
+    ${contact.email ? `<div class="contact-item"><strong>Email</strong>${contact.email}</div>` : ''}
+    ${contact.phone ? `<div class="contact-item"><strong>Phone</strong>${contact.phone}</div>` : ''}
+    ${contact.address ? `<div class="contact-item"><strong>Address</strong>${contact.address}</div>` : ''}
+  </section>
+  <footer>&copy; ${new Date().getFullYear()} ${name}</footer>
+</body>
+</html>`;
+
+    const slug = preview.slug.replace(/\//g, '-');
+    const htmlBlob = new Blob([html], { type: 'text/html' });
+    const htmlLink = document.createElement('a');
+    htmlLink.href = URL.createObjectURL(htmlBlob);
+    htmlLink.download = `${slug}-reference.html`;
+    htmlLink.click();
+
+    setTimeout(() => {
+      const jsonBlob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const jsonLink = document.createElement('a');
+      jsonLink.href = URL.createObjectURL(jsonBlob);
+      jsonLink.download = `${slug}-data.json`;
+      jsonLink.click();
+    }, 500);
+
+    toast({ title: 'Export started', description: 'HTML reference + JSON data downloading...' });
   };
 
   const currentTemplate = templates.find(t => t.id === preview.template_id) || templates[0];
@@ -196,6 +298,16 @@ export default function ManageSidebar({
           >
             <ExternalLink className="h-4 w-4 mr-3 text-muted-foreground" />
             Open Preview
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start h-9"
+            onClick={exportCode}
+          >
+            <Download className="h-4 w-4 mr-3 text-muted-foreground" />
+            Export Code
           </Button>
           
           <Button
