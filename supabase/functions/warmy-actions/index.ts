@@ -191,7 +191,7 @@ serve(async (req: Request) => {
         break;
       }
 
-      case "test":
+      case "test": {
         const testProviders = providers || ["GOOGLE", "OUTLOOK", "YAHOO"];
         warmyResponse = await fetch(
           `${WARMY_API_BASE}/api/v2/mailboxes/${connection.warmy_mailbox_id}/deliverability_checkers`,
@@ -202,7 +202,18 @@ serve(async (req: Request) => {
           }
         );
         result = await safeParseResponse(warmyResponse);
+
+        // If checker already exists, fetch existing results instead of erroring
+        if (!warmyResponse.ok && result?.error?.toLowerCase().includes("already created")) {
+          const existingResp = await fetch(
+            `${WARMY_API_BASE}/api/v2/mailboxes/${connection.warmy_mailbox_id}/deliverability_checkers`,
+            { method: "GET", headers: warmyHeaders }
+          );
+          result = await safeParseResponse(existingResp);
+          warmyResponse = new Response(JSON.stringify(result), { status: 200 });
+        }
         break;
+      }
 
       case "disconnect":
         warmyResponse = await fetch(
