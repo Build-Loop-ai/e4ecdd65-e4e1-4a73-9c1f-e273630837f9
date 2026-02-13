@@ -6,17 +6,13 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import { SmartLogo } from './SmartLogo';
 import { WaveDivider } from '@/components/animations/WaveDivider';
-import { PatternBackground } from './PatternBackground';
+
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
 import { 
-  getSuitableHeroImages, 
-  shouldUsePatternFallback, 
-  getFallbackPatternType,
-  type ProcessedSchema,
   type ClassifiedImage,
   type FallbackPatternType,
 } from '@/lib/businessIntelligence';
-import { getPatternForIndustry } from '@/lib/heroPatterns';
+
 import { getButtonTextColor, isDarkColor, getReadableTextColor } from '@/lib/colorContrast';
 import { toast } from 'sonner';
 
@@ -111,12 +107,8 @@ export function HeroSection({
   };
 
   const bgImage = getSuitableImage();
-  const usePattern = !bgImage;
-  
-  // Determine pattern type
-  const patternType = fallbackPattern 
-    ? getPatternForIndustry(industry || 'other')
-    : getPatternForIndustry(industry || 'other');
+
+
 
   // Use the imported color contrast utilities
   const buttonTextColor = getButtonTextColor(primaryColor || '#3B82F6');
@@ -137,12 +129,6 @@ export function HeroSection({
               alt=""
               className="w-full h-full object-cover"
               style={{ scale }}
-            />
-          ) : usePattern ? (
-            <PatternBackground 
-              patternType={patternType}
-              primaryColor={primaryColor}
-              templateId={effectiveTemplateId}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-stone-200 via-stone-100 to-stone-50" />
@@ -230,23 +216,20 @@ export function HeroSection({
         {/* Background - image or pattern */}
         <div className="absolute inset-0">
           {bgImage ? (
-            <motion.img
-              src={bgImage}
-              alt=""
-              className="w-full h-full object-cover"
-              style={{ scale }}
-            />
-          ) : usePattern ? (
-            <PatternBackground 
-              patternType={patternType}
-              primaryColor={primaryColor}
-              templateId={effectiveTemplateId}
-            />
+            <>
+              <motion.img
+                src={bgImage}
+                alt=""
+                className="w-full h-full object-cover"
+                style={{ scale }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+            </>
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-stone-800 via-stone-700 to-stone-900" />
+            <div className="w-full h-full" style={{
+              background: `linear-gradient(135deg, #292524 0%, ${primaryColor || '#f97316'}15 50%, #1c1917 100%)`,
+            }} />
           )}
-          {/* Overlay for text readability */}
-          {bgImage && <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />}
         </div>
         
         {/* Subtle accent glow */}
@@ -330,23 +313,18 @@ export function HeroSection({
         {/* Background - image or pattern */}
         <div className="absolute inset-0">
           {bgImage ? (
-            <motion.img
-              src={bgImage}
-              alt=""
-              className="w-full h-full object-cover"
-              style={{ scale }}
-            />
-          ) : usePattern ? (
-            <PatternBackground 
-              patternType={patternType}
-              primaryColor={primaryColor}
-              templateId={effectiveTemplateId}
-            />
+            <>
+              <motion.img
+                src={bgImage}
+                alt=""
+                className="w-full h-full object-cover"
+                style={{ scale }}
+              />
+              <div className="absolute inset-0 bg-black/70" />
+            </>
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-black" />
           )}
-          {/* Dark overlay for text readability */}
-          {bgImage && <div className="absolute inset-0 bg-black/70" />}
         </div>
 
         {/* Subtle grid pattern */}
