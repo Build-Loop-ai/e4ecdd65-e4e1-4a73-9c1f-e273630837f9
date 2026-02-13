@@ -451,28 +451,28 @@ export default function Demo() {
             animate={{ opacity: 1 }}
             className="flex min-h-screen relative z-10"
           >
-            {/* Sidebar */}
+            {/* White Sidebar */}
             <motion.div
               initial={{ x: -300, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="w-[260px] shrink-0 bg-black/40 backdrop-blur-xl flex flex-col fixed left-0 top-0 bottom-0 z-50 overflow-y-auto"
+              className="w-[260px] shrink-0 bg-background flex flex-col fixed left-0 top-0 bottom-0 z-50 overflow-y-auto border-r border-border"
             >
               {/* Sidebar header */}
-              <div className="p-4 border-b border-white/5">
+              <div className="p-4 border-b border-border">
                 <Link to="/">
                   <PitchLogo size="md" />
                 </Link>
                 <div className="mt-3 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-xs text-white/40">Preview Live</span>
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-xs text-muted-foreground">Preview Live</span>
                 </div>
               </div>
 
               {/* Device selector */}
-              <div className="p-4 border-b border-white/5">
-                <p className="text-[11px] uppercase tracking-wider text-white/30 font-medium mb-3">Responsive View</p>
-                <div className="flex gap-1 bg-white/5 rounded-xl p-1">
+              <div className="p-4 border-b border-border">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Responsive View</p>
+                <div className="flex gap-1 bg-muted rounded-xl p-1">
                   {([
                     { id: 'desktop' as DeviceView, icon: Monitor, label: 'Desktop' },
                     { id: 'tablet' as DeviceView, icon: Tablet, label: 'Tablet' },
@@ -484,8 +484,8 @@ export default function Demo() {
                       className={cn(
                         'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all',
                         deviceView === id
-                          ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                          : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-background'
                       )}
                     >
                       <Icon className="h-3.5 w-3.5" />
@@ -496,34 +496,34 @@ export default function Demo() {
               </div>
 
               {/* Quick info */}
-              <div className="p-4 border-b border-white/5 space-y-3">
-                <p className="text-[11px] uppercase tracking-wider text-white/30 font-medium">Preview Info</p>
+              <div className="p-4 border-b border-border space-y-3">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Preview Info</p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-xs">
-                    <Globe className="h-3.5 w-3.5 text-primary/60" />
-                    <span className="text-white/50 truncate">{url}</span>
+                    <Globe className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-muted-foreground truncate">{url}</span>
                   </div>
                   {schema?.companyName && (
                     <div className="flex items-center gap-2 text-xs">
-                      <Sparkles className="h-3.5 w-3.5 text-primary/60" />
-                      <span className="text-white/50">{schema.companyName}</span>
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      <span className="text-muted-foreground">{schema.companyName}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-2 text-xs">
-                    <Palette className="h-3.5 w-3.5 text-primary/60" />
-                    <span className="text-white/50 capitalize">{templateId.replace('-', ' ')}</span>
+                    <Palette className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-muted-foreground capitalize">{templateId.replace('-', ' ')}</span>
                   </div>
                 </div>
               </div>
 
               {/* Colors */}
-              <div className="p-4 border-b border-white/5">
-                <p className="text-[11px] uppercase tracking-wider text-white/30 font-medium mb-3">Brand Colors</p>
+              <div className="p-4 border-b border-border">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Brand Colors</p>
                 <div className="flex gap-2">
                   {[primaryColor, secondaryColor, accentColor].filter(Boolean).map((color, i) => (
                     <div
                       key={i}
-                      className="w-8 h-8 rounded-lg border border-white/10 shadow-lg"
+                      className="w-8 h-8 rounded-lg border border-border shadow-sm"
                       style={{ backgroundColor: color }}
                       title={color}
                     />
@@ -532,31 +532,31 @@ export default function Demo() {
               </div>
 
               {/* Actions */}
-              <div className="p-4 space-y-2">
-                <p className="text-[11px] uppercase tracking-wider text-white/30 font-medium mb-3">Actions</p>
+              <div className="p-4 space-y-1">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Actions</p>
                 <button
                   onClick={() => { setStep('input'); setProcessedSchema(null); setScrapedData(null); setUrl(''); setEmail(''); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
                   <RotateCcw className="h-4 w-4" />
                   Try Another URL
                 </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors">
+                <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                   <Share2 className="h-4 w-4" />
                   Share Preview
                 </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors">
+                <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
                   <Download className="h-4 w-4" />
                   Download PDF
                 </button>
               </div>
 
               {/* CTA */}
-              <div className="mt-auto p-4 border-t border-white/5">
-                <div className="rounded-xl bg-primary/10 p-4">
-                  <p className="text-sm font-medium text-white mb-1">Want this for your clients?</p>
-                  <p className="text-xs text-white/40 mb-3">Create unlimited pitch previews.</p>
-                  <Button size="sm" asChild className="w-full rounded-lg bg-primary hover:bg-primary/90">
+              <div className="mt-auto p-4 border-t border-border">
+                <div className="rounded-xl bg-primary/5 p-4">
+                  <p className="text-sm font-medium text-foreground mb-1">Want this for your clients?</p>
+                  <p className="text-xs text-muted-foreground mb-3">Create unlimited pitch previews.</p>
+                  <Button size="sm" asChild className="w-full rounded-lg">
                     <Link to="/auth">
                       Get Started Free
                       <ArrowRight className="h-3.5 w-3.5 ml-1" />
@@ -570,45 +570,45 @@ export default function Demo() {
             <div className="flex-1 ml-[260px]">
               {/* Email gate overlay */}
               {step === 'gated' && (
-                <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm ml-[260px]">
+                <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm ml-[260px]">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ delay: 0.3, type: 'spring', damping: 20 }}
-                    className="bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4"
+                    className="bg-card rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 border border-border"
                   >
                     <div className="text-center mb-6">
                       <motion.div
-                        className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-4"
+                        className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4"
                         animate={{ rotate: [0, 5, -5, 0] }}
                         transition={{ duration: 3, repeat: Infinity }}
                       >
                         <Eye className="h-8 w-8 text-primary" />
                       </motion.div>
-                      <h2 className="text-2xl font-bold text-white mb-2">
+                      <h2 className="text-2xl font-bold text-foreground mb-2">
                         Your preview is ready! 🎉
                       </h2>
-                      <p className="text-white/40 text-sm">
+                      <p className="text-muted-foreground text-sm">
                         Enter your email to see the full redesigned website. No spam, just inspiration.
                       </p>
                     </div>
 
                     <div className="space-y-3">
                       <div className="relative">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                           type="email"
                           placeholder="you@company.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter' && email) handleUnlock(); }}
-                          className="h-12 pl-10 text-base rounded-xl bg-white/5 border-0 text-white placeholder:text-white/25 focus-visible:ring-1 focus-visible:ring-primary/50"
+                          className="h-12 pl-10 text-base rounded-xl"
                         />
                       </div>
                       <Button
                         onClick={handleUnlock}
                         disabled={isUnlocking || !email}
-                        className="w-full h-12 text-base font-medium rounded-xl shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90"
+                        className="w-full h-12 text-base font-medium rounded-xl"
                       >
                         {isUnlocking ? (
                           <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Unlocking...</>
@@ -618,7 +618,7 @@ export default function Demo() {
                       </Button>
                     </div>
 
-                    <p className="text-xs text-white/20 text-center mt-4 flex items-center justify-center gap-1">
+                    <p className="text-xs text-muted-foreground text-center mt-4 flex items-center justify-center gap-1">
                       <Lock className="h-3 w-3" />
                       We respect your privacy. No spam ever.
                     </p>
@@ -633,11 +633,11 @@ export default function Demo() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="bg-black/60 backdrop-blur-xl shadow-2xl rounded-xl px-5 py-3 flex items-center gap-3"
+                    className="bg-card shadow-lg border border-border rounded-xl px-5 py-3 flex items-center gap-3"
                   >
-                    <CheckCircle2 className="h-5 w-5 text-green-400" />
-                    <span className="text-sm font-medium text-white">Preview unlocked!</span>
-                    <Button size="sm" asChild className="rounded-lg ml-2 bg-primary hover:bg-primary/90">
+                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                    <span className="text-sm font-medium text-foreground">Preview unlocked!</span>
+                    <Button size="sm" asChild className="rounded-lg ml-2">
                       <Link to="/auth">
                         Create yours free
                         <ArrowRight className="h-3.5 w-3.5 ml-1" />
@@ -648,11 +648,11 @@ export default function Demo() {
               )}
 
               {/* Preview frame */}
-              <div className="bg-black/20 min-h-screen p-4 pt-6 flex justify-center">
+              <div className="bg-muted/50 min-h-screen p-4 pt-6 flex justify-center">
                 <motion.div
                   layout
                   className={cn(
-                    'bg-white rounded-xl overflow-hidden shadow-2xl shadow-black/40 transition-all duration-500',
+                    'bg-white rounded-xl overflow-hidden shadow-xl border border-border transition-all duration-500',
                     step === 'gated' && 'blur-[8px] pointer-events-none select-none'
                   )}
                   style={{
@@ -661,14 +661,14 @@ export default function Demo() {
                   }}
                 >
                   {/* Browser chrome */}
-                  <div className="bg-[hsl(0,0%,95%)] px-4 py-2 flex items-center gap-2 border-b border-black/5">
+                  <div className="bg-muted px-4 py-2 flex items-center gap-2 border-b border-border">
                     <div className="flex gap-1.5">
                       <div className="w-3 h-3 rounded-full bg-[hsl(0,70%,60%)]" />
                       <div className="w-3 h-3 rounded-full bg-[hsl(45,90%,55%)]" />
                       <div className="w-3 h-3 rounded-full bg-[hsl(120,50%,50%)]" />
                     </div>
                     <div className="flex-1 mx-3">
-                      <div className="bg-white rounded-md px-3 py-1 text-xs text-black/40 truncate max-w-md mx-auto text-center">
+                      <div className="bg-background rounded-md px-3 py-1 text-xs text-muted-foreground truncate max-w-md mx-auto text-center">
                         {url || 'preview.pitch.io'}
                       </div>
                     </div>
