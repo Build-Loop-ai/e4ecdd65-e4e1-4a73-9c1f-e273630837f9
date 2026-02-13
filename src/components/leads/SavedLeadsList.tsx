@@ -373,6 +373,12 @@ export function SavedLeadsList() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-background">
+                          {lead.status === 'pitched' && lead.preview_id && lead.website_url && (
+                            <DropdownMenuItem onClick={() => handleCreatePitch(lead)}>
+                              <Plus className="h-4 w-4 mr-2" />
+                              New Pitch
+                            </DropdownMenuItem>
+                          )}
                           {lead.website_url && (
                             <DropdownMenuItem asChild>
                               <a href={lead.website_url} target="_blank" rel="noopener noreferrer">
