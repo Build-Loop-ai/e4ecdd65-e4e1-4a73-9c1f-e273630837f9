@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
@@ -18,7 +18,6 @@ import {
   Search, 
   Loader2,
   Building2,
-  Bookmark,
   Users
 } from 'lucide-react';
 import { GlowIcon } from '@/components/ui/GlowIcon';
@@ -75,28 +74,14 @@ export default function Leads() {
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [creatingPitchIndex, setCreatingPitchIndex] = useState<number | null>(null);
-  const [savingIndex, setSavingIndex] = useState<number | null>(null);
   const [savedUrls, setSavedUrls] = useState<Set<string>>(new Set());
   
   const { 
     savedLeads,
     checkExistingLeads, 
-    saveLead, 
     saveAllLeads,
-    isSaving 
   } = useLeads();
 
-  // Check which search results are already saved
-  useEffect(() => {
-    const checkSaved = async () => {
-      if (results.length > 0) {
-        const urls = results.map(r => r.website_url).filter(Boolean) as string[];
-        const existing = await checkExistingLeads(urls);
-        setSavedUrls(existing);
-      }
-    };
-    checkSaved();
-  }, [results]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -114,6 +99,32 @@ export default function Leads() {
         setResults(response.data);
         if (response.data.length === 0) {
           toast({ title: 'No results found', description: 'Try a different search query' });
+        } else {
+          // Auto-save all discovered leads to My Leads
+          const urls = response.data.map(r => r.website_url).filter(Boolean) as string[];
+          const existing = await checkExistingLeads(urls);
+          setSavedUrls(existing);
+
+          const hasUnsaved = response.data.some(
+            r => r.website_url && !existing.has(r.website_url)
+          );
+          if (hasUnsaved) {
+            try {
+              const result = await saveAllLeads({
+                leads: response.data,
+                sourceQuery: searchQuery.trim(),
+                existingUrls: existing,
+              });
+              if (result.data) {
+                setSavedUrls(prev => new Set([
+                  ...prev,
+                  ...result.data!.map(d => d.website_url).filter(Boolean) as string[],
+                ]));
+              }
+            } catch {
+              // Non-blocking — leads still shown even if auto-save fails
+            }
+          }
         }
       } else {
         toast({ 
@@ -133,33 +144,6 @@ export default function Leads() {
     }
   };
 
-  const handleSaveLead = async (lead: ApifyLead, index: number) => {
-    setSavingIndex(index);
-    try {
-      await saveLead({ lead, sourceQuery: searchQuery });
-      setSavedUrls(prev => new Set([...prev, lead.website_url!]));
-    } catch (error) {
-      // Error handled in hook
-    } finally {
-      setSavingIndex(null);
-    }
-  };
-
-  const handleSaveAll = async () => {
-    try {
-      const result = await saveAllLeads({ 
-        leads: results, 
-        sourceQuery: searchQuery,
-        existingUrls: savedUrls 
-      });
-      if (result.data) {
-        setSavedUrls(prev => new Set([...prev, ...result.data!.map(d => d.website_url).filter(Boolean) as string[]]));
-      }
-    } catch (error) {
-      // Error handled in hook
-    }
-  };
-
   const handleCreatePitch = async (lead: ApifyLead, index: number) => {
     if (!lead.website_url) {
       toast({ 
@@ -173,58 +157,23 @@ export default function Leads() {
     setCreatingPitchIndex(index);
 
     try {
-      // First save the lead if not already saved
-      let leadId: string | undefined;
+      // Lead is already saved from auto-save — just find its ID and update status
+      const { data: existingLead } = await supabase
+        .from('leads')
+        .select('id')
+        .eq('user_id', user!.id)
+        .eq('website_url', lead.website_url)
+        .maybeSingle();
       
-      if (!savedUrls.has(lead.website_url)) {
-        const { data: savedLead, error: saveError } = await supabase
-          .from('leads')
-          .insert({
-            user_id: user!.id,
-            business_name: lead.business_name,
-            website_url: lead.website_url,
-            email: lead.email,
-            phone: lead.phone,
-            address: lead.address,
-            city: lead.city,
-            category: lead.category,
-            rating: lead.rating,
-            source_query: searchQuery,
-            status: 'pitched',
-          })
-          .select()
-          .single();
+      let leadId = existingLead?.id;
 
-        if (saveError) {
-          console.error('Error saving lead:', saveError);
-          toast({ 
-            title: 'Failed to save lead', 
-            description: saveError.message,
-            variant: 'destructive' 
-          });
-          return;
-        }
-        leadId = savedLead.id;
-        setSavedUrls(prev => new Set([...prev, lead.website_url!]));
-      } else {
-        // Get existing lead ID and update status
-        const { data: existingLead } = await supabase
+      if (leadId) {
+        await supabase
           .from('leads')
-          .select('id')
-          .eq('user_id', user!.id)
-          .eq('website_url', lead.website_url)
-          .maybeSingle();
-        
-        if (existingLead) {
-          leadId = existingLead.id;
-          await supabase
-            .from('leads')
-            .update({ status: 'pitched' })
-            .eq('id', leadId);
-        }
+          .update({ status: 'pitched' })
+          .eq('id', leadId);
       }
 
-      // Navigate to new pitch page with pre-filled URL and lead ID
       navigate('/dashboard/new', { 
         state: { 
           prefilledUrl: lead.website_url,
@@ -242,8 +191,6 @@ export default function Leads() {
       setCreatingPitchIndex(null);
     }
   };
-
-  const unsavedCount = results.filter(r => r.website_url && !savedUrls.has(r.website_url)).length;
 
   return (
     <DashboardLayout>
@@ -374,23 +321,8 @@ export default function Leads() {
                     transition={{ duration: 0.3 }}
                   >
                     <p className="text-sm text-muted-foreground">
-                      Found <span className="font-medium text-foreground">{results.length}</span> businesses
+                      Found <span className="font-medium text-foreground">{results.length}</span> businesses — auto-saved to My Leads
                     </p>
-                    {unsavedCount > 0 && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={handleSaveAll}
-                        disabled={isSaving}
-                      >
-                        {isSaving ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Bookmark className="h-4 w-4 mr-2" />
-                        )}
-                        Save All ({unsavedCount})
-                      </Button>
-                    )}
                   </motion.div>
 
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -400,9 +332,7 @@ export default function Leads() {
                         lead={lead}
                         index={index}
                         isSaved={lead.website_url ? savedUrls.has(lead.website_url) : false}
-                        onSave={() => handleSaveLead(lead, index)}
                         onCreatePitch={() => handleCreatePitch(lead, index)}
-                        isSaving={savingIndex === index}
                         isCreatingPitch={creatingPitchIndex === index}
                       />
                     ))}
