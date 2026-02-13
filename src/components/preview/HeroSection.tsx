@@ -504,24 +504,15 @@ export function HeroSection({
                   linear-gradient(180deg, #050510 0%, #0a0a2e 50%, #050510 100%)
                 `,
               }} />
-              {/* Animated perspective grid — single large grid fading to edges */}
-              <div className="absolute inset-0 overflow-hidden" style={{ perspective: '800px' }}>
-                <motion.div
-                  animate={{ opacity: [0.03, 0.07, 0.03] }}
-                  transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute inset-0"
-                  style={{
-                    transform: 'rotateX(60deg) translateY(-30%)',
-                    backgroundImage: `
-                      linear-gradient(${primaryColor || '#3b82f6'}20 1px, transparent 1px),
-                      linear-gradient(90deg, ${primaryColor || '#3b82f6'}20 1px, transparent 1px)
-                    `,
-                    backgroundSize: '80px 80px',
-                    maskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 20%, transparent 70%)',
-                    WebkitMaskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 20%, transparent 70%)',
-                  }}
-                />
-              </div>
+              {/* Soft radial glow accent */}
+              <motion.div
+                animate={{ opacity: [0.08, 0.15, 0.08] }}
+                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute inset-0"
+                style={{
+                  background: `radial-gradient(ellipse 60% 40% at 50% 60%, ${primaryColor || '#3b82f6'}18, transparent 70%)`,
+                }}
+              />
             </>
           )}
         </div>
