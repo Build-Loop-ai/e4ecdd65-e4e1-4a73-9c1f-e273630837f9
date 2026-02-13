@@ -25,11 +25,14 @@ Deno.serve(async (req) => {
 Detect the language of the source website from its content (headings, paragraphs, metadata, navigation).
 ALL generated text (headlines, section titles, CTAs, descriptions, value propositions, stat labels)
 MUST be in the SAME language as the source website.
-- If the website is in English, ALL output text must be in English.
-- If the website is in Dutch, ALL output text must be in Dutch.
-- If the website is in German, ALL output text must be in German.
-- And so on for any other language.
-NEVER default to Dutch for a non-Dutch website. NEVER default to English for a non-English website.
+
+DEFAULT LANGUAGE IS ENGLISH. If you cannot clearly determine the language, USE ENGLISH.
+- If the website is clearly in Dutch (most content is Dutch), output Dutch.
+- If the website is clearly in German (most content is German), output German.
+- If the website is in any other non-English language AND the majority of content is in that language, use that language.
+- If the website mixes languages, is ambiguous, or is primarily in English, USE ENGLISH.
+- Websites from non-English-speaking countries (e.g., Indonesia, Bali, Thailand) that have English content MUST get English output.
+NEVER default to Dutch. The safe default is ALWAYS English.
 Include a "detectedLanguage" field in your response (e.g. "en", "nl", "de", "fr", "es").
 
 ## BRAND COLOR ANALYSIS (CRITICAL)

@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { firecrawlApi } from '@/lib/api/firecrawl';
+import { generateImages, type MissingImages } from '@/lib/imageGeneration';
+import { getSuitableHeroImages } from '@/lib/businessIntelligence';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -71,7 +73,7 @@ export default function NewPitch() {
   const [scrapedData, setScrapedData] = useState<any>(null);
   const [processedSchema, setProcessedSchema] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [scanPhase, setScanPhase] = useState<'connecting' | 'extracting' | 'processing'>('connecting');
+  const [scanPhase, setScanPhase] = useState<'connecting' | 'extracting' | 'processing' | 'generating'>('connecting');
   const [userProfile, setUserProfile] = useState<{ full_name: string | null } | null>(null);
 
   // Fetch user profile for slug generation
@@ -102,6 +104,68 @@ export default function NewPitch() {
       setTemplate(processedSchema.businessIntelligence.recommendedTemplate);
     }
   }, [processedSchema]);
+
+  const generateMissingImages = async (schema: any, brandData: any) => {
+    const bi = schema?.businessIntelligence;
+    const heroImgs = getSuitableHeroImages(schema);
+    const galleryImgs = schema?.gallery?.images || [];
+    const servicesWithoutImages = (schema?.services || [])
+      .filter((s: any) => !s.image)
+      .map((s: any) => s.title)
+      .filter(Boolean)
+      .slice(0, 4);
+
+    const missingImages: MissingImages = {
+      hero: heroImgs.length === 0,
+      gallery: Math.max(0, 3 - galleryImgs.length),
+      services: servicesWithoutImages,
+    };
+
+    if (!missingImages.hero && missingImages.gallery === 0 && missingImages.services.length === 0) {
+      return schema;
+    }
+
+    setScanPhase('generating');
+    const pc = brandData?.colors?.primary || schema?.brandColors?.primary || '#6366f1';
+
+    try {
+      const genResult = await generateImages({
+        businessType: bi?.businessType || 'general',
+        industry: bi?.industry || 'other',
+        companyName: schema?.companyName || 'Business',
+        primaryColor: pc,
+        missingImages,
+      });
+
+      if (genResult.success && genResult.generatedImages) {
+        const gi = genResult.generatedImages;
+        const updated = { ...schema };
+
+        if (gi.hero) {
+          if (!updated.hero) updated.hero = { headline: '', subheadline: '', ctaText: '' };
+          updated.hero.backgroundImages = [gi.hero, ...(updated.hero.backgroundImages || [])];
+          if (!updated.classifiedImages) updated.classifiedImages = [];
+          updated.classifiedImages.push({ url: gi.hero, classification: 'hero', confidence: 0.95, hasText: false });
+        }
+        if (gi.gallery?.length) {
+          if (!updated.gallery) updated.gallery = { images: [], title: 'Gallery' };
+          updated.gallery.images = [...(updated.gallery.images || []), ...gi.gallery];
+        }
+        if (gi.services && Object.keys(gi.services).length > 0) {
+          updated.services = (updated.services || []).map((s: any) => {
+            if (!s.image && gi.services[s.title]) {
+              return { ...s, image: gi.services[s.title] };
+            }
+            return s;
+          });
+        }
+        return updated;
+      }
+    } catch (e) {
+      console.error('Image generation failed:', e);
+    }
+    return schema;
+  };
 
   const handleScrapeAuto = async (autoUrl: string, autoClientName: string) => {
     setIsLoading(true);
@@ -134,7 +198,8 @@ export default function NewPitch() {
         throw new Error(processError?.message || processedResult?.error || 'AI processing failed');
       }
 
-      setProcessedSchema(processedResult.schema);
+      const schemaWithImages = await generateMissingImages(processedResult.schema, scraped.branding);
+      setProcessedSchema(schemaWithImages);
       setStep('template');
     } catch (error) {
       console.error('Error:', error);
@@ -189,7 +254,8 @@ export default function NewPitch() {
         throw new Error(processError?.message || processedResult?.error || 'AI processing failed');
       }
 
-      setProcessedSchema(processedResult.schema);
+      const schemaWithImages = await generateMissingImages(processedResult.schema, scraped.branding);
+      setProcessedSchema(schemaWithImages);
       setStep('template');
     } catch (error) {
       console.error('Error:', error);
@@ -485,6 +551,7 @@ export default function NewPitch() {
                     {scanPhase === 'connecting' && 'Connecting to website...'}
                     {scanPhase === 'extracting' && 'Extracting content...'}
                     {scanPhase === 'processing' && 'AI is analyzing...'}
+                    {scanPhase === 'generating' && 'Generating visuals...'}
                   </h3>
                   <p className="text-sm text-muted-foreground font-mono">{url}</p>
                 </div>
@@ -495,8 +562,9 @@ export default function NewPitch() {
                     { key: 'connecting', label: 'Connect to website' },
                     { key: 'extracting', label: 'Extract content & assets' },
                     { key: 'processing', label: 'AI content analysis' },
+                    { key: 'generating', label: 'Generate missing visuals' },
                   ].map((phase, index) => {
-                    const phases = ['connecting', 'extracting', 'processing'];
+                    const phases = ['connecting', 'extracting', 'processing', 'generating'];
                     const currentIndex = phases.indexOf(scanPhase);
                     const isComplete = index < currentIndex;
                     const isCurrent = index === currentIndex;
