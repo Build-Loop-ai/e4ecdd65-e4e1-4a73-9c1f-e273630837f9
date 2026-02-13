@@ -251,13 +251,13 @@ export default function Demo() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
-          className="bg-white/15 backdrop-blur-xl rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between"
+          className="bg-white backdrop-blur-xl rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between shadow-lg"
         >
           <Link to="/">
             <PitchLogo size="md" />
           </Link>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild className="rounded-xl text-white/60 hover:text-white hover:bg-white/10">
+            <Button variant="ghost" size="sm" asChild className="rounded-xl text-foreground/60 hover:text-foreground hover:bg-muted">
               <Link to="/auth">Log in</Link>
             </Button>
             <Button size="sm" asChild className="rounded-xl bg-primary hover:bg-primary/90">
