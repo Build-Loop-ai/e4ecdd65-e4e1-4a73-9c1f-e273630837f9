@@ -315,23 +315,23 @@ export default function Demo() {
                 transition={{ delay: 0.4 }}
                 className="relative max-w-xl mx-auto"
               >
-                <div className="relative flex gap-3 bg-white/5 backdrop-blur-sm rounded-2xl p-2">
+                <div className="relative flex gap-3 bg-white/20 backdrop-blur-md rounded-2xl p-2">
                   <div className="relative flex-1">
-                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/30" />
+                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/50" />
                     <Input
                       type="url"
                       placeholder="https://example.com"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter' && url) handleScan(); }}
-                      className="h-12 pl-12 text-base rounded-xl border-0 bg-transparent text-white placeholder:text-white/25 focus-visible:ring-1 focus-visible:ring-primary/50"
+                      className="h-12 pl-12 text-base rounded-xl border-0 bg-transparent text-white placeholder:text-white/50 focus-visible:ring-1 focus-visible:ring-white/30"
                     />
                   </div>
                   <Button
                     onClick={handleScan}
                     disabled={isLoading || !url}
                     size="lg"
-                    className="h-12 px-8 rounded-xl text-base font-medium shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90"
+                    className="h-12 px-8 rounded-xl text-base font-medium shadow-lg bg-white/25 hover:bg-white/35 text-white backdrop-blur-sm"
                   >
                     <Sparkles className="h-4 w-4 mr-2" />
                     Transform
@@ -343,7 +343,7 @@ export default function Demo() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
-                className="text-xs text-white/30 mt-4"
+                className="text-xs text-white/60 mt-4"
               >
                 Works with any live website · Takes about 30 seconds
               </motion.p>
