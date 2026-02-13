@@ -603,199 +603,124 @@ export function HeroSection({
     );
   }
 
-  // ========== CORPORATE CLASSIC - Split-screen image+text, Ken Burns ==========
+  // ========== CORPORATE CLASSIC - Full-width hero, value prop front & center ==========
   return (
-    <section ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* Subtle professional pattern */}
-      <div className="absolute inset-0 opacity-[0.015]" style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, #000 1px, transparent 0)`,
-        backgroundSize: '40px 40px',
-      }} />
-
-      <div className="container mx-auto max-w-7xl px-6 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center min-h-screen py-24">
-          {/* Left - Text content */}
-          <motion.div 
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="order-2 lg:order-1"
-          >
-            {logo && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="mb-10"
-              >
-                <SmartLogo 
-                  src={logo} 
-                  alt={companyName || 'Logo'} 
-                  className="h-12 w-auto object-contain"
-                  onDark={false}
-                />
-              </motion.div>
-            )}
-
-            {!logo && companyName && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="mb-8"
-              >
-                <span 
-                  className="inline-block text-sm font-semibold tracking-widest uppercase px-4 py-2 rounded-full"
-                  style={{
-                    backgroundColor: `${primaryColor || '#3b82f6'}15`,
-                    color: primaryColor || '#3b82f6',
-                  }}
-                >
-                  {companyName}
-                </span>
-              </motion.div>
-            )}
-
-            <motion.h1 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 leading-[1.1] tracking-tight mb-6"
-            >
-              {headline}
-            </motion.h1>
-
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-lg md:text-xl text-slate-600 max-w-lg leading-relaxed mb-10"
-            >
-              {subheadline}
-            </motion.p>
-
+    <section ref={containerRef} className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Background - image with overlay or clean gradient */}
+      <div className="absolute inset-0">
+        {bgImage ? (
+          <>
+            <motion.img
+              src={bgImage}
+              alt=""
+              className="w-full h-full object-cover"
+              animate={{ scale: [1, 1.06, 1] }}
+              transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/75 to-slate-900/50" />
+          </>
+        ) : (
+          <>
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor || '#1e40af'} 0%, ${primaryColor || '#1e40af'}dd 40%, ${primaryColor || '#1e40af'}99 100%)`,
+              }}
+            />
+            {/* Subtle grid texture */}
+            <div className="absolute inset-0 opacity-[0.06]" style={{
+              backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+              backgroundSize: '60px 60px',
+            }} />
+            {/* Soft accent glow */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
+              style={{ background: `radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)` }}
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </>
+        )}
+      </div>
+
+      <motion.div style={{ y, opacity }} className="container mx-auto max-w-5xl relative z-10 px-6 py-32">
+        <div className="max-w-3xl">
+          {logo && (
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="flex flex-wrap gap-4"
+              transition={{ duration: 0.6 }}
+              className="mb-10"
             >
-              <Button
-                size="lg"
-                onClick={handlePreviewClick}
-                className="text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
-                style={{
-                  backgroundColor: primaryColor || '#1e40af',
-                  color: buttonTextColor,
-                }}
-              >
-                {ctaText}
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={handlePreviewClick}
-                className="text-base px-8 py-6 rounded-lg font-semibold border-slate-300 text-slate-700 hover:bg-slate-100"
-              >
-                Meer info
-              </Button>
+              <SmartLogo 
+                src={logo} 
+                alt={companyName || 'Logo'} 
+                className="h-12 w-auto object-contain"
+                onDark={true}
+                fallbackText={companyName}
+              />
             </motion.div>
-          </motion.div>
+          )}
 
-          {/* Right - Image or Rich Visual */}
-          <motion.div 
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="order-1 lg:order-2 relative"
+          {!logo && companyName && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mb-6"
+            >
+              <span className="inline-block text-sm font-semibold tracking-widest uppercase text-white/70">
+                {companyName}
+              </span>
+            </motion.div>
+          )}
+
+          <motion.h1 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6"
           >
-            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-200">
-              {bgImage ? (
-                <motion.img
-                  src={bgImage}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  animate={{ scale: [1, 1.08, 1] }}
-                  transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-                />
-              ) : (
-                /* Rich branded visual fallback instead of empty pattern */
-                <div className="w-full h-full relative" style={{ backgroundColor: `${primaryColor || '#3b82f6'}08` }}>
-                  {/* Strong diagonal gradient with brand color */}
-                  <div 
-                    className="absolute inset-0"
-                    style={{
-                      background: `linear-gradient(145deg, ${primaryColor || '#3b82f6'}25 0%, ${primaryColor || '#3b82f6'}08 40%, ${primaryColor || '#3b82f6'}18 100%)`,
-                    }}
-                  />
-                  
-                  {/* Large brand accent shape */}
-                  <motion.div
-                    className="absolute -top-20 -right-20 w-[70%] h-[70%] rounded-full"
-                    style={{ 
-                      background: `radial-gradient(circle, ${primaryColor || '#3b82f6'}30 0%, transparent 70%)`,
-                    }}
-                    animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.9, 0.6] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                  <motion.div
-                    className="absolute -bottom-10 -left-10 w-[50%] h-[50%] rounded-full"
-                    style={{ 
-                      background: `radial-gradient(circle, ${primaryColor || '#3b82f6'}20 0%, transparent 70%)`,
-                    }}
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
-                    transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-                  />
+            {headline}
+          </motion.h1>
 
-                  {/* Grid lines for texture */}
-                  <div className="absolute inset-0 opacity-[0.06]" style={{
-                    backgroundImage: `linear-gradient(to right, ${primaryColor || '#3b82f6'} 1px, transparent 1px), linear-gradient(to bottom, ${primaryColor || '#3b82f6'} 1px, transparent 1px)`,
-                    backgroundSize: '48px 48px',
-                  }} />
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="text-lg md:text-xl text-white/80 max-w-xl leading-relaxed mb-10"
+          >
+            {subheadline}
+          </motion.p>
 
-                  {/* Large initial letter */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <motion.span
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 1, delay: 0.5 }}
-                      className="text-[12rem] md:text-[16rem] font-black leading-none select-none"
-                      style={{ 
-                        color: primaryColor || '#3b82f6',
-                        opacity: 0.08,
-                      }}
-                    >
-                      {(companyName || headline || 'P').charAt(0).toUpperCase()}
-                    </motion.span>
-                  </div>
-
-                  {/* Subtle shine sweep */}
-                  <motion.div
-                    className="absolute inset-0"
-                    style={{
-                      background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.12) 50%, transparent 70%)',
-                    }}
-                    animate={{ x: ['-100%', '200%'] }}
-                    transition={{ duration: 6, repeat: Infinity, repeatDelay: 8, ease: 'easeInOut' }}
-                  />
-                </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent" />
-            </div>
-            
-            {/* Decorative element */}
-            <div 
-              className="absolute -bottom-6 -left-6 w-32 h-32 rounded-2xl -z-10"
-              style={{ backgroundColor: primaryColor || '#3b82f6', opacity: 0.15 }}
-            />
-            <div 
-              className="absolute -top-4 -right-4 w-20 h-20 rounded-xl -z-10"
-              style={{ backgroundColor: primaryColor || '#3b82f6', opacity: 0.1 }}
-            />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.55 }}
+            className="flex flex-wrap gap-4"
+          >
+            <Button
+              size="lg"
+              onClick={handlePreviewClick}
+              className="group text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg bg-white text-slate-900 hover:bg-white/90"
+            >
+              {ctaText}
+              <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handlePreviewClick}
+              className="text-base px-8 py-6 rounded-lg font-semibold border-white/30 text-white hover:bg-white/10"
+            >
+              Meer info
+            </Button>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Bottom fade to white */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-10" />
     </section>
   );
 }
