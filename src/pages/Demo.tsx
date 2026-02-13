@@ -303,7 +303,6 @@ export default function Demo() {
         primaryColor={primaryColor}
         templateId={templateId}
         classifiedImages={schema?.classifiedImages}
-        fallbackPattern={schema?.hero?.fallbackPattern}
         industry={businessIntelligence?.industry}
       />
       {sectionOrder.map((section) => sectionComponents[section])}

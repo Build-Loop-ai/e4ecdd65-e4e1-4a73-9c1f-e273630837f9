@@ -43,6 +43,12 @@ export function AboutSection({
 
   const y = useTransform(scrollYProgress, [0, 1], [100, -100]);
 
+  // Guard: don't render if no meaningful content
+  const hasDescription = description && description.trim().length > 0;
+  const hasValueProps = valueProps && valueProps.length > 0;
+  const hasStats = stats && stats.length > 0;
+  if (!hasDescription && !hasValueProps && !hasStats) return null;
+
   // ========== ELEGANT MINIMAL ==========
   if (effectiveTemplateId === 'elegant-minimal') {
     return (

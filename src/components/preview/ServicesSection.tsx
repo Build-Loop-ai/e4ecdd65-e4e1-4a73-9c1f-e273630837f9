@@ -197,6 +197,7 @@ export function ServicesSection({
                       src={service.image} 
                       alt={service.title}
                       className="w-8 h-8 object-contain"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
                     />
                   ) : (
                     <div 
@@ -206,10 +207,10 @@ export function ServicesSection({
                   )}
                 </motion.div>
                 
-                <h3 className="text-lg font-bold mb-3 text-foreground">
+                <h3 className="text-lg font-bold mb-3 text-foreground line-clamp-2">
                   {service.title}
                 </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
+                <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
                   {service.description}
                 </p>
               </motion.div>
@@ -262,10 +263,10 @@ export function ServicesSection({
                     >
                       {String(index + 1).padStart(2, '0')}
                     </motion.span>
-                    <h3 className="text-2xl md:text-3xl lg:text-5xl font-bold text-white mb-6">
+                    <h3 className="text-2xl md:text-3xl lg:text-5xl font-bold text-white mb-6 line-clamp-2">
                       {service.title}
                     </h3>
-                    <p className="text-lg md:text-xl text-white/50 leading-relaxed max-w-lg">
+                    <p className="text-lg md:text-xl text-white/50 leading-relaxed max-w-lg line-clamp-4">
                       {service.description}
                     </p>
                   </div>
@@ -281,6 +282,7 @@ export function ServicesSection({
                         src={service.image} 
                         alt={service.title}
                         className="w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.parentElement!.parentElement!.style.display = 'none'; }}
                       />
                     </motion.div>
                   )}
@@ -385,14 +387,15 @@ export function ServicesSection({
                         src={service.image} 
                         alt={service.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={(e) => { e.currentTarget.parentElement!.style.display = 'none'; }}
                       />
                     </div>
                   )}
                   
-                  <h3 className="text-xl md:text-2xl font-semibold text-white mb-4">
+                  <h3 className="text-xl md:text-2xl font-semibold text-white mb-4 line-clamp-2">
                     {service.title}
                   </h3>
-                  <p className="text-white/50 leading-relaxed flex-1">
+                  <p className="text-white/50 leading-relaxed flex-1 line-clamp-4">
                     {service.description}
                   </p>
 
@@ -433,9 +436,10 @@ export function ServicesSection({
           <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight mb-4">
             {title}
           </h2>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-            Professional services tailored to your needs
-          </p>
+          <div 
+            className="w-20 h-1 mx-auto"
+            style={{ backgroundColor: primaryColor || '#1e40af' }}
+          />
         </motion.div>
 
         {/* Cards grid - symmetrical */}
@@ -449,7 +453,9 @@ export function ServicesSection({
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="group"
             >
-              <div className="h-full bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-slate-200 transition-all duration-300 hover:-translate-y-1">
+              <div className="h-full bg-white rounded-2xl p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:border-slate-200 transition-all duration-300 hover:-translate-y-1"
+                style={{ '--glow-color': primaryColor || '#1e40af' } as React.CSSProperties}
+              >
                 {/* Service image or accent bar */}
                 {service.image ? (
                   <div className="aspect-video rounded-xl overflow-hidden mb-6">
@@ -457,6 +463,7 @@ export function ServicesSection({
                       src={service.image} 
                       alt={service.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => { e.currentTarget.parentElement!.style.display = 'none'; }}
                     />
                   </div>
                 ) : (
@@ -466,10 +473,10 @@ export function ServicesSection({
                   />
                 )}
                 
-                <h3 className="text-xl font-semibold text-slate-900 mb-3 group-hover:text-primary transition-colors">
+                <h3 className="text-xl font-semibold text-slate-900 mb-3 group-hover:text-primary transition-colors line-clamp-2">
                   {service.title}
                 </h3>
-                <p className="text-slate-600 leading-relaxed text-sm">
+                <p className="text-slate-600 leading-relaxed text-sm line-clamp-3">
                   {service.description}
                 </p>
 

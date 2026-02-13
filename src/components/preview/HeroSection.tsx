@@ -8,10 +8,7 @@ import { SmartLogo } from './SmartLogo';
 import { WaveDivider } from '@/components/animations/WaveDivider';
 
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
-import { 
-  type ClassifiedImage,
-  type FallbackPatternType,
-} from '@/lib/businessIntelligence';
+import { type ClassifiedImage } from '@/lib/businessIntelligence';
 
 import { getButtonTextColor, isDarkColor, getReadableTextColor } from '@/lib/colorContrast';
 import { toast } from 'sonner';
@@ -45,9 +42,7 @@ interface HeroSectionProps {
   isModern?: boolean;
   primaryColor?: string;
   templateId?: TemplateId;
-  // New props for intelligent image handling
   classifiedImages?: ClassifiedImage[];
-  fallbackPattern?: FallbackPatternType;
   industry?: string;
 }
 
@@ -62,7 +57,6 @@ export function HeroSection({
   primaryColor,
   templateId,
   classifiedImages,
-  fallbackPattern,
   industry,
 }: HeroSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -101,12 +95,17 @@ export function HeroSection({
       }
     }
     
-    // No suitable image found - use pattern fallback
-    console.log('No suitable hero images found, using pattern fallback');
+    // No suitable image found - use gradient fallback
+    console.log('No suitable hero images found, using gradient fallback');
     return null;
   };
 
   const bgImage = getSuitableImage();
+
+  // Robust text fallbacks for empty/missing content
+  const displayHeadline = headline || companyName || 'Welcome';
+  const displaySubheadline = subheadline || 'Discover what we have to offer';
+  const displayCta = ctaText || 'Learn More';
 
 
 
@@ -173,7 +172,7 @@ export function HeroSection({
             className="text-4xl md:text-6xl lg:text-7xl font-light text-stone-900 leading-[1.1] tracking-[-0.03em] mb-12"
             style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
           >
-            {headline}
+            {displayHeadline}
           </motion.h1>
 
           <motion.div 
@@ -191,7 +190,7 @@ export function HeroSection({
             className="text-lg md:text-xl text-stone-500 max-w-xl mx-auto leading-relaxed tracking-wide"
             style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
           >
-            {subheadline}
+            {displaySubheadline}
           </motion.p>
 
           <motion.div
@@ -293,7 +292,7 @@ export function HeroSection({
               transition={{ duration: 0.7, delay: 0.1 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6"
             >
-              {headline}
+              {displayHeadline}
             </motion.h1>
 
             <motion.p 
@@ -302,7 +301,7 @@ export function HeroSection({
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg md:text-xl text-white/80 max-w-xl leading-relaxed mb-10"
             >
-              {subheadline}
+              {displaySubheadline}
             </motion.p>
 
             <motion.div
@@ -320,7 +319,7 @@ export function HeroSection({
                   color: buttonTextColor,
                 }}
               >
-                {ctaText}
+                {displayCta}
                 <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </motion.div>
@@ -422,7 +421,7 @@ export function HeroSection({
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-white leading-[0.95] tracking-tight mb-8"
           >
-            {headline}
+            {displayHeadline}
           </motion.h1>
 
           <motion.p 
@@ -431,7 +430,7 @@ export function HeroSection({
             transition={{ duration: 0.6, delay: 0.5 }}
             className="text-xl md:text-2xl text-white/70 max-w-2xl mx-auto leading-relaxed mb-12"
           >
-            {subheadline}
+            {displaySubheadline}
           </motion.p>
 
           <motion.div
@@ -449,7 +448,7 @@ export function HeroSection({
                 boxShadow: `0 0 60px -15px ${primaryColor || '#3b82f6'}`,
               }}
             >
-              {ctaText}
+              {displayCta}
               <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </motion.div>
@@ -643,7 +642,7 @@ export function HeroSection({
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-4xl md:text-5xl lg:text-7xl font-bold text-white leading-[1.05] tracking-tight mb-8"
           >
-            {headline}
+            {displayHeadline}
           </motion.h1>
 
           <motion.p
@@ -652,7 +651,7 @@ export function HeroSection({
             transition={{ duration: 0.6, delay: 0.4 }}
             className="text-lg md:text-xl lg:text-2xl text-white/60 max-w-2xl mx-auto leading-relaxed mb-14"
           >
-            {subheadline}
+            {displaySubheadline}
           </motion.p>
 
           <motion.div
@@ -671,7 +670,7 @@ export function HeroSection({
                 boxShadow: `0 0 60px -10px ${primaryColor || '#3b82f6'}80, 0 0 120px -30px ${primaryColor || '#3b82f6'}40`,
               }}
             >
-              {ctaText}
+              {displayCta}
               <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button
@@ -797,7 +796,7 @@ export function HeroSection({
             transition={{ duration: 0.7, delay: 0.15 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6"
           >
-            {headline}
+            {displayHeadline}
           </motion.h1>
 
           <motion.p 
@@ -806,7 +805,7 @@ export function HeroSection({
             transition={{ duration: 0.6, delay: 0.35 }}
             className="text-lg md:text-xl text-white/80 max-w-xl leading-relaxed mb-10"
           >
-            {subheadline}
+            {displaySubheadline}
           </motion.p>
 
           <motion.div
@@ -824,7 +823,7 @@ export function HeroSection({
                 color: '#1e293b',
               }}
             >
-              {ctaText}
+              {displayCta}
               <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button

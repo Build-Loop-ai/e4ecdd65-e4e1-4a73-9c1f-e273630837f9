@@ -141,8 +141,8 @@ export default function Preview() {
     return (
       <div className="min-h-screen bg-foreground flex items-center justify-center">
         <div className="text-center text-background">
-          <h1 className="text-4xl font-black mb-4">Preview niet gevonden</h1>
-          <p className="text-background/60">Deze preview link is mogelijk ongeldig of verlopen.</p>
+        <h1 className="text-4xl font-black mb-4">Preview not found</h1>
+          <p className="text-background/60">This preview link may be invalid or expired.</p>
         </div>
       </div>
     );
@@ -245,15 +245,14 @@ export default function Preview() {
       {/* Hero is always first */}
       <HeroSection
         companyName={schema?.companyName}
-        headline={schema?.hero?.headline || 'Welkom op uw nieuwe website'}
-        subheadline={schema?.hero?.subheadline || 'Een professionele online aanwezigheid voor uw bedrijf'}
-        ctaText={schema?.hero?.ctaText || 'Aan de slag'}
+        headline={schema?.hero?.headline || 'Welcome to your new website'}
+        subheadline={schema?.hero?.subheadline || 'A professional online presence for your business'}
+        ctaText={schema?.hero?.ctaText || 'Get Started'}
         logo={logo}
         backgroundImages={schema?.hero?.backgroundImages}
         primaryColor={primaryColor}
         templateId={templateId}
         classifiedImages={schema?.classifiedImages}
-        fallbackPattern={schema?.hero?.fallbackPattern}
         industry={businessIntelligence.industry}
       />
 

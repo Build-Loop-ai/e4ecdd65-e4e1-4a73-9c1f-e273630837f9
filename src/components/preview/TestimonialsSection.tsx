@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTemplateStyle, type TemplateId } from '@/lib/templateStyles';
 import { MarqueeText } from '@/components/animations/MarqueeText';
@@ -34,6 +34,16 @@ export function TestimonialsSection({
   const validTestimonials = testimonials?.filter(t => 
     t.quote && t.quote.length >= 20 && t.author && t.author.length >= 2
   ) || [];
+
+  // Auto-rotation for carousel-based templates
+  const isCarousel = templateId === 'corporate-classic' || templateId === 'elegant-minimal' || templateId === 'modern-professional';
+  useEffect(() => {
+    if (!isCarousel || validTestimonials.length <= 1) return;
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % validTestimonials.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [isCarousel, validTestimonials.length]);
 
   // Require minimum 2 valid testimonials to show section
   if (validTestimonials.length < 2) return null;

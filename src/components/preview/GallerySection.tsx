@@ -343,7 +343,8 @@ export function GallerySection({
               <img 
                 src={image} 
                 alt={`Gallery ${index + 1}`}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+                className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110"
                 onError={(e) => { e.currentTarget.parentElement!.style.display = 'none'; }}
               />
             </motion.div>
