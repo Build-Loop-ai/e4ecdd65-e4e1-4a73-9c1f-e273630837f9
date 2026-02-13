@@ -29,6 +29,7 @@ import { WarmyConnection } from '@/hooks/useWarmyStatus';
 import { TemperatureGauge } from './TemperatureGauge';
 import { SendingCapacityBar } from './SendingCapacityBar';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface WarmyStatusCardProps {
   connection: WarmyConnection;
@@ -149,26 +150,49 @@ export function WarmyStatusCard({
       <CardContent className="space-y-4">
         <TemperatureGauge temperature={temperature} size="sm" />
         <SendingCapacityBar sent={sentToday} limit={dailyLimit} size="sm" />
-        <div className="grid grid-cols-3 gap-3">
-          <div className="text-center p-2 rounded-lg bg-muted/50">
-            <p className={cn("text-lg font-bold", getScoreColor(connection.deliverability_score))}>
-              {connection.deliverability_score ?? '—'}
-            </p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Deliverability</p>
+        <TooltipProvider delayDuration={200}>
+          <div className="grid grid-cols-3 gap-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-center p-2 rounded-lg bg-muted/50 cursor-help">
+                  <p className={cn("text-lg font-bold", getScoreColor(connection.deliverability_score))}>
+                    {connection.deliverability_score ?? '—'}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Deliverability</p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[200px] text-center">
+                <p className="text-xs">How likely your emails are to reach the recipient's inbox instead of spam.</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-center p-2 rounded-lg bg-muted/50 cursor-help">
+                  <p className={cn("text-lg font-bold", getScoreColor(connection.placement_score))}>
+                    {connection.placement_score ?? '—'}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Placement</p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[200px] text-center">
+                <p className="text-xs">Where your emails land — primary inbox, promotions tab, or spam folder.</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="text-center p-2 rounded-lg bg-muted/50 cursor-help">
+                  <p className={cn("text-lg font-bold", getScoreColor(connection.dns_score))}>
+                    {connection.dns_score ?? '—'}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">DNS</p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[200px] text-center">
+                <p className="text-xs">Health of your domain's email authentication (SPF, DKIM, DMARC records).</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
-          <div className="text-center p-2 rounded-lg bg-muted/50">
-            <p className={cn("text-lg font-bold", getScoreColor(connection.placement_score))}>
-              {connection.placement_score ?? '—'}
-            </p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Placement</p>
-          </div>
-          <div className="text-center p-2 rounded-lg bg-muted/50">
-            <p className={cn("text-lg font-bold", getScoreColor(connection.dns_score))}>
-              {connection.dns_score ?? '—'}
-            </p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">DNS</p>
-          </div>
-        </div>
+        </TooltipProvider>
 
         {connection.last_warmy_sync && (
           <p className="text-xs text-muted-foreground text-center">
