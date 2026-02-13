@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Users, FileText, Eye, Search, Mail, MessageSquare, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Users, FileText, Eye, Search, Mail, MessageSquare, ArrowLeft, ShieldCheck, Inbox } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { PitchLogo } from '@/components/ui/PitchLogo';
@@ -67,6 +67,7 @@ export default function Admin() {
             <KPICard icon={Search} label="Leads Saved" value={data.kpis.totalLeads} />
             <KPICard icon={Mail} label="Emails Sent" value={data.kpis.totalEmailsSent} />
             <KPICard icon={MessageSquare} label="Feedback" value={data.kpis.totalFeedback} />
+            <KPICard icon={Inbox} label="Demo Leads" value={data.kpis.totalDemoLeads ?? 0} />
           </div>
         ) : null}
 
@@ -75,7 +76,9 @@ export default function Admin() {
           <TabsList>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="pitches">Pitches</TabsTrigger>
+            <TabsTrigger value="demo-leads">Demo Leads</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="email">Email Health</TabsTrigger>
             <TabsTrigger value="email">Email Health</TabsTrigger>
           </TabsList>
 
@@ -152,6 +155,43 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>{p.views}</TableCell>
                           <TableCell className="text-muted-foreground text-xs">{format(new Date(p.created_at), 'MMM d, yyyy')}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Demo Leads Tab */}
+          <TabsContent value="demo-leads">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Demo Page Leads</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {isLoading ? (
+                  <div className="p-6"><Skeleton className="h-40 w-full" /></div>
+                ) : !data?.demoLeads?.length ? (
+                  <p className="text-sm text-muted-foreground py-8 text-center">No demo leads yet</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Email</TableHead>
+                        <TableHead>URL Submitted</TableHead>
+                        <TableHead>Preview Slug</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {data.demoLeads.map((d: any) => (
+                        <TableRow key={d.id}>
+                          <TableCell className="font-medium">{d.email}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs max-w-[200px] truncate">{d.url_submitted}</TableCell>
+                          <TableCell className="text-xs">{d.preview_slug || '—'}</TableCell>
+                          <TableCell className="text-muted-foreground text-xs">{format(new Date(d.created_at), 'MMM d, yyyy HH:mm')}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

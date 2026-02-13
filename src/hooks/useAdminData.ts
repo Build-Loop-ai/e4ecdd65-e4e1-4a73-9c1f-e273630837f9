@@ -10,6 +10,7 @@ export interface AdminKPIs {
   totalLeads: number;
   totalEmailsSent: number;
   totalFeedback: number;
+  totalDemoLeads: number;
 }
 
 export interface AdminUser {
@@ -55,12 +56,21 @@ export interface AdminEmailHealth {
   is_active: boolean;
 }
 
+export interface DemoLead {
+  id: string;
+  email: string;
+  url_submitted: string;
+  preview_slug: string | null;
+  created_at: string;
+}
+
 export interface AdminData {
   kpis: AdminKPIs;
   usersTable: AdminUser[];
   pitchesTable: AdminPitch[];
   activity: AdminActivity[];
   emailHealth: AdminEmailHealth[];
+  demoLeads: DemoLead[];
 }
 
 export function useAdminData() {
