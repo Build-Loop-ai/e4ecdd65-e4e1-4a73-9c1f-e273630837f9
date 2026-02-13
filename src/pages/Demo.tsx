@@ -242,8 +242,8 @@ export default function Demo() {
         className="fixed inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${heroGradient})` }}
       />
-      {/* Dark overlay for text readability */}
-      <div className="fixed inset-0 bg-black/40" />
+      {/* Subtle overlay for text contrast only */}
+      <div className="fixed inset-0 bg-black/10" />
 
       {/* Header */}
       <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl px-1">
@@ -282,7 +282,7 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/15 text-primary text-sm font-medium mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 text-white text-sm font-medium mb-6"
               >
                 <Zap className="h-4 w-4" />
                 Free Demo — No signup needed
@@ -295,7 +295,7 @@ export default function Demo() {
                 className="text-4xl sm:text-6xl font-bold tracking-tight mb-5"
               >
                 <span className="text-white">See your website </span>
-                <span className="bg-gradient-to-r from-primary via-[hsl(260,80%,70%)] to-primary bg-clip-text text-transparent">
+                <span className="text-white">
                   reimagined
                 </span>
               </motion.h1>
@@ -304,7 +304,7 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-lg text-white/50 mb-10 max-w-lg mx-auto"
+                className="text-lg text-white/80 mb-10 max-w-lg mx-auto"
               >
                 Enter any website URL and watch our AI rebuild it with a stunning premium template in seconds.
               </motion.p>
@@ -363,9 +363,9 @@ export default function Demo() {
                 ].map((feat) => (
                   <div
                     key={feat.label}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 text-xs text-white/40"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-xs text-white/70"
                   >
-                    <feat.icon className="h-3.5 w-3.5 text-primary/60" />
+                    <feat.icon className="h-3.5 w-3.5 text-white/60" />
                     {feat.label}
                   </div>
                 ))}
