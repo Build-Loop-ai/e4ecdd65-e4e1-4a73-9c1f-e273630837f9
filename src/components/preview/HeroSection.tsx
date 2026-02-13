@@ -137,11 +137,6 @@ export function HeroSection({
           <div className="absolute inset-0 bg-stone-50/85" />
         </div>
 
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: `linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px)`,
-          backgroundSize: '80px 80px',
-        }} />
 
         <motion.div style={{ opacity }} className="container mx-auto max-w-4xl text-center relative z-10 px-6 py-32">
           {logo && (
@@ -327,11 +322,6 @@ export function HeroSection({
           )}
         </div>
 
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-[0.08]" style={{
-          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px',
-        }} />
 
         {/* Subtle gradient orb */}
         <motion.div 
@@ -674,11 +664,6 @@ export function HeroSection({
                 background: `linear-gradient(135deg, ${primaryColor || '#1e40af'} 0%, ${primaryColor || '#1e40af'}dd 40%, ${primaryColor || '#1e40af'}99 100%)`,
               }}
             />
-            {/* Subtle grid texture */}
-            <div className="absolute inset-0 opacity-[0.06]" style={{
-              backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-              backgroundSize: '60px 60px',
-            }} />
             {/* Soft accent glow */}
             <motion.div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
