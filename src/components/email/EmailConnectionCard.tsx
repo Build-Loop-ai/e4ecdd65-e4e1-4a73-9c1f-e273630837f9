@@ -248,16 +248,6 @@ export function EmailConnectionsSection() {
           onSendTest={sendTestEmail}
           isConnecting={isConnecting}
         />
-        
-        <ProviderCard
-          provider="outlook"
-          connection={outlookConnection}
-          onConnect={handleConnectOutlook}
-          onDisconnect={disconnectEmail}
-          onSendTest={sendTestEmail}
-          isConnecting={isConnecting}
-          comingSoon={true}
-        />
 
         <Separator />
 
