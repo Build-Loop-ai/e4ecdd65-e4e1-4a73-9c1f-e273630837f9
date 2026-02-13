@@ -22,7 +22,7 @@ interface ServicesSectionProps {
 
 export function ServicesSection({
   services,
-  title = 'Onze Diensten',
+  title = 'Our Services',
   isModern = false,
   primaryColor,
   templateId,

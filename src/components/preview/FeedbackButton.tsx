@@ -52,8 +52,8 @@ export function FeedbackButton({ previewId, primaryColor }: FeedbackButtonProps)
         .eq('id', previewId);
 
       toast({
-        title: 'Feedback verzonden!',
-        description: 'Bedankt voor je feedback. We nemen het mee.',
+        title: 'Feedback sent!',
+        description: 'Thank you for your feedback. We\'ll take it from here.',
       });
       setOpen(false);
     }
@@ -73,31 +73,31 @@ export function FeedbackButton({ previewId, primaryColor }: FeedbackButtonProps)
             }}
           >
             <MessageSquare className="h-5 w-5 mr-2" />
-            Wijzigingen aanvragen
+            Request Changes
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Wijzigingen aanvragen</DialogTitle>
+            <DialogTitle>Request Changes</DialogTitle>
             <DialogDescription>
-              Laat ons weten welke aanpassingen je wilt zien op je nieuwe website
+              Let us know what adjustments you'd like to see on your new website
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Je naam (optioneel)</Label>
-              <Input id="name" name="name" placeholder="Jan Jansen" />
+              <Label htmlFor="name">Your name (optional)</Label>
+              <Input id="name" name="name" placeholder="John Smith" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail (optioneel)</Label>
-              <Input id="email" name="email" type="email" placeholder="jan@voorbeeld.nl" />
+              <Label htmlFor="email">Email (optional)</Label>
+              <Input id="email" name="email" type="email" placeholder="john@example.com" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="feedback">Wat wil je aanpassen?</Label>
+              <Label htmlFor="feedback">What would you like to change?</Label>
               <Textarea
                 id="feedback"
                 name="feedback"
-                placeholder="Ik wil graag de hero tekst aanpassen en meer diensten toevoegen..."
+                placeholder="I'd like to update the hero text and add more services..."
                 required
                 rows={4}
               />
@@ -112,7 +112,7 @@ export function FeedbackButton({ previewId, primaryColor }: FeedbackButtonProps)
               }}
             >
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Verstuur feedback
+              Submit Feedback
             </Button>
           </form>
         </DialogContent>

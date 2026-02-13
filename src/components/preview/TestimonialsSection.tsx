@@ -21,7 +21,7 @@ interface TestimonialsSectionProps {
 
 export function TestimonialsSection({
   testimonials,
-  title = 'Wat Klanten Zeggen',
+  title = 'What Clients Say',
   primaryColor,
   templateId,
 }: TestimonialsSectionProps) {
