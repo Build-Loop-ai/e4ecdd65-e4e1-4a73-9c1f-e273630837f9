@@ -131,7 +131,17 @@ export function HeroSection({
               style={{ scale }}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-stone-200 via-stone-100 to-stone-50" />
+            <>
+              <div className="w-full h-full bg-gradient-to-br from-stone-200 via-stone-100 to-stone-50" />
+              {/* Subtle animated paper texture */}
+              <div className="absolute inset-0 opacity-[0.015]" style={{
+                backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.85\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' /%3E%3C/svg%3E")',
+              }} />
+              {/* Soft vignette */}
+              <div className="absolute inset-0" style={{
+                background: 'radial-gradient(ellipse at center, transparent 50%, rgba(28,25,23,0.06) 100%)',
+              }} />
+            </>
           )}
           {/* Light elegant overlay */}
           <div className="absolute inset-0 bg-stone-50/85" />
@@ -195,7 +205,7 @@ export function HeroSection({
               transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
               className="flex flex-col items-center gap-3 text-stone-400"
             >
-              <span className="text-[10px] tracking-[0.4em] uppercase">Ontdek</span>
+              <span className="text-[10px] tracking-[0.4em] uppercase">Explore</span>
               <ChevronDown className="w-4 h-4" />
             </motion.div>
           </motion.div>
@@ -221,9 +231,30 @@ export function HeroSection({
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
             </>
           ) : (
-            <div className="w-full h-full" style={{
-              background: `linear-gradient(135deg, #292524 0%, ${primaryColor || '#f97316'}15 50%, #1c1917 100%)`,
-            }} />
+            <>
+              <div className="w-full h-full" style={{
+                background: `linear-gradient(135deg, #292524 0%, ${primaryColor || '#f97316'}15 50%, #1c1917 100%)`,
+              }} />
+              {/* Soft organic floating shapes */}
+              <motion.div
+                animate={{ x: [0, 40, 0], y: [0, -30, 0], scale: [1, 1.15, 1] }}
+                transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute w-[500px] h-[500px] rounded-full blur-[150px] opacity-20"
+                style={{ backgroundColor: primaryColor || '#f97316', top: '10%', left: '20%' }}
+              />
+              <motion.div
+                animate={{ x: [0, -30, 0], y: [0, 40, 0], scale: [1, 1.2, 1] }}
+                transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+                className="absolute w-[400px] h-[400px] rounded-full blur-[130px] opacity-15"
+                style={{ backgroundColor: primaryColor || '#f97316', bottom: '5%', right: '10%' }}
+              />
+              <motion.div
+                animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.2, 0.1] }}
+                transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+                className="absolute w-[350px] h-[350px] rounded-full blur-[120px]"
+                style={{ backgroundColor: primaryColor || '#f97316', top: '50%', left: '50%', transform: 'translate(-50%,-50%)' }}
+              />
+            </>
           )}
         </div>
         
@@ -318,7 +349,40 @@ export function HeroSection({
               <div className="absolute inset-0 bg-black/70" />
             </>
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-black" />
+            <>
+              <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-black" />
+              {/* Aurora / northern-lights effect */}
+              <motion.div
+                animate={{ x: [0, 80, -40, 0], y: [0, -60, 30, 0], scale: [1, 1.3, 0.9, 1] }}
+                transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute w-[700px] h-[400px] rounded-full blur-[180px] opacity-25"
+                style={{ 
+                  background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}, #8b5cf6, #06b6d4)`,
+                  top: '5%', left: '10%',
+                  mixBlendMode: 'screen',
+                }}
+              />
+              <motion.div
+                animate={{ x: [0, -60, 50, 0], y: [0, 40, -50, 0], scale: [1, 1.2, 1.1, 1] }}
+                transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+                className="absolute w-[600px] h-[350px] rounded-full blur-[160px] opacity-20"
+                style={{ 
+                  background: `linear-gradient(225deg, #ec4899, ${primaryColor || '#3b82f6'}, #10b981)`,
+                  bottom: '10%', right: '5%',
+                  mixBlendMode: 'screen',
+                }}
+              />
+              <motion.div
+                animate={{ scale: [1, 1.4, 1], opacity: [0.15, 0.3, 0.15] }}
+                transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
+                className="absolute w-[500px] h-[500px] rounded-full blur-[200px]"
+                style={{ 
+                  background: `radial-gradient(circle, ${primaryColor || '#3b82f6'}60, transparent 70%)`,
+                  top: '30%', left: '40%',
+                  mixBlendMode: 'screen',
+                }}
+              />
+            </>
           )}
         </div>
 
@@ -440,6 +504,24 @@ export function HeroSection({
                   linear-gradient(180deg, #050510 0%, #0a0a2e 50%, #050510 100%)
                 `,
               }} />
+              {/* Animated perspective grid — single large grid fading to edges */}
+              <div className="absolute inset-0 overflow-hidden" style={{ perspective: '800px' }}>
+                <motion.div
+                  animate={{ opacity: [0.03, 0.07, 0.03] }}
+                  transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute inset-0"
+                  style={{
+                    transform: 'rotateX(60deg) translateY(-30%)',
+                    backgroundImage: `
+                      linear-gradient(${primaryColor || '#3b82f6'}20 1px, transparent 1px),
+                      linear-gradient(90deg, ${primaryColor || '#3b82f6'}20 1px, transparent 1px)
+                    `,
+                    backgroundSize: '80px 80px',
+                    maskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 20%, transparent 70%)',
+                    WebkitMaskImage: 'radial-gradient(ellipse 70% 50% at 50% 50%, black 20%, transparent 70%)',
+                  }}
+                />
+              </div>
             </>
           )}
         </div>
@@ -612,7 +694,7 @@ export function HeroSection({
                 backgroundColor: 'rgba(255,255,255,0.05)',
               }}
             >
-              Meer info
+              Learn More
             </Button>
           </motion.div>
         </motion.div>
@@ -663,6 +745,17 @@ export function HeroSection({
               style={{
                 background: `linear-gradient(135deg, ${primaryColor || '#1e40af'} 0%, ${primaryColor || '#1e40af'}dd 40%, ${primaryColor || '#1e40af'}99 100%)`,
               }}
+            />
+            {/* Animated grain texture */}
+            <div className="absolute inset-0 opacity-[0.04]" style={{
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' /%3E%3C/svg%3E")',
+            }} />
+            {/* Floating light streak */}
+            <motion.div
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', repeatDelay: 4 }}
+              className="absolute top-1/3 w-[600px] h-[2px]"
+              style={{ background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)` }}
             />
             {/* Soft accent glow */}
             <motion.div
@@ -754,7 +847,7 @@ export function HeroSection({
                 backgroundColor: 'rgba(0,0,0,0.25)',
               }}
             >
-              Meer info
+              Learn More
             </Button>
           </motion.div>
         </div>
