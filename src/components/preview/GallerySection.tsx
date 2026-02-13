@@ -15,7 +15,7 @@ interface GallerySectionProps {
 
 export function GallerySection({
   images,
-  title = 'Ons Werk',
+  title = 'Our Work',
   primaryColor,
   templateId,
 }: GallerySectionProps) {

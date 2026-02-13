@@ -149,7 +149,7 @@ export function ContactSection({
               {title} 👋
             </h2>
             <p className="text-muted-foreground text-lg">
-              We helpen je graag verder
+              We'd love to hear from you
             </p>
           </motion.div>
 
@@ -176,7 +176,7 @@ export function ContactSection({
                       <Mail className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: primaryColor || '#f97316' }} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-muted-foreground">E-mail</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Email</p>
                       <p className="font-medium text-sm sm:text-base truncate">{email}</p>
                     </div>
                   </motion.a>
@@ -195,7 +195,7 @@ export function ContactSection({
                       <Phone className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: primaryColor || '#f97316' }} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-muted-foreground">Telefoon</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Phone</p>
                       <p className="font-medium text-sm sm:text-base">{phone}</p>
                     </div>
                   </motion.a>
@@ -210,7 +210,7 @@ export function ContactSection({
                       <MapPin className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: primaryColor || '#f97316' }} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-muted-foreground">Adres</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Address</p>
                       <p className="font-medium text-sm sm:text-base break-words">{address}</p>
                     </div>
                   </div>
@@ -222,7 +222,7 @@ export function ContactSection({
                 className="flex flex-col justify-center items-center text-center p-5 sm:p-8 rounded-2xl"
                 style={{ backgroundColor: `${primaryColor || '#f97316'}10` }}
               >
-                <p className="text-base sm:text-lg mb-4 sm:mb-6 font-medium">Klaar om te beginnen?</p>
+                <p className="text-base sm:text-lg mb-4 sm:mb-6 font-medium">Ready to get started?</p>
                 <Button 
                   size="lg"
                   onClick={handlePreviewClick}
@@ -232,7 +232,7 @@ export function ContactSection({
                     color: getButtonTextColor(primaryColor || '#f97316')
                   }}
                 >
-                  Neem contact op
+                  Get in Touch
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
 
@@ -391,11 +391,11 @@ export function ContactSection({
               viewport={{ once: true }}
             >
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Laten we{' '}
-                <span style={{ color: primaryColor || '#3b82f6' }}>samenwerken</span>
+                Let's{' '}
+                <span style={{ color: primaryColor || '#3b82f6' }}>collaborate</span>
               </h2>
               <p className="text-lg text-white/60 mb-8 max-w-md">
-                Klaar om uw project naar het volgende niveau te tillen? Neem vandaag nog contact op.
+                Ready to take your project to the next level? Get in touch today.
               </p>
               <Button 
                 size="lg"
@@ -406,7 +406,7 @@ export function ContactSection({
                   color: getButtonTextColor(primaryColor || '#3b82f6'),
                 }}
               >
-                Start een gesprek
+                Start a Conversation
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </motion.div>
@@ -459,7 +459,7 @@ export function ContactSection({
                       <Phone className="w-4 h-4" style={{ color: getButtonTextColor(primaryColor || '#3b82f6') }} />
                     </div>
                     <div>
-                      <p className="text-white/50 text-sm">Telefoon</p>
+                      <p className="text-white/50 text-sm">Phone</p>
                       <p className="text-white font-medium">{phone}</p>
                     </div>
                   </a>
@@ -474,7 +474,7 @@ export function ContactSection({
                       <MapPin className="w-4 h-4" style={{ color: getButtonTextColor(primaryColor || '#3b82f6') }} />
                     </div>
                     <div>
-                      <p className="text-white/50 text-sm">Locatie</p>
+                      <p className="text-white/50 text-sm">Location</p>
                       <p className="text-white font-medium">{address}</p>
                     </div>
                   </div>
@@ -525,10 +525,10 @@ export function ContactSection({
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Neem contact op
+              Get in Touch
             </h2>
             <p className="text-lg text-background/60 mb-10 max-w-md">
-              Klaar om samen te werken? We horen graag van u.
+              Ready to work together? We'd love to hear from you.
             </p>
             <Button 
               size="lg"
@@ -539,7 +539,7 @@ export function ContactSection({
                 color: getButtonTextColor(primaryColor || '#6366f1'),
               }}
             >
-              Stuur een bericht
+              Send a Message
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </motion.div>
@@ -582,7 +582,7 @@ export function ContactSection({
                   <Phone className="w-5 h-5" style={{ color: getButtonTextColor(primaryColor || '#6366f1') }} />
                 </div>
                 <div>
-                  <p className="text-background/50 text-sm">Telefoon</p>
+                  <p className="text-background/50 text-sm">Phone</p>
                   <p className="text-background font-medium">{phone}</p>
                 </div>
               </a>
@@ -597,7 +597,7 @@ export function ContactSection({
                   <MapPin className="w-5 h-5" style={{ color: getButtonTextColor(primaryColor || '#6366f1') }} />
                 </div>
                 <div>
-                  <p className="text-background/50 text-sm">Adres</p>
+                  <p className="text-background/50 text-sm">Address</p>
                   <p className="text-background font-medium">{address}</p>
                 </div>
               </div>

@@ -401,7 +401,7 @@ export function ServicesSection({
                     className="mt-6 flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity"
                     style={{ color: primaryColor || '#3b82f6' }}
                   >
-                    Meer info
+                    Learn More
                     <ArrowRight className="w-4 h-4" />
                   </motion.div>
                 </div>
@@ -419,11 +419,7 @@ export function ServicesSection({
 
   return (
     <section ref={containerRef} className="py-28 bg-slate-50 relative overflow-hidden">
-      {/* Subtle pattern */}
-      <div className="absolute inset-0 opacity-[0.02]" style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, #000 1px, transparent 0)`,
-        backgroundSize: '32px 32px',
-      }} />
+      {/* Clean background - no pattern */}
 
       <div className="container mx-auto max-w-6xl px-6 relative z-10">
         {/* Header */}
@@ -438,7 +434,7 @@ export function ServicesSection({
             {title}
           </h2>
           <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-            Professionele services op maat gemaakt voor uw behoeften
+            Professional services tailored to your needs
           </p>
         </motion.div>
 
@@ -481,7 +477,7 @@ export function ServicesSection({
                 <div className="mt-6 flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ color: primaryColor || '#1e40af' }}
                 >
-                  Meer informatie
+                  Learn More
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </div>
