@@ -331,7 +331,7 @@ export default function Demo() {
                     onClick={handleScan}
                     disabled={isLoading || !url}
                     size="lg"
-                    className="h-12 px-8 rounded-xl text-base font-medium shadow-lg bg-white/25 hover:bg-white/35 text-white backdrop-blur-sm"
+                    className="h-12 px-8 rounded-xl text-base font-medium shadow-lg shadow-primary/30 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     <Sparkles className="h-4 w-4 mr-2" />
                     Transform
