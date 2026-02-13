@@ -98,7 +98,7 @@ serve(async (req: Request) => {
     const requestOrigin = req.headers.get("origin");
     const refererUrl = req.headers.get("referer");
     const refererOrigin = refererUrl ? new URL(refererUrl).origin : null;
-    const appOrigin = requestOrigin || refererOrigin || Deno.env.get("APP_ORIGIN") || "https://website4u.lovable.app";
+    const appOrigin = requestOrigin || refererOrigin || Deno.env.get("SUPABASE_URL")!.replace('.supabase.co', '.lovable.app');
     
     console.log("Using origin for redirect_uri:", appOrigin);
     

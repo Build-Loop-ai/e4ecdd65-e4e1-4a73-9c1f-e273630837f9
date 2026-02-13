@@ -186,7 +186,10 @@ serve(async (req: Request) => {
 
           if (preview) {
             previewData = preview;
-            const origin = Deno.env.get("APP_ORIGIN") || "https://website4u.lovable.app";
+            const requestOrigin = req.headers.get("origin");
+            const refererUrl = req.headers.get("referer");
+            const refererOrigin = refererUrl ? new URL(refererUrl).origin : null;
+            const origin = requestOrigin || refererOrigin || Deno.env.get("SUPABASE_URL")!.replace('.supabase.co', '.lovable.app');
             previewUrl = `${origin}/preview/${preview.slug}`;
           }
         }
