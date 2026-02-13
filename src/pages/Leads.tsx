@@ -338,7 +338,7 @@ export default function Leads() {
                   </motion.div>
 
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {results.map((lead, index) => (
+                    {[...results].sort((a, b) => (b.email ? 1 : 0) - (a.email ? 1 : 0)).map((lead, index) => (
                       <LeadCard
                         key={`${lead.business_name}-${index}`}
                         lead={lead}
