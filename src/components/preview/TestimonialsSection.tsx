@@ -212,47 +212,91 @@ export function TestimonialsSection({
     );
   }
 
-  // ========== BOLD STARTER - Marquee ticker ==========
+  // ========== BOLD STARTER - Stacked editorial cards ==========
   if (templateId === 'bold-starter') {
-    // Create marquee text from testimonials
-    const marqueeContent = validTestimonials.map(t => `"${t.quote}" — ${t.author}`).join('   •   ');
+    const symmetricalCount = getSymmetricalCount(validTestimonials.length, 2);
+    const displayTestimonials = validTestimonials.slice(0, symmetricalCount);
 
     return (
-      <section ref={containerRef} className="py-24 bg-[#0a0a0a] overflow-hidden">
-        <div className="container mx-auto px-6 mb-12">
-          <motion.h2 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+      <section ref={containerRef} className="py-32 bg-[#0a0a0a] overflow-hidden">
+        <div className="container mx-auto px-6 max-w-6xl">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-black text-white tracking-tight"
+            transition={{ duration: 0.6 }}
+            className="mb-16"
           >
-            {title}
-          </motion.h2>
-        </div>
+            <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase">
+              {title}
+            </h2>
+            <div 
+              className="h-1.5 w-24 mt-6"
+              style={{ backgroundColor: primaryColor || '#3b82f6' }}
+            />
+          </motion.div>
 
-        {/* Marquee strips */}
-        <div className="space-y-6">
-          <div 
-            className="py-6 border-y border-white/10"
-            style={{ backgroundColor: `${primaryColor || '#3b82f6'}10` }}
-          >
-            <MarqueeText 
-              speed={15} 
-              direction="left" 
-              className="text-xl md:text-2xl font-medium text-white/80"
-            >
-              {marqueeContent}
-            </MarqueeText>
-          </div>
-          
-          <div className="py-4 opacity-50">
-            <MarqueeText 
-              speed={10} 
-              direction="right" 
-              className="text-lg text-white/40"
-            >
-              {marqueeContent}
-            </MarqueeText>
+          {/* Testimonial cards grid */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {displayTestimonials.map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.12 }}
+                className="group relative"
+              >
+                <div 
+                  className="relative p-8 md:p-10 rounded-none border border-white/10 bg-white/[0.03] backdrop-blur-sm overflow-hidden transition-all duration-500 hover:border-white/20 hover:bg-white/[0.06]"
+                >
+                  {/* Large decorative quote number */}
+                  <span 
+                    className="absolute top-4 right-6 text-[8rem] font-black leading-none opacity-[0.04] select-none pointer-events-none"
+                    style={{ color: primaryColor || '#3b82f6' }}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+
+                  {/* Quote icon */}
+                  <div 
+                    className="w-10 h-10 rounded-sm flex items-center justify-center mb-6"
+                    style={{ backgroundColor: `${primaryColor || '#3b82f6'}20` }}
+                  >
+                    <Quote 
+                      className="w-5 h-5" 
+                      style={{ color: primaryColor || '#3b82f6' }} 
+                    />
+                  </div>
+
+                  {/* Quote text */}
+                  <p className="text-lg md:text-xl text-white/90 leading-relaxed mb-8 font-medium">
+                    "{testimonial.quote}"
+                  </p>
+
+                  {/* Author */}
+                  <div className="flex items-center gap-4 pt-6 border-t border-white/10">
+                    <div 
+                      className="w-11 h-11 rounded-sm flex items-center justify-center text-white text-lg font-black"
+                      style={{ backgroundColor: primaryColor || '#3b82f6' }}
+                    >
+                      {testimonial.author.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-sm uppercase tracking-wider">
+                        {testimonial.author}
+                      </p>
+                      {testimonial.role && (
+                        <p className="text-xs text-white/40 mt-0.5 uppercase tracking-wider">
+                          {testimonial.role}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
