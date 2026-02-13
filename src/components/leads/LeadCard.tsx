@@ -122,7 +122,7 @@ export function LeadCard({
 
             {/* Contact Details - staggered reveal */}
             <motion.div
-              className="space-y-1.5 text-sm text-muted-foreground"
+              className="space-y-1.5 text-sm text-muted-foreground flex-1"
               initial="hidden"
               animate="visible"
               variants={{
