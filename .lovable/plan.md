@@ -1,55 +1,63 @@
 
 
-## Fix: Language-Aware Content Generation
+# Make Templates Look REALLY Sick
 
-### Problem
-The demo generates Dutch content regardless of the source website's language because:
-- The AI system prompt hardcodes all example titles and CTA text in Dutch
-- Default/fallback values in code are all Dutch
-- There is no instruction telling the AI to detect and match the source website's language
-- A duplicate JSON block in the prompt may confuse the AI model
+## Problem Analysis
+After reviewing all 5 template hero sections and supporting components, I found:
 
-### Solution
+1. **The "weird pattern" issue**: The `PatternBackground.tsx` component contains repeating SVG grid/dot/circuit patterns. While it's not currently imported into the hero, the fallback hero backgrounds for some templates are still too plain or use subtle pattern-like effects that look dated.
 
-**1. Update `process-content` edge function** (`supabase/functions/process-content/index.ts`)
-- Add a clear "LANGUAGE DETECTION" section at the top of the system prompt instructing the AI to detect the source website's language and generate ALL content in that same language
-- Replace all Dutch example titles/CTAs with English defaults, and tell the AI to translate them appropriately based on detected language
-- Remove the duplicate JSON schema block (lines 370-396)
-- Add a `language` field to the expected JSON output so the frontend knows what language was detected
+2. **Remaining Dutch text**: "Meer info" buttons in Corporate Classic and Modern Professional heroes, "Ontdek" in Elegant Minimal, and "Ons Werk" as Gallery default title.
 
-**2. Update default fallbacks** (`src/lib/businessIntelligence.ts`)
-- Change `DEFAULT_ADAPTED_CONTENT` from Dutch to English:
-  - "Onze Diensten" -> "Our Services"
-  - "Galerij" -> "Gallery"  
-  - "Over Ons" -> "About Us"
-  - "Wat Klanten Zeggen" -> "What Clients Say"
-  - "Contact" stays "Contact"
+3. **Template quality gaps**: The templates are decent but missing the "wow factor" that makes clients immediately say "I want this."
 
-**3. Update fallback defaults in the edge function**
-- Change the hardcoded Dutch fallback values (lines 571-578) from Dutch to English
-- Change gallery fallback title from "Galerij" to "Gallery"
+## Upgrade Plan
 
-### Files to Change
-- `supabase/functions/process-content/index.ts` - Fix prompt, remove duplicate, add language detection
-- `src/lib/businessIntelligence.ts` - English defaults
+### 1. Kill the PatternBackground Component
+- Remove `PatternBackground.tsx` entirely (it's unused but clutters the codebase)
+- Remove `heroPatterns.ts` (the pattern configuration file)
+- This ensures patterns can never accidentally come back
 
-### Technical Details
+### 2. Upgrade Hero Fallbacks (No Background Image)
+When no suitable hero image exists, each template currently shows a simple gradient. We'll replace these with premium effects:
 
-The key prompt additions will be:
+- **Corporate Classic**: Rich branded gradient with subtle animated grain texture and a floating light streak
+- **Modern Professional**: Already has animated gradient mesh orbs -- enhance with a subtle animated grid of thin glowing lines (not a repeating pattern, but a single large perspective grid that fades to edges)
+- **Bold Starter**: Add animated aurora/northern-lights effect using multiple layered gradient blobs with blend modes
+- **Elegant Minimal**: Already clean -- add a very subtle animated paper texture and soft vignette
+- **Warm Friendly**: Add soft organic floating shapes (large blurred circles that drift slowly) with warm color tones
 
-```
-## LANGUAGE DETECTION (CRITICAL - DO THIS FIRST)
-Detect the language of the source website from its content.
-ALL generated text (headlines, section titles, CTAs, descriptions, value props)
-MUST be in the SAME language as the source website.
-If the website is in English, output English. If Dutch, output Dutch. Etc.
-NEVER default to Dutch for an English website.
-```
+### 3. Fix Remaining Dutch Text
+- "Meer info" -> "Learn More" (in Corporate Classic and Modern Professional heroes)
+- "Ontdek" -> "Explore" (Elegant Minimal scroll indicator)
+- "Ons Werk" -> "Our Work" (Gallery section default title)
 
-The adaptive section titles table will become language-neutral instructions like:
-```
-Use industry-appropriate titles IN THE DETECTED LANGUAGE.
-For English: "Our Services", "Gallery", "About Us", etc.
-For Dutch: "Onze Diensten", "Galerij", "Over Ons", etc.
-```
+### 4. Elevate Section Design Quality
+Quick wins to make ALL templates feel more premium:
+
+- **Add micro-interactions**: Subtle hover states on cards that reveal a colored border glow
+- **Improve section transitions**: Add smooth reveal animations using intersection observer (already using `useInView` but can enhance timing/easing)
+- **Typography polish**: Increase letter-spacing on section subtitles, use gradient text sparingly for emphasis on dark templates
+
+### 5. Gallery Section Upgrade
+- Add a subtle parallax depth effect to the horizontal scroll gallery
+- Improve image hover: scale + slight brightness boost + shadow lift
+
+## Technical Details
+
+### Files to modify:
+- `src/components/preview/HeroSection.tsx` -- Upgrade fallback backgrounds, fix Dutch text
+- `src/components/preview/GallerySection.tsx` -- Fix "Ons Werk" default, enhance hover effects
+- `src/components/preview/ServicesSection.tsx` -- Polish card interactions
+- `src/components/preview/ContactSection.tsx` -- Minor polish
+
+### Files to delete:
+- `src/components/preview/PatternBackground.tsx`
+- `src/lib/heroPatterns.ts`
+
+### No new dependencies needed
+All enhancements use existing Framer Motion + Tailwind CSS capabilities.
+
+## Expected Result
+Each generated website will look like a $5,000+ custom build rather than a template, whether or not quality background images are available. The "weird pattern" fallback is completely eliminated and replaced with premium gradient/animation effects that are unique per template style.
 
