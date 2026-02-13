@@ -278,24 +278,24 @@ export default function Leads() {
                       initial="hidden"
                       animate="visible"
                     >
-                      <Card className="overflow-hidden border-border/50 bg-gradient-to-br from-card to-muted/30">
+                      <Card className="overflow-hidden border-primary/10 bg-gradient-to-br from-primary/[0.03] to-primary/[0.08]">
                         <CardContent className="p-5 space-y-4">
                           <div className="flex items-center gap-3">
-                            <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+                            <Skeleton className="h-10 w-10 rounded-full shrink-0 bg-primary/10" />
                             <div className="space-y-2 flex-1">
-                              <Skeleton className="h-4 w-3/5" />
-                              <Skeleton className="h-3 w-2/5" />
+                              <Skeleton className="h-4 w-3/5 bg-primary/10" />
+                              <Skeleton className="h-3 w-2/5 bg-primary/[0.07]" />
                             </div>
                           </div>
                           <div className="space-y-2">
-                            <Skeleton className="h-3 w-full" />
-                            <Skeleton className="h-3 w-4/5" />
+                            <Skeleton className="h-3 w-full bg-primary/[0.07]" />
+                            <Skeleton className="h-3 w-4/5 bg-primary/[0.06]" />
                           </div>
                           <div className="flex items-center gap-2 pt-1">
-                            <Skeleton className="h-6 w-16 rounded-full" />
-                            <Skeleton className="h-6 w-20 rounded-full" />
+                            <Skeleton className="h-6 w-16 rounded-full bg-primary/10" />
+                            <Skeleton className="h-6 w-20 rounded-full bg-primary/[0.08]" />
                           </div>
-                          <Skeleton className="h-9 w-full rounded-lg" />
+                          <Skeleton className="h-9 w-full rounded-lg bg-primary/10" />
                         </CardContent>
                       </Card>
                     </motion.div>
