@@ -702,7 +702,11 @@ export function HeroSection({
             <Button
               size="lg"
               onClick={handlePreviewClick}
-              className="group text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg bg-white text-slate-900 hover:bg-white/90"
+              className="group text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
+              style={{
+                backgroundColor: '#ffffff',
+                color: '#1e293b',
+              }}
             >
               {ctaText}
               <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -711,7 +715,12 @@ export function HeroSection({
               size="lg"
               variant="outline"
               onClick={handlePreviewClick}
-              className="text-base px-8 py-6 rounded-lg font-semibold border-white/30 text-white hover:bg-white/10"
+              className="text-base px-8 py-6 rounded-lg font-semibold transition-all hover:scale-105"
+              style={{
+                borderColor: 'rgba(255,255,255,0.4)',
+                color: '#ffffff',
+                backgroundColor: 'rgba(0,0,0,0.25)',
+              }}
             >
               Meer info
             </Button>
