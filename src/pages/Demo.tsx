@@ -251,7 +251,7 @@ export default function Demo() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
-          className="bg-black/30 backdrop-blur-xl rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between"
+          className="bg-white/15 backdrop-blur-xl rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between"
         >
           <Link to="/">
             <PitchLogo size="md" />
