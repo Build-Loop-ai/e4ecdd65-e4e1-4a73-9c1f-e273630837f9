@@ -180,7 +180,7 @@ export function EmailReadinessCard() {
             variant="ghost" 
             size="sm"
             className="flex-1 text-xs"
-            onClick={() => navigate('/dashboard/settings')}
+            onClick={() => navigate('/dashboard/settings?tab=warmup')}
           >
             View Details
             <ChevronRight className="h-3 w-3 ml-1" />

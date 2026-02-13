@@ -254,7 +254,7 @@ export default function Settings() {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="profile" className="space-y-6">
+        <Tabs value={searchParams.get('tab') || 'profile'} onValueChange={(v) => setSearchParams({ tab: v }, { replace: true })} className="space-y-6">
           <TabsList className="bg-muted/50 p-1">
             <TabsTrigger value="profile" className="gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <User className="h-4 w-4" />
