@@ -393,30 +393,20 @@ export default function Leads() {
                     )}
                   </motion.div>
 
-                  <motion.div 
-                    className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                  >
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {results.map((lead, index) => (
-                      <motion.div
+                      <LeadCard
                         key={`${lead.business_name}-${index}`}
-                        variants={cardVariants}
-                        layout
-                      >
-                        <LeadCard
-                          lead={lead}
-                          index={index}
-                          isSaved={lead.website_url ? savedUrls.has(lead.website_url) : false}
-                          onSave={() => handleSaveLead(lead, index)}
-                          onCreatePitch={() => handleCreatePitch(lead, index)}
-                          isSaving={savingIndex === index}
-                          isCreatingPitch={creatingPitchIndex === index}
-                        />
-                      </motion.div>
+                        lead={lead}
+                        index={index}
+                        isSaved={lead.website_url ? savedUrls.has(lead.website_url) : false}
+                        onSave={() => handleSaveLead(lead, index)}
+                        onCreatePitch={() => handleCreatePitch(lead, index)}
+                        isSaving={savingIndex === index}
+                        isCreatingPitch={creatingPitchIndex === index}
+                      />
                     ))}
-                  </motion.div>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
