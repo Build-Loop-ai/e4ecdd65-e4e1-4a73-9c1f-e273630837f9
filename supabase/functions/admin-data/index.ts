@@ -66,6 +66,7 @@ Deno.serve(async (req) => {
       emailsRes,
       feedbackRes,
       connectionsRes,
+      demoLeadsRes,
     ] = await Promise.all([
       adminClient.auth.admin.listUsers({ perPage: 1000 }),
       adminClient.from("client_previews").select("*").order("created_at", { ascending: false }),
@@ -74,6 +75,7 @@ Deno.serve(async (req) => {
       adminClient.from("outreach_emails").select("*").order("sent_at", { ascending: false }),
       adminClient.from("client_feedback").select("*").order("created_at", { ascending: false }),
       adminClient.from("email_connections").select("*"),
+      adminClient.from("demo_leads").select("*").order("created_at", { ascending: false }),
     ]);
 
     const users = usersRes.data?.users ?? [];
@@ -83,6 +85,7 @@ Deno.serve(async (req) => {
     const emails = emailsRes.data ?? [];
     const feedback = feedbackRes.data ?? [];
     const connections = connectionsRes.data ?? [];
+    const demoLeads = demoLeadsRes.data ?? [];
 
     // Compute KPIs
     const now = new Date();
@@ -102,6 +105,7 @@ Deno.serve(async (req) => {
       totalLeads: leads.length,
       totalEmailsSent: emails.length,
       totalFeedback: feedback.length,
+      totalDemoLeads: demoLeads.length,
     };
 
     // Build users table data
@@ -162,7 +166,7 @@ Deno.serve(async (req) => {
     }));
 
     return new Response(
-      JSON.stringify({ kpis, usersTable, pitchesTable, activity: activity.slice(0, 50), emailHealth }),
+      JSON.stringify({ kpis, usersTable, pitchesTable, activity: activity.slice(0, 50), emailHealth, demoLeads }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
