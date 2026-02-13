@@ -703,7 +703,7 @@ export function HeroSection({
             </motion.div>
           </motion.div>
 
-          {/* Right - Image or Pattern */}
+          {/* Right - Image or Rich Visual */}
           <motion.div 
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
@@ -719,27 +719,79 @@ export function HeroSection({
                   animate={{ scale: [1, 1.08, 1] }}
                   transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
                 />
-              ) : usePattern ? (
-                <PatternBackground 
-                  patternType={patternType}
-                  primaryColor={primaryColor}
-                  templateId={effectiveTemplateId}
-                />
               ) : (
-                <div 
-                  className="w-full h-full"
-                  style={{
-                    background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}30 0%, ${primaryColor || '#3b82f6'}10 50%, ${primaryColor || '#3b82f6'}25 100%)`
-                  }}
-                />
+                /* Rich branded visual fallback instead of empty pattern */
+                <div className="w-full h-full relative" style={{ backgroundColor: `${primaryColor || '#3b82f6'}08` }}>
+                  {/* Strong diagonal gradient with brand color */}
+                  <div 
+                    className="absolute inset-0"
+                    style={{
+                      background: `linear-gradient(145deg, ${primaryColor || '#3b82f6'}25 0%, ${primaryColor || '#3b82f6'}08 40%, ${primaryColor || '#3b82f6'}18 100%)`,
+                    }}
+                  />
+                  
+                  {/* Large brand accent shape */}
+                  <motion.div
+                    className="absolute -top-20 -right-20 w-[70%] h-[70%] rounded-full"
+                    style={{ 
+                      background: `radial-gradient(circle, ${primaryColor || '#3b82f6'}30 0%, transparent 70%)`,
+                    }}
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0.9, 0.6] }}
+                    transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                  <motion.div
+                    className="absolute -bottom-10 -left-10 w-[50%] h-[50%] rounded-full"
+                    style={{ 
+                      background: `radial-gradient(circle, ${primaryColor || '#3b82f6'}20 0%, transparent 70%)`,
+                    }}
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
+                    transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+                  />
+
+                  {/* Grid lines for texture */}
+                  <div className="absolute inset-0 opacity-[0.06]" style={{
+                    backgroundImage: `linear-gradient(to right, ${primaryColor || '#3b82f6'} 1px, transparent 1px), linear-gradient(to bottom, ${primaryColor || '#3b82f6'} 1px, transparent 1px)`,
+                    backgroundSize: '48px 48px',
+                  }} />
+
+                  {/* Large initial letter */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                      className="text-[12rem] md:text-[16rem] font-black leading-none select-none"
+                      style={{ 
+                        color: primaryColor || '#3b82f6',
+                        opacity: 0.08,
+                      }}
+                    >
+                      {(companyName || headline || 'P').charAt(0).toUpperCase()}
+                    </motion.span>
+                  </div>
+
+                  {/* Subtle shine sweep */}
+                  <motion.div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.12) 50%, transparent 70%)',
+                    }}
+                    animate={{ x: ['-100%', '200%'] }}
+                    transition={{ duration: 6, repeat: Infinity, repeatDelay: 8, ease: 'easeInOut' }}
+                  />
+                </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent" />
             </div>
             
             {/* Decorative element */}
             <div 
-              className="absolute -bottom-6 -left-6 w-32 h-32 rounded-2xl -z-10 opacity-20"
-              style={{ backgroundColor: primaryColor || '#3b82f6' }}
+              className="absolute -bottom-6 -left-6 w-32 h-32 rounded-2xl -z-10"
+              style={{ backgroundColor: primaryColor || '#3b82f6', opacity: 0.15 }}
+            />
+            <div 
+              className="absolute -top-4 -right-4 w-20 h-20 rounded-xl -z-10"
+              style={{ backgroundColor: primaryColor || '#3b82f6', opacity: 0.1 }}
             />
           </motion.div>
         </div>
