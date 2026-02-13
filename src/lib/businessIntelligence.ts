@@ -128,10 +128,10 @@ export interface ProcessedSchema {
 
 // Default adapted content if not provided by AI
 export const DEFAULT_ADAPTED_CONTENT: AdaptedContent = {
-  servicesTitle: 'Onze Diensten',
-  galleryTitle: 'Galerij',
-  aboutTitle: 'Over Ons',
-  testimonialsTitle: 'Wat Klanten Zeggen',
+  servicesTitle: 'Our Services',
+  galleryTitle: 'Gallery',
+  aboutTitle: 'About Us',
+  testimonialsTitle: 'What Clients Say',
   contactTitle: 'Contact',
 };
 
