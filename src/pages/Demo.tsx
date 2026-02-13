@@ -648,11 +648,10 @@ export default function Demo() {
               )}
 
               {/* Preview frame */}
-              <div className="bg-muted/50 min-h-screen p-4 pt-6 flex justify-center">
-                <motion.div
-                  layout
+              <div className="bg-background min-h-screen">
+                <div
                   className={cn(
-                    'bg-white rounded-xl overflow-hidden shadow-xl border border-border transition-all duration-500',
+                    'mx-auto transition-all duration-500',
                     step === 'gated' && 'blur-[8px] pointer-events-none select-none'
                   )}
                   style={{
@@ -660,21 +659,8 @@ export default function Demo() {
                     maxWidth: '100%',
                   }}
                 >
-                  {/* Browser chrome */}
-                  <div className="bg-muted px-4 py-2 flex items-center gap-2 border-b border-border">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-[hsl(0,70%,60%)]" />
-                      <div className="w-3 h-3 rounded-full bg-[hsl(45,90%,55%)]" />
-                      <div className="w-3 h-3 rounded-full bg-[hsl(120,50%,50%)]" />
-                    </div>
-                    <div className="flex-1 mx-3">
-                      <div className="bg-background rounded-md px-3 py-1 text-xs text-muted-foreground truncate max-w-md mx-auto text-center">
-                        {url || 'preview.pitch.io'}
-                      </div>
-                    </div>
-                  </div>
                   {renderPreview()}
-                </motion.div>
+                </div>
               </div>
             </div>
           </motion.div>
