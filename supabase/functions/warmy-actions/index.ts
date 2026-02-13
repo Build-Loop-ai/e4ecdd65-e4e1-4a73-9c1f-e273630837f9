@@ -115,43 +115,81 @@ serve(async (req: Request) => {
     let result: any;
 
     switch (action) {
-      case "pause":
-        warmyResponse = await fetch(
-          `${WARMY_API_BASE}/api/v2/mailboxes/${connection.warmy_mailbox_id}/update_state`,
-          {
-            method: "PUT",
-            headers: warmyHeaders,
-            body: JSON.stringify({ mailbox: { state: "pause!" } }),
-          }
+      case "pause": {
+        // First check actual state from Warmy to avoid "not allowed transmission" errors
+        const pauseCheckResp = await fetch(
+          `${WARMY_API_BASE}/api/v2/mailboxes/${connection.warmy_mailbox_id}`,
+          { method: "GET", headers: warmyHeaders }
         );
-        result = await safeParseResponse(warmyResponse);
-        
-        if (warmyResponse.ok) {
+        const pauseCheckData = await safeParseResponse(pauseCheckResp);
+        const currentPauseStatus = pauseCheckData?.status;
+
+        if (currentPauseStatus === "paused" || pauseCheckData?.warmup_active === false) {
+          // Already paused on Warmy side — just sync local DB
           await adminSupabase
             .from("email_connections")
             .update({ warmy_state: "paused", last_warmy_sync: new Date().toISOString() })
             .eq("id", connection_id);
+          result = { message: "Mailbox is already paused" };
+          warmyResponse = new Response(JSON.stringify(result), { status: 200 });
+        } else {
+          warmyResponse = await fetch(
+            `${WARMY_API_BASE}/api/v2/mailboxes/${connection.warmy_mailbox_id}/update_state`,
+            {
+              method: "PUT",
+              headers: warmyHeaders,
+              body: JSON.stringify({ mailbox: { state: "pause!" } }),
+            }
+          );
+          result = await safeParseResponse(warmyResponse);
+          
+          if (warmyResponse.ok) {
+            await adminSupabase
+              .from("email_connections")
+              .update({ warmy_state: "paused", last_warmy_sync: new Date().toISOString() })
+              .eq("id", connection_id);
+          }
         }
         break;
+      }
 
-      case "resume":
-        warmyResponse = await fetch(
-          `${WARMY_API_BASE}/api/v2/mailboxes/${connection.warmy_mailbox_id}/update_state`,
-          {
-            method: "PUT",
-            headers: warmyHeaders,
-            body: JSON.stringify({ mailbox: { state: "activate!" } }),
-          }
+      case "resume": {
+        // First check actual state from Warmy
+        const resumeCheckResp = await fetch(
+          `${WARMY_API_BASE}/api/v2/mailboxes/${connection.warmy_mailbox_id}`,
+          { method: "GET", headers: warmyHeaders }
         );
-        result = await safeParseResponse(warmyResponse);
-        
-        if (warmyResponse.ok) {
+        const resumeCheckData = await safeParseResponse(resumeCheckResp);
+        const currentResumeStatus = resumeCheckData?.status;
+
+        if (currentResumeStatus === "active" || resumeCheckData?.warmup_active === true) {
+          // Already active — just sync local DB
           await adminSupabase
             .from("email_connections")
             .update({ warmy_state: "active", last_warmy_sync: new Date().toISOString() })
             .eq("id", connection_id);
+          result = { message: "Mailbox is already active" };
+          warmyResponse = new Response(JSON.stringify(result), { status: 200 });
+        } else {
+          warmyResponse = await fetch(
+            `${WARMY_API_BASE}/api/v2/mailboxes/${connection.warmy_mailbox_id}/update_state`,
+            {
+              method: "PUT",
+              headers: warmyHeaders,
+              body: JSON.stringify({ mailbox: { state: "activate!" } }),
+            }
+          );
+          result = await safeParseResponse(warmyResponse);
+          
+          if (warmyResponse.ok) {
+            await adminSupabase
+              .from("email_connections")
+              .update({ warmy_state: "active", last_warmy_sync: new Date().toISOString() })
+              .eq("id", connection_id);
+          }
         }
         break;
+      }
 
       case "test":
         const testProviders = providers || ["GOOGLE", "OUTLOOK", "YAHOO"];

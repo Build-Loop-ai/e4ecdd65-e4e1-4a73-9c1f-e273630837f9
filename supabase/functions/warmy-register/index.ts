@@ -253,7 +253,7 @@ serve(async (req: Request) => {
       .from("email_connections")
       .update({
         warmy_mailbox_id: warmyMailboxId,
-        warmy_state: "active",
+        warmy_state: "paused", // Warmy starts new mailboxes in paused state
         last_warmy_sync: new Date().toISOString(),
       })
       .eq("id", connection_id);
