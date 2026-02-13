@@ -180,7 +180,7 @@ const Index = () => {
       </section>
 
       {/* Stats */}
-      <section className="py-16 bg-foreground text-background">
+      <section className="py-16 bg-muted/50 border-y border-border">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
             {[
@@ -190,8 +190,8 @@ const Index = () => {
               { value: '5 min', label: 'Avg. pitch time' },
             ].map((stat, index) => (
               <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}>
-                <div className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1">{stat.value}</div>
-                <div className="text-sm text-background/60">{stat.label}</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1">{stat.value}</div>
+                <div className="text-sm text-muted-foreground">{stat.label}</div>
               </motion.div>
             ))}
           </div>
