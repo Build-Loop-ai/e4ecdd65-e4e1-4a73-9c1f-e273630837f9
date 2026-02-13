@@ -204,7 +204,11 @@ serve(async (req: Request) => {
         result = await safeParseResponse(warmyResponse);
 
         // If checker already exists, fetch existing results instead of erroring
-        if (!warmyResponse.ok && result?.error?.toLowerCase().includes("already created")) {
+        const alreadyCreated = !warmyResponse.ok && (
+          result?.error?.toLowerCase?.().includes("already created") ||
+          (Array.isArray(result?.errors) && result.errors.some((e: string) => typeof e === 'string' && e.toLowerCase().includes("already created")))
+        );
+        if (alreadyCreated) {
           const existingResp = await fetch(
             `${WARMY_API_BASE}/api/v2/mailboxes/${connection.warmy_mailbox_id}/deliverability_checkers`,
             { method: "GET", headers: warmyHeaders }
