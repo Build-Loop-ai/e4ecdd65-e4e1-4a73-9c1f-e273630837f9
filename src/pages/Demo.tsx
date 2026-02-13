@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { firecrawlApi } from '@/lib/api/firecrawl';
+import { generateImages, type MissingImages } from '@/lib/imageGeneration';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
@@ -60,8 +61,8 @@ export default function Demo() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
-  const [scanPhase, setScanPhase] = useState<'connecting' | 'extracting' | 'processing'>('connecting');
-  const [deviceView, setDeviceView] = useState<DeviceView>('desktop');
+   const [scanPhase, setScanPhase] = useState<'connecting' | 'extracting' | 'processing' | 'generating'>('connecting');
+   const [deviceView, setDeviceView] = useState<DeviceView>('desktop');
 
   // Preview data
   const [scrapedData, setScrapedData] = useState<any>(null);
@@ -100,7 +101,80 @@ export default function Demo() {
         throw new Error(processError?.message || processedResult?.error || 'AI processing failed');
       }
 
-      setProcessedSchema(processedResult.schema as ProcessedSchema);
+      let schema = processedResult.schema as ProcessedSchema;
+
+      // Detect missing images and generate AI replacements
+      const heroImgs = schema?.hero?.backgroundImages || [];
+      const galleryImgs = schema?.gallery?.images || [];
+      const services = schema?.services || [];
+      const hasHero = heroImgs.length > 0;
+      const galleryNeeded = Math.max(0, 3 - galleryImgs.length);
+      const servicesWithoutImages = services
+        .filter((s: any) => !s.image)
+        .map((s: any) => s.title)
+        .filter(Boolean)
+        .slice(0, 4);
+
+      const missingImages: MissingImages = {
+        hero: !hasHero,
+        gallery: galleryNeeded,
+        services: servicesWithoutImages,
+      };
+
+      if (missingImages.hero || missingImages.gallery > 0 || missingImages.services.length > 0) {
+        setScanPhase('generating');
+        const bi = schema.businessIntelligence;
+        const pc = schema.brandColors?.primary || '#4F46E5';
+        const genResult = await generateImages({
+          businessType: bi?.businessType || 'general',
+          industry: bi?.industry || 'other',
+          companyName: schema.companyName || 'Business',
+          primaryColor: pc,
+          missingImages,
+        });
+
+        if (genResult.success && genResult.generatedImages) {
+          const gi = genResult.generatedImages;
+          // Merge hero
+          if (gi.hero) {
+            schema = {
+              ...schema,
+              hero: {
+                ...schema.hero,
+                backgroundImages: [gi.hero, ...(schema.hero?.backgroundImages || [])],
+              },
+              classifiedImages: [
+                { url: gi.hero, classification: 'hero', confidence: 0.95, hasText: false },
+                ...(schema.classifiedImages || []),
+              ],
+            };
+          }
+          // Merge gallery
+          if (gi.gallery?.length) {
+            schema = {
+              ...schema,
+              gallery: {
+                ...schema.gallery,
+                images: [...(schema.gallery?.images || []), ...gi.gallery],
+              },
+            };
+          }
+          // Merge services
+          if (gi.services && Object.keys(gi.services).length > 0) {
+            schema = {
+              ...schema,
+              services: (schema.services || []).map((s: any) => {
+                if (!s.image && gi.services[s.title]) {
+                  return { ...s, image: gi.services[s.title] };
+                }
+                return s;
+              }),
+            };
+          }
+        }
+      }
+
+      setProcessedSchema(schema);
       setStep('gated');
     } catch (error) {
       console.error('Demo scan error:', error);
@@ -411,25 +485,27 @@ export default function Demo() {
                 {scanPhase === 'connecting' && 'Connecting to website...'}
                 {scanPhase === 'extracting' && 'Extracting content & brand...'}
                 {scanPhase === 'processing' && 'AI is building your preview...'}
+                {scanPhase === 'generating' && 'Generating visuals...'}
               </h2>
               <p className="text-white/40 text-sm mb-6">
                 {scanPhase === 'connecting' && 'Establishing a secure connection'}
                 {scanPhase === 'extracting' && 'Pulling colors, images, and content'}
                 {scanPhase === 'processing' && 'Organizing everything into a premium layout'}
+                {scanPhase === 'generating' && 'Creating AI-powered images for your site'}
               </p>
 
               {/* Progress dots */}
               <div className="flex items-center justify-center gap-3 mb-6">
-                {['connecting', 'extracting', 'processing'].map((phase, i) => (
+                {['connecting', 'extracting', 'processing', 'generating'].map((phase, i) => (
                   <div key={phase} className="flex items-center gap-3">
                     <div className={cn(
                       'w-2.5 h-2.5 rounded-full transition-all duration-500',
                       scanPhase === phase ? 'bg-primary scale-125 shadow-lg shadow-primary/50' :
-                      ['connecting', 'extracting', 'processing'].indexOf(scanPhase) > i ? 'bg-primary/80' : 'bg-white/10'
+                      ['connecting', 'extracting', 'processing', 'generating'].indexOf(scanPhase) > i ? 'bg-primary/80' : 'bg-white/10'
                     )} />
-                    {i < 2 && <div className={cn(
+                    {i < 3 && <div className={cn(
                       'w-8 h-px transition-colors duration-500',
-                      ['connecting', 'extracting', 'processing'].indexOf(scanPhase) > i ? 'bg-primary/50' : 'bg-white/10'
+                      ['connecting', 'extracting', 'processing', 'generating'].indexOf(scanPhase) > i ? 'bg-primary/50' : 'bg-white/10'
                     )} />}
                   </div>
                 ))}
