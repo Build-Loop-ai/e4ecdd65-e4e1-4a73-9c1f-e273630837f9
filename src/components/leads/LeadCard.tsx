@@ -45,6 +45,7 @@ export function LeadCard({
 }: LeadCardProps) {
   return (
     <motion.div
+      className="h-full"
       initial={{ opacity: 0, y: 30, scale: 0.92 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{
@@ -54,7 +55,7 @@ export function LeadCard({
         delay: index * 0.06,
       }}
     >
-      <Card className="group relative overflow-hidden hover:shadow-elevated hover:border-primary/30 hover:-translate-y-1 transition-all duration-500">
+      <Card className="group relative overflow-hidden hover:shadow-elevated hover:border-primary/30 hover:-translate-y-1 transition-all duration-500 h-full flex flex-col">
         {/* Animated gradient border glow on hover */}
         <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
           style={{
@@ -71,8 +72,8 @@ export function LeadCard({
           transition={{ duration: 1.2, delay: index * 0.06 + 0.3, ease: 'easeInOut' }}
         />
 
-        <CardContent className="p-4 relative z-10">
-          <div className="space-y-3">
+        <CardContent className="p-4 relative z-10 flex-1 flex flex-col">
+          <div className="space-y-3 flex-1 flex flex-col">
             {/* Header */}
             <div className="flex items-start gap-3">
               {isSelectable && (
@@ -187,7 +188,7 @@ export function LeadCard({
 
             {/* Actions */}
             <motion.div
-              className="flex gap-2 pt-2"
+              className="flex gap-2 pt-2 mt-auto"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.06 + 0.4, duration: 0.35 }}
