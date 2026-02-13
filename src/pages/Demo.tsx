@@ -27,6 +27,7 @@ import {
   Loader2,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
   Mail,
   Lock,
   CheckCircle2,
@@ -319,27 +320,29 @@ export default function Demo() {
       {/* Subtle overlay for text contrast only */}
       <div className="fixed inset-0 bg-black/10" />
 
-      {/* Header */}
-      <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl px-1">
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="bg-white backdrop-blur-xl rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between shadow-lg"
-        >
-          <Link to="/">
-            <PitchLogo size="md" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild className="rounded-xl text-foreground/60 hover:text-foreground hover:bg-muted">
-              <Link to="/auth">Log in</Link>
-            </Button>
-            <Button size="sm" asChild className="rounded-xl bg-primary hover:bg-primary/90">
-              <Link to="/auth">Get Started Free</Link>
-            </Button>
-          </div>
-        </motion.div>
-      </header>
+      {/* Header - only show when NOT in preview mode */}
+      {!showPreview && (
+        <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl px-1">
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className="bg-white backdrop-blur-xl rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between shadow-lg"
+          >
+            <Link to="/">
+              <PitchLogo size="md" />
+            </Link>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" asChild className="rounded-xl text-foreground/60 hover:text-foreground hover:bg-muted">
+                <Link to="/auth">Log in</Link>
+              </Button>
+              <Button size="sm" asChild className="rounded-xl bg-primary hover:bg-primary/90">
+                <Link to="/auth">Get Started Free</Link>
+              </Button>
+            </div>
+          </motion.div>
+        </header>
+      )}
 
       <AnimatePresence mode="wait">
         {/* Step 1: Input */}
@@ -534,12 +537,18 @@ export default function Demo() {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="w-[260px] shrink-0 bg-background flex flex-col fixed left-0 top-0 bottom-0 z-50 overflow-y-auto border-r border-border"
             >
-              {/* Sidebar header */}
+              {/* Sidebar header with back button */}
               <div className="p-4 border-b border-border">
-                <Link to="/">
-                  <PitchLogo size="md" />
-                </Link>
-                <div className="mt-3 flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setStep('input'); setProcessedSchema(null); setScrapedData(null); setUrl(''); }}
+                  className="mb-3 -ml-1 text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-1.5" />
+                  Try another site
+                </Button>
+                <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <span className="text-xs text-muted-foreground">Preview Live</span>
                 </div>
