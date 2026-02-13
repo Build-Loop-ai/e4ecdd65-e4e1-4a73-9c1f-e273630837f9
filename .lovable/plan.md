@@ -1,89 +1,35 @@
 
-# Audit Report: All Implemented Features
 
-## Overall Verdict: Solid -- a few bugs and improvements to address
+## Remove APP_ORIGIN Secret Dependency
 
----
+The `APP_ORIGIN` secret is used in two edge functions to build URLs. Instead of requiring it as a secret, we can dynamically derive the origin from the incoming request headers (which already partially happens in `warmy-register`).
 
-## 1. Password Reset Flow (ResetPassword.tsx) -- 1 minor bug
+### Changes
 
-**Bug**: The `Link` wrapping the "Request New Link" button (line 108-113) will render incorrectly -- `Link` wraps a `Button` but the `Button` has `className="mt-4"` for spacing. Because `Link` is an inline element wrapping a block, this can cause layout quirks. Should use `Button asChild` pattern or just use `navigate`.
+**1. `supabase/functions/auto-outreach/index.ts` (line ~189)**
 
-**Otherwise good**: The auth listener, fallback timeout, cleanup, and state machine (`checking -> hasSession / invalid`) are all correct.
+Replace the static `Deno.env.get("APP_ORIGIN")` fallback with dynamic origin detection from request headers, matching the pattern already used in `warmy-register`:
 
----
+```typescript
+const requestOrigin = req.headers.get("origin");
+const refererUrl = req.headers.get("referer");
+const refererOrigin = refererUrl ? new URL(refererUrl).origin : null;
+const appOrigin = requestOrigin || refererOrigin || Deno.env.get("SUPABASE_URL")!.replace('.supabase.co', '.lovable.app');
+```
 
-## 2. Terms of Service & Privacy Policy -- 1 bug
+This will be extracted once near the top of the function and reused where `previewUrl` is built.
 
-**Bug**: The "Last updated" date uses `new Date().toLocaleDateString(...)` which means it shows **today's date** every time the page loads. It should be a hardcoded date string (e.g. `"February 12, 2026"`) so it reflects when the terms were actually last updated -- not the current visit date.
+**2. `supabase/functions/warmy-register/index.ts` (line ~101)**
 
----
+Remove the `APP_ORIGIN` env fallback from the existing chain. The function already reads `origin` and `referer` headers. Update the final fallback to derive from `SUPABASE_URL` instead:
 
-## 3. Welcome Wizard (WelcomeWizard.tsx) -- Clean, no bugs
+```typescript
+const appOrigin = requestOrigin || refererOrigin || Deno.env.get("SUPABASE_URL")!.replace('.supabase.co', '.lovable.app');
+```
 
-- Step navigation, progress bar, animations all work correctly
-- `localStorage` persistence is correct
-- The trigger logic in Dashboard.tsx properly checks `data.length === 0` and the localStorage flag
-- No issues found
+### Technical Details
 
----
+- Both functions are called from the browser via `supabase.functions.invoke`, so the `origin` header will always be present in normal usage.
+- The `SUPABASE_URL` fallback is a safety net that doesn't require any manual secret configuration.
+- After this change, `APP_ORIGIN` is no longer needed as a secret, reducing setup friction when remixing the app.
 
-## 4. 404 Page (NotFound.tsx) -- Clean, no bugs
-
-- Properly branded with PitchLogo
-- Shows attempted path
-- "Go back" and "Dashboard" buttons work correctly
-- Catch-all route is correctly placed last in App.tsx
-
----
-
-## 5. Auth Page (Auth.tsx) -- 1 potential issue
-
-**Issue**: After signup (line 68-76), the toast says "Your account has been created" and immediately navigates to `/dashboard`. But if email confirmation is required (which it should be by default), the user won't have a session yet and will be bounced back to `/auth` by `ProtectedRoute`. The signup success message should tell users to check their email for verification instead of navigating to dashboard.
-
----
-
-## 6. Loading/Empty States -- Clean, no bugs
-
-- ProtectedRoute: Branded with PitchLogo + spinner -- correct
-- Settings: Skeleton layout mimicking the real form -- correct
-- Analytics MetricCards: Now pass `isLoading` prop -- correct
-- Dashboard pitch cards: Already had good loading skeletons and empty state -- correct
-
----
-
-## 7. Responsive Polish (Index.tsx, Dashboard.tsx) -- Clean
-
-- Font scaling, flex-wrap on action buttons -- all correct
-
----
-
-## Fixes to Implement
-
-### Fix 1: Hardcode "Last updated" dates in Terms and Privacy
-Replace `new Date().toLocaleDateString(...)` with a static string like `"February 12, 2026"` in both pages.
-
-### Fix 2: Fix signup flow messaging
-When email confirmation is enabled, the signup handler should show a "Check your email to verify your account" message instead of navigating to `/dashboard` (which will just bounce them back).
-
-### Fix 3: Fix Link/Button pattern in ResetPassword
-Use the `asChild` pattern on the Button inside the Link for the "Request New Link" action, consistent with how it's done elsewhere (e.g., NotFound.tsx line 34-38).
-
----
-
-## Technical Details
-
-### Files to modify:
-- `src/pages/Terms.tsx` (line 23) -- hardcode date
-- `src/pages/Privacy.tsx` (line 23) -- hardcode date
-- `src/pages/Auth.tsx` (lines 68-76) -- fix post-signup behavior
-- `src/pages/ResetPassword.tsx` (lines 108-113) -- fix Link/Button pattern
-
-### No changes needed:
-- `src/components/dashboard/WelcomeWizard.tsx`
-- `src/pages/NotFound.tsx`
-- `src/components/ProtectedRoute.tsx`
-- `src/pages/Analytics.tsx`
-- `src/pages/Settings.tsx`
-- `src/pages/Dashboard.tsx`
-- `src/pages/Index.tsx`
