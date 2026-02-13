@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
 type Viewport = 'desktop' | 'tablet' | 'mobile';
@@ -22,9 +23,7 @@ const viewportStyles: Record<Viewport, { width: string; className: string }> = {
   },
 };
 
-export default function PreviewFrame({ slug, viewport }: PreviewFrameProps) {
-  // If slug contains a slash (new format), use it directly as the path
-  // Otherwise use the legacy /preview/:slug format
+const PreviewFrame = forwardRef<HTMLIFrameElement, PreviewFrameProps>(({ slug, viewport }, ref) => {
   const previewUrl = slug.includes('/') ? `/${slug}` : `/preview/${slug}`;
   const { className } = viewportStyles[viewport];
 
@@ -41,10 +40,8 @@ export default function PreviewFrame({ slug, viewport }: PreviewFrameProps) {
         height: viewport === 'desktop' ? 'calc(100vh - 64px)' : 'calc(100vh - 100px)',
       }}
     >
-      {/* Device frame for mobile/tablet */}
       {viewport !== 'desktop' && (
         <div className="absolute inset-0 pointer-events-none z-10">
-          {/* Top bezel */}
           <div className={cn(
             'absolute top-0 left-0 right-0 bg-foreground/5 backdrop-blur-sm flex items-center justify-center',
             viewport === 'mobile' ? 'h-8' : 'h-6'
@@ -56,15 +53,11 @@ export default function PreviewFrame({ slug, viewport }: PreviewFrameProps) {
               <div className="w-2.5 h-2.5 bg-foreground/20 rounded-full" />
             )}
           </div>
-          
-          {/* Bottom bezel for mobile */}
           {viewport === 'mobile' && (
             <div className="absolute bottom-0 left-0 right-0 h-6 bg-foreground/5 flex items-center justify-center">
               <div className="w-24 h-1 bg-foreground/20 rounded-full" />
             </div>
           )}
-          
-          {/* Side bezels */}
           <div className={cn(
             'absolute top-0 bottom-0 left-0 bg-foreground/5',
             viewport === 'mobile' ? 'w-2' : 'w-1.5'
@@ -77,6 +70,7 @@ export default function PreviewFrame({ slug, viewport }: PreviewFrameProps) {
       )}
 
       <iframe
+        ref={ref}
         src={previewUrl}
         className={cn(
           'w-full h-full border-0 bg-background',
@@ -87,4 +81,8 @@ export default function PreviewFrame({ slug, viewport }: PreviewFrameProps) {
       />
     </div>
   );
-}
+});
+
+PreviewFrame.displayName = 'PreviewFrame';
+
+export default PreviewFrame;
