@@ -191,7 +191,7 @@ export default function Preview() {
       <AboutSection
         key="about"
         title={adaptedContent.aboutTitle}
-        description={schema?.about?.description || 'Wij bieden uitzonderlijke diensten om uw bedrijf te laten groeien.'}
+        description={schema?.about?.description || 'We provide exceptional services to help your business grow.'}
         valueProps={schema?.about?.valueProps}
         stats={schema?.about?.stats}
         primaryColor={primaryColor}
