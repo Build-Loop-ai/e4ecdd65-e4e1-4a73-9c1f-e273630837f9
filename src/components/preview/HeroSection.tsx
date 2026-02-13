@@ -448,68 +448,115 @@ export function HeroSection({
   // ========== MODERN PROFESSIONAL - "Tech Forward" ==========
   if (effectiveTemplateId === 'modern-professional') {
     return (
-      <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0a]">
-        {/* Background - image or pattern */}
+      <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ backgroundColor: '#050510' }}>
+        {/* Background image or animated gradient mesh */}
         <div className="absolute inset-0">
           {bgImage ? (
-            <motion.img
-              src={bgImage}
-              alt=""
-              className="w-full h-full object-cover"
-              style={{ scale }}
-            />
-          ) : usePattern ? (
-            <PatternBackground 
-              patternType={patternType}
-              primaryColor={primaryColor}
-              templateId={effectiveTemplateId}
-            />
+            <>
+              <motion.img
+                src={bgImage}
+                alt=""
+                className="w-full h-full object-cover"
+                style={{ scale }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-[#050510]/80 via-[#050510]/60 to-[#050510]/90" />
+            </>
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-black" />
+            <>
+              {/* Rich animated gradient mesh — no pattern */}
+              <div className="absolute inset-0" style={{
+                background: `
+                  radial-gradient(ellipse 80% 60% at 20% 30%, ${primaryColor || '#3b82f6'}25 0%, transparent 70%),
+                  radial-gradient(ellipse 60% 80% at 80% 70%, #06b6d420 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 50% at 50% 50%, ${primaryColor || '#3b82f6'}10 0%, transparent 80%),
+                  linear-gradient(180deg, #050510 0%, #0a0a2e 50%, #050510 100%)
+                `,
+              }} />
+            </>
           )}
-          {/* Dark overlay for text readability */}
-          {bgImage && <div className="absolute inset-0 bg-black/60" />}
         </div>
 
-        {/* Gradient mesh background with animated orbs */}
-        <div className="absolute inset-0 pointer-events-none">
-          <motion.div 
-            animate={{ 
-              x: [0, 50, 0],
-              y: [0, -30, 0],
-              scale: [1, 1.1, 1],
-            }}
+        {/* Animated floating orbs */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div
+            animate={{ x: [0, 80, 0], y: [0, -50, 0], scale: [1, 1.3, 1] }}
             transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute top-1/4 left-1/3 w-[600px] h-[600px] rounded-full blur-[150px] opacity-25"
-            style={{ backgroundColor: primaryColor || '#3b82f6' }}
+            className="absolute w-[500px] h-[500px] rounded-full blur-[180px] opacity-30"
+            style={{ backgroundColor: primaryColor || '#3b82f6', top: '10%', left: '15%' }}
           />
-          <motion.div 
-            animate={{ 
-              x: [0, -40, 0],
-              y: [0, 40, 0],
-              scale: [1, 1.15, 1],
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-            className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] rounded-full blur-[130px] opacity-20"
-            style={{ backgroundColor: '#06b6d4' }}
+          <motion.div
+            animate={{ x: [0, -60, 0], y: [0, 60, 0], scale: [1, 1.2, 1] }}
+            transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+            className="absolute w-[400px] h-[400px] rounded-full blur-[160px] opacity-20"
+            style={{ backgroundColor: '#06b6d4', bottom: '10%', right: '10%' }}
           />
-          <motion.div 
-            animate={{ 
-              scale: [1, 1.2, 1],
-              opacity: [0.15, 0.25, 0.15],
-            }}
-            transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[200px]"
-            style={{ backgroundColor: primaryColor || '#3b82f6' }}
+          <motion.div
+            animate={{ scale: [1, 1.4, 1], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
+            className="absolute w-[600px] h-[600px] rounded-full blur-[200px]"
+            style={{ backgroundColor: primaryColor || '#3b82f6', top: '40%', left: '40%' }}
           />
         </div>
 
-        {/* Subtle grid overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)`,
-          backgroundSize: '80px 80px',
-        }} />
+        {/* Floating glassmorphic UI elements for depth */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Floating card top-right */}
+          <motion.div
+            initial={{ opacity: 0, x: 40, y: -20 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: 1.2, delay: 1 }}
+            className="absolute top-[15%] right-[8%] hidden lg:block"
+          >
+            <motion.div
+              animate={{ y: [0, -12, 0], rotate: [0, 1, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              className="w-48 h-28 rounded-2xl border border-white/[0.08] backdrop-blur-sm"
+              style={{ background: `linear-gradient(135deg, ${primaryColor || '#3b82f6'}15, transparent)` }}
+            >
+              <div className="p-4">
+                <div className="w-8 h-1.5 rounded-full mb-3" style={{ backgroundColor: `${primaryColor || '#3b82f6'}60` }} />
+                <div className="w-full h-1 rounded-full bg-white/[0.06] mb-2" />
+                <div className="w-3/4 h-1 rounded-full bg-white/[0.04]" />
+              </div>
+            </motion.div>
+          </motion.div>
 
+          {/* Floating card bottom-left */}
+          <motion.div
+            initial={{ opacity: 0, x: -40, y: 20 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            transition={{ duration: 1.2, delay: 1.4 }}
+            className="absolute bottom-[20%] left-[6%] hidden lg:block"
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0], rotate: [0, -1, 0] }}
+              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+              className="w-40 h-24 rounded-2xl border border-white/[0.08] backdrop-blur-sm"
+              style={{ background: `linear-gradient(225deg, #06b6d415, transparent)` }}
+            >
+              <div className="p-4">
+                <div className="flex gap-1.5 mb-3">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: `${primaryColor || '#3b82f6'}50` }} />
+                  <div className="w-2 h-2 rounded-full bg-white/10" />
+                  <div className="w-2 h-2 rounded-full bg-white/10" />
+                </div>
+                <div className="w-full h-1 rounded-full bg-white/[0.06] mb-2" />
+                <div className="w-2/3 h-1 rounded-full bg-white/[0.04]" />
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Accent line */}
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 2, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute top-1/2 left-0 right-0 h-px origin-left"
+            style={{ background: `linear-gradient(90deg, transparent 0%, ${primaryColor || '#3b82f6'}30 50%, transparent 100%)` }}
+          />
+        </div>
+
+        {/* Content */}
         <motion.div
           style={{ y, opacity }}
           className="container mx-auto max-w-5xl text-center relative z-10 px-6"
@@ -533,6 +580,22 @@ export function HeroSection({
             </motion.div>
           )}
 
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mb-8 flex justify-center"
+          >
+            <span
+              className="inline-flex items-center gap-2 text-xs font-medium tracking-widest uppercase px-5 py-2 rounded-full border border-white/10 backdrop-blur-sm"
+              style={{ color: `${primaryColor || '#3b82f6'}`, backgroundColor: `${primaryColor || '#3b82f6'}15` }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: primaryColor || '#3b82f6' }} />
+              {companyName || 'Welcome'}
+            </span>
+          </motion.div>
+
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -546,7 +609,7 @@ export function HeroSection({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-lg md:text-xl lg:text-2xl text-white/70 max-w-2xl mx-auto leading-relaxed mb-12"
+            className="text-lg md:text-xl lg:text-2xl text-white/60 max-w-2xl mx-auto leading-relaxed mb-14"
           >
             {subheadline}
           </motion.p>
@@ -564,7 +627,7 @@ export function HeroSection({
               style={{
                 backgroundColor: primaryColor || '#3b82f6',
                 color: buttonTextColor,
-                boxShadow: `0 0 80px -20px ${primaryColor || '#3b82f6'}`,
+                boxShadow: `0 0 60px -10px ${primaryColor || '#3b82f6'}80, 0 0 120px -30px ${primaryColor || '#3b82f6'}40`,
               }}
             >
               {ctaText}
@@ -574,13 +637,19 @@ export function HeroSection({
               size="lg"
               variant="outline"
               onClick={handlePreviewClick}
-              className="text-base px-10 py-7 rounded-xl font-semibold border-white/30 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm"
+              className="text-base px-10 py-7 rounded-xl font-semibold transition-all hover:scale-105"
+              style={{
+                borderColor: 'rgba(255,255,255,0.15)',
+                color: '#ffffff',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+              }}
             >
               Meer info
             </Button>
           </motion.div>
         </motion.div>
 
+        {/* Scroll indicator */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
