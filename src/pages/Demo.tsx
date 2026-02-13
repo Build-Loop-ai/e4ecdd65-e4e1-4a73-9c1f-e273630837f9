@@ -42,6 +42,7 @@ import {
   ScanLine,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import heroGradient from '@/assets/hero-gradient.png';
 
 type DemoStep = 'input' | 'scanning' | 'gated' | 'revealed';
 type DeviceView = 'desktop' | 'tablet' | 'mobile';
@@ -51,20 +52,6 @@ const DEVICE_WIDTHS: Record<DeviceView, string> = {
   tablet: '768px',
   mobile: '375px',
 };
-
-// Floating particle component
-const Particle = ({ delay, x, y, size }: { delay: number; x: string; y: string; size: number }) => (
-  <motion.div
-    className="absolute rounded-full bg-primary/30"
-    style={{ left: x, top: y, width: size, height: size }}
-    animate={{
-      y: [0, -30, 0],
-      opacity: [0, 0.8, 0],
-      scale: [0.5, 1, 0.5],
-    }}
-    transition={{ duration: 3 + Math.random() * 2, repeat: Infinity, delay, ease: 'easeInOut' }}
-  />
-);
 
 export default function Demo() {
   const { toast } = useToast();
@@ -249,45 +236,14 @@ export default function Demo() {
   );
 
   return (
-    <div className="min-h-screen bg-[hsl(222,47%,5%)] text-white overflow-hidden">
-      {/* Animated background mesh */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Gradient orbs */}
-        <motion.div
-          animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-primary/8 blur-[120px]"
-        />
-        <motion.div
-          animate={{ x: [0, -80, 0], y: [0, 60, 0] }}
-          transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-[hsl(280,80%,50%)]/8 blur-[120px]"
-        />
-        <motion.div
-          animate={{ x: [0, 40, 0], y: [0, -30, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]"
-        />
-
-        {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: 'linear-gradient(hsl(239 84% 67% / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(239 84% 67% / 0.3) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
-        />
-
-        {/* Floating particles */}
-        <Particle delay={0} x="10%" y="20%" size={4} />
-        <Particle delay={0.5} x="85%" y="15%" size={3} />
-        <Particle delay={1} x="70%" y="60%" size={5} />
-        <Particle delay={1.5} x="25%" y="75%" size={3} />
-        <Particle delay={2} x="50%" y="40%" size={4} />
-        <Particle delay={2.5} x="90%" y="80%" size={3} />
-        <Particle delay={0.8} x="15%" y="50%" size={5} />
-        <Particle delay={1.8} x="60%" y="25%" size={4} />
-      </div>
+    <div className="min-h-screen text-white overflow-hidden relative">
+      {/* Full-cover hero background image */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${heroGradient})` }}
+      />
+      {/* Dark overlay for text readability */}
+      <div className="fixed inset-0 bg-black/40" />
 
       {/* Header */}
       <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl px-1">
@@ -295,7 +251,7 @@ export default function Demo() {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
-          className="bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/20 rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between"
+          className="bg-black/30 backdrop-blur-xl rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between"
         >
           <Link to="/">
             <PitchLogo size="md" />
@@ -326,7 +282,7 @@ export default function Demo() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/15 border border-primary/20 text-primary text-sm font-medium mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/15 text-primary text-sm font-medium mb-6"
               >
                 <Zap className="h-4 w-4" />
                 Free Demo — No signup needed
@@ -359,8 +315,7 @@ export default function Demo() {
                 transition={{ delay: 0.4 }}
                 className="relative max-w-xl mx-auto"
               >
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-[hsl(280,80%,50%)]/20 to-primary/30 rounded-2xl blur-lg opacity-60" />
-                <div className="relative flex gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-2">
+                <div className="relative flex gap-3 bg-white/5 backdrop-blur-sm rounded-2xl p-2">
                   <div className="relative flex-1">
                     <Globe className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/30" />
                     <Input
@@ -408,7 +363,7 @@ export default function Demo() {
                 ].map((feat) => (
                   <div
                     key={feat.label}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/8 text-xs text-white/40"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 text-xs text-white/40"
                   >
                     <feat.icon className="h-3.5 w-3.5 text-primary/60" />
                     {feat.label}
@@ -432,19 +387,19 @@ export default function Demo() {
               <div className="relative mb-8">
                 {/* Pulsing rings */}
                 <motion.div
-                  className="absolute inset-0 w-28 h-28 mx-auto rounded-2xl border border-primary/30"
+                  className="absolute inset-0 w-28 h-28 mx-auto rounded-2xl border border-primary/15"
                   animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
                   style={{ margin: '0 auto' }}
                 />
                 <motion.div
-                  className="absolute inset-0 w-28 h-28 mx-auto rounded-2xl border border-primary/20"
+                  className="absolute inset-0 w-28 h-28 mx-auto rounded-2xl border border-primary/10"
                   animate={{ scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] }}
                   transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
                   style={{ margin: '0 auto' }}
                 />
                 <motion.div
-                  className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary/20 to-[hsl(280,80%,50%)]/10 border border-primary/20 flex items-center justify-center mx-auto backdrop-blur-sm"
+                  className="w-28 h-28 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto backdrop-blur-sm"
                   animate={{ rotate: [0, 5, -5, 0] }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
                 >
@@ -501,10 +456,10 @@ export default function Demo() {
               initial={{ x: -300, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="w-[260px] shrink-0 bg-[hsl(222,47%,8%)] border-r border-white/8 flex flex-col fixed left-0 top-0 bottom-0 z-50 overflow-y-auto"
+              className="w-[260px] shrink-0 bg-black/40 backdrop-blur-xl flex flex-col fixed left-0 top-0 bottom-0 z-50 overflow-y-auto"
             >
               {/* Sidebar header */}
-              <div className="p-4 border-b border-white/8">
+              <div className="p-4 border-b border-white/5">
                 <Link to="/">
                   <PitchLogo size="md" />
                 </Link>
@@ -515,7 +470,7 @@ export default function Demo() {
               </div>
 
               {/* Device selector */}
-              <div className="p-4 border-b border-white/8">
+              <div className="p-4 border-b border-white/5">
                 <p className="text-[11px] uppercase tracking-wider text-white/30 font-medium mb-3">Responsive View</p>
                 <div className="flex gap-1 bg-white/5 rounded-xl p-1">
                   {([
@@ -541,7 +496,7 @@ export default function Demo() {
               </div>
 
               {/* Quick info */}
-              <div className="p-4 border-b border-white/8 space-y-3">
+              <div className="p-4 border-b border-white/5 space-y-3">
                 <p className="text-[11px] uppercase tracking-wider text-white/30 font-medium">Preview Info</p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-xs">
@@ -562,7 +517,7 @@ export default function Demo() {
               </div>
 
               {/* Colors */}
-              <div className="p-4 border-b border-white/8">
+              <div className="p-4 border-b border-white/5">
                 <p className="text-[11px] uppercase tracking-wider text-white/30 font-medium mb-3">Brand Colors</p>
                 <div className="flex gap-2">
                   {[primaryColor, secondaryColor, accentColor].filter(Boolean).map((color, i) => (
@@ -597,8 +552,8 @@ export default function Demo() {
               </div>
 
               {/* CTA */}
-              <div className="mt-auto p-4 border-t border-white/8">
-                <div className="rounded-xl bg-gradient-to-br from-primary/20 to-[hsl(280,80%,50%)]/10 border border-primary/20 p-4">
+              <div className="mt-auto p-4 border-t border-white/5">
+                <div className="rounded-xl bg-primary/10 p-4">
                   <p className="text-sm font-medium text-white mb-1">Want this for your clients?</p>
                   <p className="text-xs text-white/40 mb-3">Create unlimited pitch previews.</p>
                   <Button size="sm" asChild className="w-full rounded-lg bg-primary hover:bg-primary/90">
@@ -620,11 +575,11 @@ export default function Demo() {
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ delay: 0.3, type: 'spring', damping: 20 }}
-                    className="bg-[hsl(222,47%,10%)] border border-white/10 rounded-2xl shadow-2xl shadow-black/40 p-8 max-w-md w-full mx-4"
+                    className="bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4"
                   >
                     <div className="text-center mb-6">
                       <motion.div
-                        className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-[hsl(280,80%,50%)]/10 border border-primary/20 flex items-center justify-center mx-auto mb-4"
+                        className="w-16 h-16 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-4"
                         animate={{ rotate: [0, 5, -5, 0] }}
                         transition={{ duration: 3, repeat: Infinity }}
                       >
@@ -647,7 +602,7 @@ export default function Demo() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter' && email) handleUnlock(); }}
-                          className="h-12 pl-10 text-base rounded-xl bg-white/5 border-white/10 text-white placeholder:text-white/25 focus-visible:ring-primary/50"
+                          className="h-12 pl-10 text-base rounded-xl bg-white/5 border-0 text-white placeholder:text-white/25 focus-visible:ring-1 focus-visible:ring-primary/50"
                         />
                       </div>
                       <Button
@@ -678,7 +633,7 @@ export default function Demo() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="bg-[hsl(222,47%,10%)] border border-white/10 shadow-2xl rounded-xl px-5 py-3 flex items-center gap-3"
+                    className="bg-black/60 backdrop-blur-xl shadow-2xl rounded-xl px-5 py-3 flex items-center gap-3"
                   >
                     <CheckCircle2 className="h-5 w-5 text-green-400" />
                     <span className="text-sm font-medium text-white">Preview unlocked!</span>
@@ -693,7 +648,7 @@ export default function Demo() {
               )}
 
               {/* Preview frame */}
-              <div className="bg-[hsl(222,47%,6%)] min-h-screen p-4 pt-6 flex justify-center">
+              <div className="bg-black/20 min-h-screen p-4 pt-6 flex justify-center">
                 <motion.div
                   layout
                   className={cn(
