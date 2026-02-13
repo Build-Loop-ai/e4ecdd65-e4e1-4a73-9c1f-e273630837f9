@@ -145,7 +145,7 @@ const Index = () => {
                 </Link>
               </MagneticButton>
               <Button size="lg" variant="outline" className="h-12 px-6 text-base bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white rounded-xl" asChild>
-                <Link to="/auth">
+                <Link to="/demo">
                   <Play className="h-4 w-4 mr-2" />
                   See how it works
                 </Link>

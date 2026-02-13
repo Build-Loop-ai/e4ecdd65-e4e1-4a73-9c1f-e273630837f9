@@ -97,6 +97,30 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          preview_slug: string | null
+          url_submitted: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          preview_slug?: string | null
+          url_submitted: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          preview_slug?: string | null
+          url_submitted?: string
+        }
+        Relationships: []
+      }
       email_connections: {
         Row: {
           access_token: string
