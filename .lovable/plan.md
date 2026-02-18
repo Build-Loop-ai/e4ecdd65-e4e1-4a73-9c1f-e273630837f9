@@ -1,109 +1,85 @@
 
 
-# Premium Template Overhaul: Bulletproof & Beautiful
+# Fix Gmail OAuth `redirect_uri_mismatch` for All Domains
 
-## What We Found
+## The Problem
 
-After a thorough audit of all 5 templates and the full rendering pipeline, here's the current state and what needs fixing:
+Google OAuth requires the `redirect_uri` to **exactly match** a URI registered in Google Cloud Console. Right now, the redirect URI is built dynamically from `window.location.origin` (e.g., `https://preview--e4ecdd65-....lovable.app/dashboard/settings?oauth=gmail`). This means:
 
-### Issues Found
+- Every new domain (preview, published, custom domain, remixed project) needs to be manually registered in Google Cloud Console
+- Remixed projects will **always** fail because they have a completely different domain
 
-1. **Dutch text fallbacks in Preview.tsx** (the main rendering page)
-   - Line 144: "Preview niet gevonden" (should be "Preview not found")
-   - Line 145: "Deze preview link is mogelijk ongeldig of verlopen" (should be "This preview link may be invalid or expired")
-   - Line 248: Fallback headline "Welkom op uw nieuwe website" (should be "Welcome to your new website")
-   - Line 249: Fallback subheadline "Een professionele online aanwezigheid voor uw bedrijf" (should be "A professional online presence for your business")
-   - Line 250: Fallback CTA "Aan de slag" (should be "Get Started")
+## The Solution
 
-2. **Stale "pattern" comments and imports** in HeroSection.tsx
-   - `FallbackPatternType` still imported and used as a prop (leftover from deleted pattern system)
-   - Comments still say "Background - image or pattern" and "use pattern fallback"
-   - These are cosmetic code issues but confusing for maintenance
+Create a new **backend redirect handler** (`email-oauth-redirect`) with a **stable URL** that never changes, regardless of which frontend domain the user is on. Only this one URL needs to be registered in Google Cloud Console.
 
-3. **Robustness gaps** -- templates can break or look empty with edge-case input:
-   - No graceful handling when `headline` or `subheadline` are empty strings
-   - Gallery images with broken URLs show empty boxes before `onError` fires
-   - Service cards with very long titles or descriptions overflow without truncation
-   - Testimonials with extremely short quotes (edge case near the 20-char filter) can look odd
-   - About section renders even with empty description
-   - Contact section in some templates renders even with no contact info
+### New Flow
 
-4. **Visual polish opportunities**:
-   - Service cards across templates lack hover glow borders (planned but not yet added)
-   - Gallery hover effects are basic -- could add brightness + shadow lift
-   - Section transitions could use smoother staggered timing
-   - Corporate Classic services section has a hardcoded subtitle "Professional services tailored to your needs" -- should be dynamic or removed
+```text
+1. User clicks "Connect Gmail"
+2. Frontend calls get-oauth-url, passing their current origin
+3. get-oauth-url builds the Google auth URL with:
+   - redirect_uri = stable edge function URL (email-oauth-redirect)
+   - state = JSON containing { provider, origin } (so we know where to send the user back)
+4. Google redirects to the stable edge function URL with code + state
+5. Edge function reads the origin from state, redirects the browser to:
+   {origin}/dashboard/settings?oauth=gmail&code={code}
+6. Frontend Settings page picks up the code and exchanges it (as it does today)
+```
 
-## Implementation Plan
+The key insight: the `redirect_uri` registered with Google is always the same edge function URL, but the user gets redirected back to whatever frontend they came from.
 
-### Phase 1: Fix Remaining Dutch Text (Preview.tsx)
+## Changes
 
-**File: `src/pages/Preview.tsx`**
-- Translate the 404/not-found state (lines 144-145) to English
-- Translate the 3 fallback props for HeroSection (lines 248-250)
+### 1. New Edge Function: `supabase/functions/email-oauth-redirect/index.ts`
 
-### Phase 2: Clean Up Pattern Remnants (HeroSection.tsx)
+A simple GET handler that Google redirects to. It:
+- Reads `code` and `state` from query params
+- Decodes `state` to get `{ provider, origin }`
+- Sends a 302 redirect to `{origin}/dashboard/settings?oauth={provider}&code={code}`
+- On error, shows a simple error page
 
-**File: `src/components/preview/HeroSection.tsx`**
-- Remove `FallbackPatternType` import (no longer used for anything)
-- Remove `fallbackPattern` prop from the interface and destructuring
-- Update comments from "pattern" to "gradient fallback"
-- Update console.log message from "using pattern fallback" to "using gradient fallback"
+No auth needed -- this is just a redirect passthrough. The actual token exchange (which needs auth) still happens in `oauth-callback`.
 
-**File: `src/pages/Preview.tsx`** and **`src/pages/Demo.tsx`**
-- Remove the `fallbackPattern` prop from HeroSection usage (2 places)
+### 2. Update `get-oauth-url` Edge Function
 
-### Phase 3: Robustness Improvements
+- Stop accepting `redirect_uri` from the frontend
+- Instead, accept `origin` (the user's current domain)
+- Build the stable redirect URI: `{SUPABASE_URL}/functions/v1/email-oauth-redirect`
+- Pack `{ provider, origin }` into the Google OAuth `state` parameter
+- Use the stable redirect URI in the Google/Microsoft auth URL
 
-**File: `src/components/preview/HeroSection.tsx`**
-- Add fallback text for empty headlines: `headline || companyName || 'Welcome'`
-- Add fallback text for empty subheadlines: `subheadline || 'Discover what we have to offer'`
-- Add fallback CTA text: `ctaText || 'Learn More'`
+### 3. Update `oauth-callback` Edge Function
 
-**File: `src/components/preview/ServicesSection.tsx`**
-- Add `line-clamp-2` to service titles and `line-clamp-3` to descriptions to prevent overflow
-- Remove the hardcoded "Professional services tailored to your needs" subtitle from Corporate Classic (line 437-438) -- it's generic and doesn't adapt to the business
-- Add image `onError` handlers to service card images so broken images hide gracefully
+- Change the `redirect_uri` it sends to Google's token endpoint to use the same stable edge function URL
+- This must match exactly what was used in the authorization request
 
-**File: `src/components/preview/GallerySection.tsx`**
-- Add `loading="lazy"` to all gallery images for performance
-- Add a subtle skeleton/placeholder state while images load
+### 4. Update Frontend (`oauthRedirect.ts`, `useEmailConnections.ts`)
 
-**File: `src/components/preview/AboutSection.tsx`**
-- Add guard: don't render the section if both `description` and `valueProps` are empty/missing
-- Add `line-clamp` safety on description text
+- `getEmailOAuthRedirectUri` is no longer needed for the Google redirect -- remove or repurpose
+- `useEmailConnections.ts` `getOAuthUrl`: pass `origin: window.location.origin` instead of `redirect_uri`
+- `useEmailConnections.ts` `handleOAuthCallback`: pass the stable edge function URL as `redirect_uri` (needed for token exchange)
+- Settings.tsx callback handler: pass the stable redirect URI when calling `oauth-callback`
 
-**File: `src/components/preview/ContactSection.tsx`**
-- Ensure ALL template variants (not just Elegant and Modern) return null when no contact info exists
+### 5. Google Cloud Console (manual step for you)
 
-### Phase 4: Visual Polish
+Register ONE redirect URI:
+`https://wylrvlvphndooigebwrg.supabase.co/functions/v1/email-oauth-redirect`
 
-**File: `src/components/preview/ServicesSection.tsx`**
-- Add subtle hover glow border to Corporate Classic and Modern Professional cards:
-  `hover:shadow-[0_0_20px_-5px] transition-shadow` using `primaryColor`
-- Improve Warm Friendly card hover with a colored border transition
-
-**File: `src/components/preview/GallerySection.tsx`**
-- Add brightness boost on image hover: `group-hover:brightness-110`
-- Add stronger shadow lift: `hover:shadow-2xl`
-
-**File: `src/components/preview/TestimonialsSection.tsx`**
-- Add auto-rotation timer to carousel-based testimonials (Corporate Classic, Elegant Minimal) so they cycle every 6 seconds without user interaction
+This single URI works for all domains -- preview, published, custom domains, and remixed projects.
 
 ## Files Modified
 
-| File | Changes |
-|------|---------|
-| `src/pages/Preview.tsx` | Translate Dutch fallbacks, remove `fallbackPattern` prop |
-| `src/pages/Demo.tsx` | Remove `fallbackPattern` prop |
-| `src/components/preview/HeroSection.tsx` | Remove pattern imports/props, add text fallbacks, clean comments |
-| `src/components/preview/ServicesSection.tsx` | Text clamping, remove generic subtitle, hover glow, image error handling |
-| `src/components/preview/GallerySection.tsx` | Lazy loading, brightness hover, shadow lift |
-| `src/components/preview/AboutSection.tsx` | Empty content guard |
-| `src/components/preview/ContactSection.tsx` | Null render guard for all templates |
-| `src/components/preview/TestimonialsSection.tsx` | Auto-rotation timer |
+| File | Change |
+|------|--------|
+| `supabase/functions/email-oauth-redirect/index.ts` | **New** -- redirect handler |
+| `supabase/functions/get-oauth-url/index.ts` | Use stable redirect URI + state param |
+| `supabase/functions/oauth-callback/index.ts` | Use stable redirect URI for token exchange |
+| `src/lib/oauthRedirect.ts` | Update to return the stable edge function URL |
+| `src/hooks/useEmailConnections.ts` | Pass origin instead of redirect_uri to get-oauth-url |
+| `src/pages/Settings.tsx` | Use stable redirect URI in callback handler |
 
-## No New Dependencies
+## After Approving
 
-Everything uses existing Framer Motion + Tailwind CSS.
+You will need to update your Google Cloud Console authorized redirect URIs to include the new stable URL. I will provide the exact URL after implementation.
 
