@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { getEmailOAuthRedirectUri } from '@/lib/oauthRedirect';
 
 export interface EmailConnection {
   id: string;
@@ -54,10 +53,8 @@ export function useEmailConnections() {
 
   const getOAuthUrl = useCallback(async (provider: 'gmail' | 'outlook') => {
     try {
-      const redirectUri = getEmailOAuthRedirectUri(provider);
-      
       const { data, error } = await supabase.functions.invoke('get-oauth-url', {
-        body: { provider, redirect_uri: redirectUri },
+        body: { provider, origin: window.location.origin },
       });
 
       if (error) {
@@ -86,15 +83,13 @@ export function useEmailConnections() {
     setIsConnecting(true);
     
     try {
-      const redirectUri = getEmailOAuthRedirectUri(provider);
-      
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.access_token) {
         throw new Error('No active session');
       }
 
       const response = await supabase.functions.invoke('oauth-callback', {
-        body: { provider, code, redirect_uri: redirectUri },
+        body: { provider, code },
       });
 
       if (response.error) {
@@ -138,7 +133,6 @@ export function useEmailConnections() {
     if (!connection) return;
 
     try {
-      // Create a test preview ID (we'll use a fake one for testing)
       const response = await supabase.functions.invoke('send-email', {
         body: {
           to: connection.email_address,
@@ -153,7 +147,7 @@ export function useEmailConnections() {
               </body>
             </html>
           `,
-          previewId: '00000000-0000-0000-0000-000000000000', // Placeholder for test
+          previewId: '00000000-0000-0000-0000-000000000000',
         },
       });
 

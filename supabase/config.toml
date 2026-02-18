@@ -61,3 +61,6 @@ verify_jwt = false
 
 [functions.customer-portal]
 verify_jwt = false
+
+[functions.email-oauth-redirect]
+verify_jwt = false

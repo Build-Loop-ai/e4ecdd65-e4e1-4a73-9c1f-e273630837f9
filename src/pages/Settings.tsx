@@ -20,7 +20,7 @@ import { EmailConnectionsSection } from '@/components/email/EmailConnectionCard'
 import { WarmySection } from '@/components/email/WarmySection';
 import { OutreachSettings } from '@/components/settings/OutreachSettings';
 import { BillingSettings } from '@/components/settings/BillingSettings';
-import { getEmailOAuthRedirectUri } from '@/lib/oauthRedirect';
+
 
 interface CreatorProfile {
   full_name: string | null;
@@ -73,9 +73,8 @@ export default function Settings() {
             return;
           }
 
-          const redirectUri = getEmailOAuthRedirectUri(oauthProvider);
           const response = await supabase.functions.invoke('oauth-callback', {
-            body: { provider: oauthProvider, code, redirect_uri: redirectUri },
+            body: { provider: oauthProvider, code },
           });
 
           if (response.error) {
