@@ -10,7 +10,6 @@ const corsHeaders = {
 interface OAuthCallbackRequest {
   provider: "gmail" | "outlook";
   code: string;
-  redirect_uri: string;
 }
 
 serve(async (req: Request) => {
@@ -44,14 +43,17 @@ serve(async (req: Request) => {
     }
     const userId = claimsData.claims.sub;
 
-    const { provider, code, redirect_uri }: OAuthCallbackRequest = await req.json();
+    const { provider, code }: OAuthCallbackRequest = await req.json();
 
-    if (!provider || !code || !redirect_uri) {
+    if (!provider || !code) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: provider, code, redirect_uri" }),
+        JSON.stringify({ error: "Missing required fields: provider, code" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // The redirect_uri used during token exchange MUST match the one used in the authorization request
+    const redirect_uri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/email-oauth-redirect`;
 
     let tokenResponse: any;
     let emailAddress: string;
@@ -67,7 +69,6 @@ serve(async (req: Request) => {
         );
       }
 
-      // Exchange code for tokens with Google
       const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -90,7 +91,6 @@ serve(async (req: Request) => {
         );
       }
 
-      // Get user email from Google
       const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
         headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
       });
@@ -108,7 +108,6 @@ serve(async (req: Request) => {
         );
       }
 
-      // Exchange code for tokens with Microsoft
       const tokenRes = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -132,7 +131,6 @@ serve(async (req: Request) => {
         );
       }
 
-      // Get user email from Microsoft Graph
       const userInfoRes = await fetch("https://graph.microsoft.com/v1.0/me", {
         headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
       });
@@ -145,12 +143,10 @@ serve(async (req: Request) => {
       );
     }
 
-    // Calculate token expiry
     const expiresAt = tokenResponse.expires_in
       ? new Date(Date.now() + tokenResponse.expires_in * 1000).toISOString()
       : null;
 
-    // Store tokens in database using service role
     const adminSupabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
