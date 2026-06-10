@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { lovable } from '@/integrations/lovable/index';
@@ -23,6 +23,12 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  // The form swap is animated (AnimatePresence mode="wait"), so the previous
+  // form lingers — and stays clickable — for a moment after the tab changes.
+  // This ref always reflects the *current* tab so a click on the exiting form
+  // can't fire the wrong action (e.g. a sign-in attempt on the Sign Up tab).
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -51,6 +57,9 @@ export default function Auth() {
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Ignore a submit from the Sign In form while it's animating out after the
+    // user switched to Sign Up.
+    if (modeRef.current !== 'signin') return;
     setIsLoading(true);
     
     const formData = new FormData(e.currentTarget);
@@ -74,6 +83,7 @@ export default function Auth() {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (modeRef.current !== 'signup') return;
     setIsLoading(true);
     
     const formData = new FormData(e.currentTarget);
