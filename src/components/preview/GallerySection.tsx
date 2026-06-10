@@ -21,8 +21,6 @@ export function GallerySection({
 }: GallerySectionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
-  const [scrollX, setScrollX] = useState(0);
-  const scrollRef = useRef(0);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -254,58 +252,15 @@ export function GallerySection({
   }
 
   // ========== MODERN PROFESSIONAL - Infinite horizontal auto-scroll ==========
+  // Rendered as its own component so useAnimationFrame is always called at the
+  // top level of that component (never conditionally after an early return).
   if (templateId === 'modern-professional') {
-    // Auto-scroll animation
-    useAnimationFrame((time) => {
-      scrollRef.current = (time / 50) % (validImages.length * 350);
-      setScrollX(-scrollRef.current);
-    });
-
     return (
-      <section ref={containerRef} className="py-32 overflow-hidden bg-[#0a0a0a]">
-        <div className="container mx-auto px-6 mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
-              {title}
-            </h2>
-            <div 
-              className="w-16 h-1"
-              style={{ backgroundColor: primaryColor || '#3b82f6' }}
-            />
-          </motion.div>
-        </div>
-
-        {/* Infinite scroll strip */}
-        <div className="relative">
-          <motion.div 
-            className="flex gap-6"
-            style={{ x: scrollX }}
-          >
-            {/* Double the images for seamless loop */}
-            {[...validImages, ...validImages].map((image, index) => (
-              <motion.div
-                key={index}
-                className="flex-shrink-0 w-[320px] md:w-[400px] aspect-[4/5] rounded-2xl overflow-hidden group"
-              >
-                <img 
-                  src={image} 
-                  alt={`Gallery ${(index % validImages.length) + 1}`}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  onError={(e) => { e.currentTarget.parentElement!.style.display = 'none'; }}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-          
-          {/* Fade edges */}
-          <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none" />
-          <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none" />
-        </div>
-      </section>
+      <ModernProfessionalGallery
+        validImages={validImages}
+        title={title}
+        primaryColor={primaryColor}
+      />
     );
   }
 
@@ -350,6 +305,71 @@ export function GallerySection({
             </motion.div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+// Infinite horizontal auto-scroll gallery. Kept as its own component so the
+// useAnimationFrame hook is always called unconditionally at the top level.
+function ModernProfessionalGallery({
+  validImages,
+  title,
+  primaryColor,
+}: {
+  validImages: string[];
+  title: string;
+  primaryColor?: string;
+}) {
+  const [scrollX, setScrollX] = useState(0);
+  const scrollRef = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useAnimationFrame((time) => {
+    scrollRef.current = (time / 50) % (validImages.length * 350);
+    setScrollX(-scrollRef.current);
+  });
+
+  return (
+    <section ref={containerRef} className="py-32 overflow-hidden bg-[#0a0a0a]">
+      <div className="container mx-auto px-6 mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+            {title}
+          </h2>
+          <div
+            className="w-16 h-1"
+            style={{ backgroundColor: primaryColor || '#3b82f6' }}
+          />
+        </motion.div>
+      </div>
+
+      {/* Infinite scroll strip */}
+      <div className="relative">
+        <motion.div className="flex gap-6" style={{ x: scrollX }}>
+          {/* Double the images for seamless loop */}
+          {[...validImages, ...validImages].map((image, index) => (
+            <motion.div
+              key={index}
+              className="flex-shrink-0 w-[320px] md:w-[400px] aspect-[4/5] rounded-2xl overflow-hidden group"
+            >
+              <img
+                src={image}
+                alt={`Gallery ${(index % validImages.length) + 1}`}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                onError={(e) => { e.currentTarget.parentElement!.style.display = 'none'; }}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Fade edges */}
+        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0a0a0a] to-transparent pointer-events-none" />
+        <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#0a0a0a] to-transparent pointer-events-none" />
       </div>
     </section>
   );

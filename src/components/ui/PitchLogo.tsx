@@ -6,9 +6,11 @@ interface PitchLogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
+  /** Render as a Link to the dashboard. Set false when already inside an anchor. */
+  asLink?: boolean;
 }
 
-export function PitchLogo({ className, size = 'md', showText = true }: PitchLogoProps) {
+export function PitchLogo({ className, size = 'md', showText = true, asLink = true }: PitchLogoProps) {
   const sizes = {
     sm: { icon: 'w-6 h-6', text: 'text-base' },
     md: { icon: 'w-8 h-8', text: 'text-lg' },
@@ -17,11 +19,11 @@ export function PitchLogo({ className, size = 'md', showText = true }: PitchLogo
 
   const s = sizes[size];
 
-  return (
-    <Link to="/dashboard" className={cn('flex items-center gap-2 hover:opacity-80 transition-opacity', className)}>
-      <img 
-        src={pitchLogoIcon} 
-        alt="Pitch" 
+  const content = (
+    <>
+      <img
+        src={pitchLogoIcon}
+        alt="Pitch"
         className={cn('object-contain', s.icon)}
       />
       {showText && (
@@ -29,6 +31,18 @@ export function PitchLogo({ className, size = 'md', showText = true }: PitchLogo
           Pitch
         </span>
       )}
+    </>
+  );
+
+  const classes = cn('flex items-center gap-2 hover:opacity-80 transition-opacity', className);
+
+  if (!asLink) {
+    return <span className={classes}>{content}</span>;
+  }
+
+  return (
+    <Link to="/dashboard" className={classes}>
+      {content}
     </Link>
   );
 }

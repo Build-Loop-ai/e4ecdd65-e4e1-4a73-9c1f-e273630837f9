@@ -329,7 +329,7 @@ export default function Demo() {
             className="bg-white backdrop-blur-xl rounded-2xl px-4 sm:px-6 h-14 flex items-center justify-between shadow-lg"
           >
             <Link to="/">
-              <PitchLogo size="md" />
+              <PitchLogo size="md" asLink={false} />
             </Link>
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild className="rounded-xl text-foreground/60 hover:text-foreground hover:bg-muted">

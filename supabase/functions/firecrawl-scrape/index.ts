@@ -14,11 +14,29 @@ Deno.serve(async (req) => {
     const { url, options } = await req.json();
     console.log('Received URL:', url);
 
-    if (!url) {
+    if (!url || typeof url !== 'string') {
       return new Response(
         JSON.stringify({ success: false, error: 'URL is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Public demo endpoint — only scrape public http(s) sites, never localhost
+    // or private/internal hosts.
+    {
+      const candidate = url.startsWith('http') ? url : `https://${url}`;
+      let host = '';
+      try { host = new URL(candidate).hostname.toLowerCase(); } catch { host = ''; }
+      const isPrivate = !host || host === 'localhost' || !host.includes('.') ||
+        /^127\.|^10\.|^192\.168\.|^169\.254\.|^0\./.test(host) ||
+        /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+        host.endsWith('.local') || host.endsWith('.internal');
+      if (isPrivate) {
+        return new Response(
+          JSON.stringify({ success: false, error: 'Only public websites can be scraped' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');

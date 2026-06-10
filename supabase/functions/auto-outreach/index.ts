@@ -208,7 +208,9 @@ serve(async (req: Request) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${supabaseAnon}`,
+            // Internal service-to-service call — use the service role key so the
+            // generate-email-copy auth check recognizes this as a trusted caller.
+            Authorization: `Bearer ${supabaseServiceKey}`,
           },
           body: JSON.stringify({
             recipientName: lead.business_name,

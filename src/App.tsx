@@ -1,32 +1,42 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Auth from "./pages/Auth";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import Index from "./pages/Index";
-import Demo from "./pages/Demo";
-import Dashboard from "./pages/Dashboard";
-import Previews from "./pages/Previews";
-import Analytics from "./pages/Analytics";
-
-import NewPitch from "./pages/NewPitch";
-import Preview from "./pages/Preview";
-import Feedback from "./pages/Feedback";
-import ManagePreview from "./pages/ManagePreview";
-import Settings from "./pages/Settings";
-import Leads from "./pages/Leads";
-import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
 import { AdminGuard } from "@/components/admin/AdminGuard";
+import Index from "./pages/Index";
+
+// Route-level code splitting: the landing page loads eagerly for fast first
+// paint, every other page is fetched on demand.
+const Auth = lazy(() => import("./pages/Auth"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Demo = lazy(() => import("./pages/Demo"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Previews = lazy(() => import("./pages/Previews"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const NewPitch = lazy(() => import("./pages/NewPitch"));
+const Preview = lazy(() => import("./pages/Preview"));
+const Feedback = lazy(() => import("./pages/Feedback"));
+const ManagePreview = lazy(() => import("./pages/ManagePreview"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Leads = lazy(() => import("./pages/Leads"));
+const Admin = lazy(() => import("./pages/Admin"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
+
+const PageLoader = () => (
+  <div className="flex min-h-screen items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 const LegacyPreviewRedirect = () => {
   const { userPrefix, clientSlug } = useParams<{ userPrefix: string; clientSlug: string }>();
@@ -40,12 +50,14 @@ const LegacySettingsRedirect = () => {
 };
 
 const App = () => (
+  <ErrorBoundary>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/demo" element={<Demo />} />
@@ -141,10 +153,12 @@ const App = () => (
             <Route path="/preview/:slug" element={<Preview />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

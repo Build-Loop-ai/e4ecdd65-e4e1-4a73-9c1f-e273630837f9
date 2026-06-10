@@ -38,7 +38,11 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
-    const origin = req.headers.get("origin") || "https://website4u.lovable.app";
+    // Prefer a configured APP_URL so a spoofed Origin can't redirect the user
+    // elsewhere after leaving the Stripe portal.
+    const origin = Deno.env.get("APP_URL")?.split(",")[0].trim()
+      || req.headers.get("origin")
+      || "https://website4u.lovable.app";
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,

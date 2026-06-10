@@ -262,7 +262,7 @@ serve(async (req: Request) => {
         result = await safeParseResponse(warmyResponse);
         break;
 
-      case "get_alerts":
+      case "get_alerts": {
         const alertDomain = domain || connection.email_address.split("@")[1];
         warmyResponse = await fetch(
           `${WARMY_API_BASE}/api/v2/warmup_alerts?domain=${encodeURIComponent(alertDomain)}`,
@@ -273,6 +273,7 @@ serve(async (req: Request) => {
         );
         result = await safeParseResponse(warmyResponse);
         break;
+      }
 
       default:
         return new Response(

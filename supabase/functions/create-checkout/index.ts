@@ -37,7 +37,11 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    const origin = req.headers.get("origin") || "https://website4u.lovable.app";
+    // Prefer a configured APP_URL so a spoofed Origin header can't redirect the
+    // user elsewhere after checkout. Falls back to the request origin locally.
+    const origin = Deno.env.get("APP_URL")?.split(",")[0].trim()
+      || req.headers.get("origin")
+      || "https://website4u.lovable.app";
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,

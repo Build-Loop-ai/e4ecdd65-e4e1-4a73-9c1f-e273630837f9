@@ -196,7 +196,7 @@ export default function Auth() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <Link to="/" className="flex lg:hidden items-center justify-center mb-10">
-            <PitchLogo size="lg" />
+            <PitchLogo size="lg" asLink={false} />
           </Link>
           
           {/* Form header */}

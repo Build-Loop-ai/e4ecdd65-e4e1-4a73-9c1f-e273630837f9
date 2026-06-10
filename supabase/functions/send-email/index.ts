@@ -167,11 +167,33 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get user's active email connection
+    // Reject header injection: a CR/LF in the recipient or subject would let an
+    // attacker smuggle extra headers (e.g. Bcc) into the outgoing message.
+    if (/[\r\n]/.test(to) || /[\r\n]/.test(subject)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid characters in recipient or subject" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const adminSupabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+
+    // Verify the preview being emailed belongs to the caller.
+    const { data: ownedPreview } = await adminSupabase
+      .from("client_previews")
+      .select("id")
+      .eq("id", previewId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!ownedPreview) {
+      return new Response(
+        JSON.stringify({ error: "Preview not found" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { data: connection, error: connError } = await adminSupabase
       .from("email_connections")

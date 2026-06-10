@@ -554,6 +554,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_pitch_usage: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      increment_email_usage: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"

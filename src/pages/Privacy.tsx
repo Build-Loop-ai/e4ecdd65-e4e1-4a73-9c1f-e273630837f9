@@ -8,7 +8,7 @@ export default function Privacy() {
       <header className="border-b border-border">
         <div className="container mx-auto max-w-3xl px-6 py-6 flex items-center justify-between">
           <Link to="/">
-            <PitchLogo size="md" />
+            <PitchLogo size="md" asLink={false} />
           </Link>
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
             <ArrowLeft className="h-3 w-3" />

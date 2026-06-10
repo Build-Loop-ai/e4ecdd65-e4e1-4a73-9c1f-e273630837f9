@@ -50,6 +50,18 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Production configuration
+
+Set these in Lovable Cloud → **Secrets** before going live:
+
+- `APP_URL` — your production URL (e.g. `https://app.yourdomain.com`). Used as
+  an allowlist for Stripe checkout/portal redirects and the email-OAuth redirect
+  so a spoofed `Origin` header can't redirect users (or leak an OAuth code) to
+  another site. Comma-separate multiple allowed origins if needed.
+
+**Admin access:** there is no hardcoded admin. After you sign up, grant your own
+account the admin role once: `INSERT INTO user_roles (user_id, role) VALUES ('<your-auth-user-id>', 'admin');`
+
 ## What technologies are used for this project?
 
 This project is built with:

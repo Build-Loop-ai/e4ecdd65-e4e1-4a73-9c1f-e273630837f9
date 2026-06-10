@@ -105,7 +105,7 @@ export async function auditAndFixImages(
 
   // Find which image targets need regeneration
   const toRegenerate = allImages.filter(img => failedUrls.has(img.url));
-  let updatedSchema = JSON.parse(JSON.stringify(schema));
+  const updatedSchema = JSON.parse(JSON.stringify(schema));
 
   // Regenerate each failed image
   for (const target of toRegenerate) {

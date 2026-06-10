@@ -78,23 +78,20 @@ export function useSubscription() {
     return Math.max(0, limit - subscription.emails_used);
   }, [subscription]);
 
+  // Usage is bumped through SECURITY DEFINER RPCs that only ever increment by 1.
+  // The client cannot write usage columns directly (RLS denies it), so a user
+  // can't reset their own quota to get unlimited pitches/emails.
   const incrementPitchUsage = useCallback(async () => {
     if (!user) return;
-    await supabase
-      .from('subscriptions')
-      .update({ pitches_used: subscription.pitches_used + 1 })
-      .eq('user_id', user.id);
+    await supabase.rpc('increment_pitch_usage');
     queryClient.invalidateQueries({ queryKey: ['subscription', user.id] });
-  }, [user, subscription.pitches_used, queryClient]);
+  }, [user, queryClient]);
 
   const incrementEmailUsage = useCallback(async () => {
     if (!user) return;
-    await supabase
-      .from('subscriptions')
-      .update({ emails_used: subscription.emails_used + 1 })
-      .eq('user_id', user.id);
+    await supabase.rpc('increment_email_usage');
     queryClient.invalidateQueries({ queryKey: ['subscription', user.id] });
-  }, [user, subscription.emails_used, queryClient]);
+  }, [user, queryClient]);
 
   const startCheckout = async (priceId: string) => {
     const { data, error } = await supabase.functions.invoke('create-checkout', {

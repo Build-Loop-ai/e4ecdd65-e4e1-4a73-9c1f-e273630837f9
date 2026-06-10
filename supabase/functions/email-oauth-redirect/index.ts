@@ -40,8 +40,41 @@ serve(async (req: Request) => {
       );
     }
 
+    // The OAuth authorization code is appended to state.origin below, so a
+    // forged origin would leak the code to an attacker. Require a well-formed
+    // http(s) origin, and — when APP_URL is configured — that it is on the
+    // allowlist. Set APP_URL (comma-separated allowed origins) in production.
+    let originUrl: URL;
+    try {
+      originUrl = new URL(state.origin);
+      if (originUrl.protocol !== "http:" && originUrl.protocol !== "https:") {
+        throw new Error("bad protocol");
+      }
+    } catch {
+      return new Response(
+        `<html><body style="font-family:system-ui;max-width:500px;margin:80px auto;text-align:center"><h2>Invalid State</h2><p>Invalid origin.</p></body></html>`,
+        { status: 400, headers: { "Content-Type": "text/html" } }
+      );
+    }
+
+    const allowList = (Deno.env.get("APP_URL") || "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (allowList.length > 0) {
+      const allowedHosts = allowList.map((u) => {
+        try { return new URL(u).host; } catch { return u; }
+      });
+      if (!allowedHosts.includes(originUrl.host)) {
+        return new Response(
+          `<html><body style="font-family:system-ui;max-width:500px;margin:80px auto;text-align:center"><h2>Invalid State</h2><p>Origin not allowed.</p></body></html>`,
+          { status: 400, headers: { "Content-Type": "text/html" } }
+        );
+      }
+    }
+
     // Redirect back to the user's frontend with the code
-    const redirectUrl = `${state.origin}/dashboard/settings?oauth=${encodeURIComponent(state.provider)}&code=${encodeURIComponent(code)}`;
+    const redirectUrl = `${originUrl.origin}/dashboard/settings?oauth=${encodeURIComponent(state.provider)}&code=${encodeURIComponent(code)}`;
 
     return new Response(null, {
       status: 302,

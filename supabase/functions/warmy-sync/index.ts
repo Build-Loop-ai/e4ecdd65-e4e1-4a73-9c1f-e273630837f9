@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authenticate, unauthorizedResponse } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -43,19 +44,14 @@ serve(async (req: Request) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Optional: filter by user_id if provided in auth header
-    let userId: string | null = null;
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader?.startsWith("Bearer ")) {
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_ANON_KEY")!,
-        { global: { headers: { Authorization: authHeader } } }
-      );
-      const token = authHeader.replace("Bearer ", "");
-      const { data: claimsData } = await supabase.auth.getClaims(token);
-      userId = claimsData?.claims?.sub || null;
+    // Require authentication. A logged-in user only syncs their own mailboxes;
+    // the service role (e.g. a future cron) may sync all. Without this, anyone
+    // could trigger an account-wide Warmy sync and read every user's mailboxes.
+    const auth = await authenticate(req);
+    if (!auth.ok) {
+      return unauthorizedResponse(auth, corsHeaders);
     }
+    const userId: string | null = auth.isServiceRole ? null : auth.userId;
 
     // Fetch all mailboxes from Warmy
     const warmyResponse = await fetch(`${WARMY_API_BASE}/api/v2/mailboxes`, {

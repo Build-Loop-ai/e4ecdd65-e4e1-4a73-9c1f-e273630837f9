@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { authenticate, unauthorizedResponse } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +13,13 @@ serve(async (req: Request) => {
   }
 
   try {
+    // Calls a paid LLM — require an authenticated caller (the dashboard sends
+    // the user's JWT; auto-outreach calls this with the service role key).
+    const auth = await authenticate(req);
+    if (!auth.ok) {
+      return unauthorizedResponse(auth, corsHeaders);
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");

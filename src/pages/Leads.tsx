@@ -165,7 +165,7 @@ export default function Leads() {
         .eq('website_url', lead.website_url)
         .maybeSingle();
       
-      let leadId = existingLead?.id;
+      const leadId = existingLead?.id;
 
       if (leadId) {
         await supabase
