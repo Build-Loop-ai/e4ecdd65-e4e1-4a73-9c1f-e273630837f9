@@ -122,7 +122,13 @@ export default function Leads() {
                 ]));
               }
             } catch {
-              // Non-blocking — leads still shown even if auto-save fails
+              // Results stay on screen, but warn that they weren't persisted so
+              // the user doesn't assume they're saved to "My Leads".
+              toast({
+                title: "Couldn't save all leads",
+                description: "Your results are shown below but may not be saved. Run the search again to retry.",
+                variant: "destructive",
+              });
             }
           }
         }

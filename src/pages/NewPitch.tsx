@@ -168,6 +168,17 @@ export default function NewPitch() {
   };
 
   const handleScrapeAuto = async (autoUrl: string, autoClientName: string) => {
+    // Same upfront quota check as the manual path — avoid a wasted scan.
+    if (!canCreatePitch()) {
+      toast({
+        title: 'Pitch limit reached',
+        description: `You've used all ${PLAN_LIMITS[subscription.plan].pitches} pitches this month. Upgrade your plan for more.`,
+        variant: 'destructive',
+      });
+      setStep('input');
+      return;
+    }
+
     setIsLoading(true);
     setStep('scanning');
     setScanPhase('connecting');
@@ -219,6 +230,31 @@ export default function NewPitch() {
       toast({
         title: 'Missing information',
         description: 'Please enter both company name and website URL.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate the URL before the slow scan so it doesn't fail 1-2 minutes in.
+    const normalizedUrl = /^https?:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`;
+    try {
+      const parsed = new URL(normalizedUrl);
+      if (!parsed.hostname.includes(".")) throw new Error("no TLD");
+    } catch {
+      toast({
+        title: "Enter a valid website URL",
+        description: "For example: https://example.com",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check the pitch quota upfront — don't make the user wait through the whole
+    // scan only to be blocked at the final save step.
+    if (!canCreatePitch()) {
+      toast({
+        title: 'Pitch limit reached',
+        description: `You've used all ${PLAN_LIMITS[subscription.plan].pitches} pitches this month. Upgrade your plan for more.`,
         variant: 'destructive',
       });
       return;
