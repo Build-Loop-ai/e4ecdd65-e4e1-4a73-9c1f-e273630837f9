@@ -49,8 +49,8 @@ function StatCard({ title, value, icon, trend, loading, description }: StatCardP
           </div>
         )}
       </div>
-      <p className="text-2xl font-semibold text-foreground tracking-tight">{value}</p>
-      <p className="text-sm text-muted-foreground mt-1">{title}</p>
+      <p className="text-3xl font-bold text-foreground tracking-tight leading-none">{value}</p>
+      <p className="text-sm text-muted-foreground mt-1.5">{title}</p>
       {description && (
         <p className="text-xs text-muted-foreground/70 mt-0.5">{description}</p>
       )}

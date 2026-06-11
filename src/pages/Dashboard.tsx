@@ -130,6 +130,9 @@ export default function Dashboard() {
       <div className="space-y-8">
         {/* Header */}
         <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/70 mb-1.5">
+            {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+          </p>
           <h1 className="text-2xl font-semibold text-foreground">Overview</h1>
           <p className="text-muted-foreground text-sm mt-1">
             Welcome back. Here's what's happening with your pitches.
