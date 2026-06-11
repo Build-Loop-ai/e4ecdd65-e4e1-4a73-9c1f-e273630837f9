@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -124,14 +126,14 @@ export function WelcomeWizard({ open, onOpenChange, userName }: WelcomeWizardPro
             </div>
 
             {/* Title */}
-            <h2 className="text-xl font-bold text-foreground mb-1">
+            <DialogTitle className="text-xl font-bold text-foreground mb-1">
               {isFirst && userName
                 ? `Welcome to Pitch, ${userName.split(' ')[0]}!`
                 : current.title}
-            </h2>
-            <p className="text-sm text-muted-foreground mb-5">
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mb-5">
               {current.description}
-            </p>
+            </DialogDescription>
 
             {/* Tips */}
             <ul className="space-y-2.5 mb-6">
