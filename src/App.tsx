@@ -19,6 +19,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Demo = lazy(() => import("./pages/Demo"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const DashboardLaunch = lazy(() => import("./pages/DashboardLaunch"));
 const Previews = lazy(() => import("./pages/Previews"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const NewPitch = lazy(() => import("./pages/NewPitch"));
@@ -71,6 +72,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/launch"
+              element={
+                <ProtectedRoute>
+                  <DashboardLaunch />
                 </ProtectedRoute>
               }
             />
